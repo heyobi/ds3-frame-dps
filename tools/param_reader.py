@@ -9,7 +9,8 @@ FILES = {}
 def setup(paramdex_ds3_dir, files):
     global DEFS, FILES
     DEFS = os.path.join(paramdex_ds3_dir, "Defs"); FILES = files
-SZ = {"s8": ("b", 1), "u8": ("B", 1), "s16": ("h", 2), "u16": ("H", 2), "s32": ("i", 4), "u32": ("I", 4), "f32": ("f", 4)}
+SZ = {"s8": ("b", 1), "u8": ("B", 1), "s16": ("h", 2), "u16": ("H", 2), "s32": ("i", 4), "u32": ("I", 4), "f32": ("f", 4),
+      "angle32": ("f", 4), "f64": ("d", 8), "s64": ("q", 8), "u64": ("Q", 8)}
 
 def load_def(paramtype):
     s = open(os.path.join(DEFS, paramtype + ".xml"), encoding="utf-8-sig").read()
@@ -24,6 +25,14 @@ def load_def(paramtype):
 def parse_row(defs, d, off):
     row = {}; p = off; bit_t = None; bit_pos = 0; bit_val = 0
     for t, name, n, bits in defs:
+        if t == "dummy8" and bits is not None:
+            # padding bits: continue the current u8 bitfield if it fits, else start a new byte
+            if bit_t == "u8" and bit_pos + bits <= 8:
+                bit_pos += bits
+            else:
+                if bit_t is not None: p += SZ[bit_t][1]
+                bit_t, bit_pos, bit_val = "u8", bits, d[p]
+            continue
         if bits is not None and t in SZ:
             fmt, sz = SZ[t]
             if bit_t != t or bit_pos + bits > sz * 8:
