@@ -7,7 +7,7 @@ Existing community frame data covers a handful of reference weapons per class, m
 early regulation. This set reads the attack and cancel frames for every weapon moveset straight out of
 `c0000.anibnd.dcx`, including paired weapons, fists, claws, whips, reapers and DLC weapons.
 
-**Interactive calculator:** [heyobi.github.io/ds3-frame-dps](https://heyobi.github.io/ds3-frame-dps/) (enter your own stats or soul level, weapon upgrade level and target defense).
+**Interactive calculator:** [heyobi.github.io/ds3-frame-dps](https://heyobi.github.io/ds3-frame-dps/) (enter your own stats or soul level, weapon upgrade level and target defense; click a weapon for a leveling path with a DPS chart).
 
 **Game version:** App ver. 1.15.2, Regulation ver. 1.35, Ashes of Ariandel + The Ringed City (Steam, PC)
 

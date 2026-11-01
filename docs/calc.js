@@ -132,7 +132,49 @@
     return rows;
   }
 
-  const api = { eff, ar, rank, optimizeMove, evalMove, levelIndex, MOVES, STATS };
+  // Leveling path: meet the requirements, then add points one at a time to whichever stat gives the most DPS
+  // per point (judged over the next 1 to 25 points, so slow-starting curves are not skipped). Every point in the
+  // path extends the previous one, so the spread never jumps around between soul levels.
+  function levelPath(D, w, key, base, maxBudget, up, def, step) {
+    step = step || 1;
+    const mvset = D.moves[w.n][key];
+    if (!mvset) return null;
+    const twoHand = key !== "r1h";
+    const li = levelIndex(w, up);
+    const st = base.slice();
+    const need = [twoHand ? Math.ceil(w.req[0] / 1.5) : w.req[0], w.req[1], w.req[2], w.req[3], 0];
+    let pts = 0;
+    const chunks = [];
+    for (let i = 0; i < 5; i++) if (st[i] < need[i]) { pts += need[i] - st[i]; chunks.push({ stat: i, from: st[i], to: need[i], req: true }); st[i] = need[i]; }
+    if (pts > maxBudget) return { cost: pts, points: [], chunks };
+    const dpsOf = (t) => moveDps(ar(D, w, li, t, { twoHand }), mvset[0], mvset[1], def);
+    const rel = relevant(w, li);
+    let cur = dpsOf(st);
+    const points = [{ pts, stats: st.slice(), dps: cur }];
+    while (pts + step <= maxBudget) {
+      let bestGain = 1e-9, pick = -1;
+      for (const i of rel) {
+        for (const c of [step, 5, 10, 15, 20, 25]) {
+          const t = st.slice(); t[i] = Math.min(99, t[i] + c);
+          if (t[i] === st[i]) continue;
+          const g = (dpsOf(t) - cur) / c;
+          if (g > bestGain) { bestGain = g; pick = i; }
+        }
+      }
+      if (pick < 0) break;                          // nothing raises DPS any more
+      const from = st[pick];
+      st[pick] = Math.min(99, st[pick] + step);
+      pts += step;
+      cur = dpsOf(st);
+      const last = chunks[chunks.length - 1];
+      if (last && !last.req && last.stat === pick) last.to = st[pick];
+      else chunks.push({ stat: pick, from, to: st[pick] });
+      points.push({ pts, stats: st.slice(), dps: cur });
+    }
+    return { cost: points[0].pts, points, chunks };
+  }
+
+  const api = { eff, ar, rank, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.DS3 = api;
 })(this);
