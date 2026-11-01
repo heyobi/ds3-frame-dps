@@ -56,11 +56,19 @@ def hash64(p):
 
 
 def bhd_entries(bhd):
-    assert bhd[:4] == b"BHD5", bhd[:16]
-    bucket_count, buckets_off = struct.unpack_from("<qq", bhd, 0x10)
+    assert bhd[:4] == b"BHD5", bhd[:32].hex()
+    # same layout test as SoulsFormats: 64-bit counts/offsets if the ints at 0x14 and 0x1C are both 0
+    is64 = struct.unpack_from("<i", bhd, 0x14)[0] == 0 and struct.unpack_from("<i", bhd, 0x1C)[0] == 0
+    if is64:
+        bucket_count, buckets_off = struct.unpack_from("<qq", bhd, 0x10)
+    else:
+        bucket_count, buckets_off = struct.unpack_from("<ii", bhd, 0x10)
     ents = {}
     for bi in range(bucket_count):
-        cnt, _, off = struct.unpack_from("<iiq", bhd, buckets_off + bi * 16)
+        if is64:
+            cnt, _, off = struct.unpack_from("<iiq", bhd, buckets_off + bi * 16)
+        else:
+            cnt, off = struct.unpack_from("<ii", bhd, buckets_off + bi * 8)
         for j in range(cnt):
             h, padded, unpadded, foff, sha_off, aes_off = struct.unpack_from("<QiiqqQ", bhd, off + j * 0x28)
             aes = None
@@ -94,6 +102,7 @@ if __name__ == "__main__":
             continue
         raw = open(bhd_p, "rb").read()
         bhd = raw if raw[:4] == b"BHD5" else rsa_decrypt(raw, KEYS[arc])
+        print(f"# {arc}: header {bhd[:32].hex()}", file=sys.stderr)
         ents = bhd_entries(bhd)
         print(f"# {arc}: {len(ents)} files", file=sys.stderr)
         for h, p in want.items():
