@@ -3,13 +3,15 @@
 
 Inputs
   --frames   output of `ds3_frames.py <Game dir> full` (TAE attack/cancel frames + EquipParamWeapon motion categories)
+  --regulation  output of tools/ds3_params.py (behavior stamina + motion values, read from Data0.bdt)
   --weapons  DataGenerator/Raw folder of https://github.com/Phil25/DS3InventoryBuilder
              (weapons_10.csv and saturations.csv: base damage, scaling and CalcCorrectGraph curves)
   --out      output folder for the CSV files
 
 Model
   AR       : DS3 attack-rating formula (base x (1 + scaling x CalcCorrect)), +10 / +5 weapons, two-handed (Str x 1.5)
-  Damage   : per hit, per element, DS-series attack/defense curve against a flat defense value
+  Damage   : per hit, per element, AR x motion value (AtkParam_Pc, per element) through the DS-series
+             attack/defense curve against a flat defense value; hit list per step from tools/moves.py
   Timing   : 3-step chain, each step lasts from the start of the attack until the first frame the next attack
              can be started (TAE ChrActionFlag 4 "Cancel - RH Attack" for R1, flag 16 "Cancel - LH Attack" for L1)
   Moves    : 1H R1 chain (anims 30000/30010/30020, no Str bonus), 2H R1 chain (34000/34010/34020, Str x 1.5) and,
@@ -24,6 +26,7 @@ import numpy as np
 ap = argparse.ArgumentParser()
 ap.add_argument("--frames", required=True)
 ap.add_argument("--weapons", required=True)
+ap.add_argument("--regulation", default="data/regulation_extract.json", help="output of tools/ds3_params.py")
 ap.add_argument("--out", default="results")
 ap.add_argument("--defense", default="80,120,160")
 ap.add_argument("--budget", type=int, default=87,
@@ -107,110 +110,75 @@ BUILDS = {
     "luck": (18, 18, 10, 10, 60),
 }
 
-# ---------------------------------------------------------------- frames (from ds3_frames.py full)
-TAE, WCAT = {}, {}
-for line in open(args.frames):
-    line = line.rstrip("\n")
-    if line.startswith("W "):
-        for tok in line.split()[1:]:
-            i, c, o, b, sp = map(int, tok.split(":")); WCAT[i] = (c, sp)
-        continue
-    tae, aid, atk, rh, lh, rhi, ref = line.split("|")[:7]
-    f, imp, _ = map(int, ref.split(":"))
-    TAE[(int(tae[1:]), int(aid))] = dict(
-        hits=[tuple(map(int, x.split("-"))) for x in atk.split("/") if x],
-        rh=[int(x) for x in rh.split("/") if x], lh=[int(x) for x in lh.split("/") if x],
-        ref=imp if f == 1 else None)
-
-
-def resolve(t, aid, depth=0):
-    e = TAE.get((t, aid))
-    if e is None or depth > 5:
-        return None, None
-    if e["hits"] and (e["rh"] or e["lh"]):
-        return e, t
-    if e["ref"] and e["ref"] > 0:
-        return resolve(e["ref"] // 1000000, e["ref"] % 1000000, depth + 1)
-    return None, None
-
-
-def chain(cat, sp, base, hand):
-    out, srcs = [], []
-    for k in range(3):
-        e = src = None
-        for t in ([sp] if sp else []) + [cat]:
-            e, src = resolve(t, base + 10 * k)
-            if e:
-                break
-        if e is None or not e[hand]:
-            return None, None
-        out.append(e[hand][0]); srcs.append(f"a{src}_{base + 10 * k}")
-    return out, srcs
-
-# ---------------------------------------------------------------- motion values (community AtkParam sheet)
-MV_R1_CLASS = {"Ultra Greatsword": 105, "Greataxe": 105, "Great Hammer": 105}
-MV_R1_W = {"Halberd": 98, "Red Hilted Halberd": 98, "Friede's Great Scythe": 115}
-MV_L1 = {"Sellsword Twinblades": [85, 85], "Warden Twinblades": [85, 85], "Winged Knight Twinaxes": [90, 90],
-         "Dancer's Enchanted Swords": [90, 90], "Brigand Twindaggers": [90, 90], "Gotthard Twinswords": [85, 85],
-         "Onikiri and Ubadachi": [85, 85], "Drang Twinspears": [65, 90], "Drang Hammers": [88, 88],
-         "Crow Quills": [85, 85], "Caestus": [85, 85], "Demon's Fist": [85, 85], "Claw": [85, 85],
-         "Manikin Claws": [85, 85], "Crow Talons": [85, 85], "Farron Greatsword": [30, 100]}
+# ---------------------------------------------------------------- moves (frames + regulation behaviors)
+import json, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import moves as MV
+TAE, WCAT = MV.load_frames(args.frames)
+REG = json.load(open(args.regulation))
 SKIP_CLS = {"Shield", "Small Shield", "Greatshield", "Staff", "Talisman", "Sacred Chime", "Bow", "Greatbow",
             "Crossbow", "Pyromancy Flame"}
-SKIP_W = {"Giant Door Shield", "Dark Hand", "Ringed Knight Paired Greatswords"}
+LABEL = {"r1h": "1H R1", "r2h": "2H R1", "l1": "L1 dual"}
 
 # ---------------------------------------------------------------- per-weapon chains
 chains = {}
 with open(f"{args.out}/weapon_chains{args.tag}.csv", "w", newline="") as f:
     wr = csv.writer(f)
-    wr.writerow(["weapon_id", "weapon", "class", "wepmotionCategory", "spAtkCategory",
-                 "1h_r1_frames", "1h_r1_seconds_per_attack", "2h_r1_frames", "2h_r1_seconds_per_attack",
-                 "l1_dual_frames", "l1_dual_seconds_per_attack", "1h_r1_source_anims", "2h_r1_source_anims",
-                 "l1_source_anims"])
+    hdr = ["weapon_id", "weapon", "class", "wepmotionCategory", "spAtkCategory"]
+    for k in ("1h_r1", "2h_r1", "l1_dual"):
+        hdr += [f"{k}_frames", f"{k}_seconds_per_attack", f"{k}_motion_values", f"{k}_stamina"]
+    wr.writerow(hdr)
     for bid, name in sorted(base_name.items()):
         cls = next(w["cls"] for w in WEAPONS if w["bid"] == bid)
-        if bid not in WCAT or cls in SKIP_CLS:
+        row = REG["weapons"].get(str(bid * 10000))
+        if bid not in WCAT or cls in SKIP_CLS or not row:
             continue
+        m = MV.weapon_moves(TAE, WCAT, REG, bid, name, row)
+        if not m:
+            continue
+        chains[name] = m
         cat, sp = WCAT[bid]
-        r1h, s1h = chain(cat, sp, 30000, "rh")
-        r2h, s2h = chain(cat, sp, 34000, "rh")
-        l1, sl1 = chain(cat, sp, 33000, "lh") if name in MV_L1 else (None, None)
-        chains[name] = (r1h, r2h, l1)
-        fmt = lambda x: "/".join(map(str, x)) if x else ""
-        sec = lambda x: round(np.mean(x) / 60, 3) if x else ""
-        wr.writerow([bid * 10000, name, cls, cat, sp, fmt(r1h), sec(r1h), fmt(r2h), sec(r2h), fmt(l1), sec(l1),
-                     " ".join(s1h or []), " ".join(s2h or []), " ".join(sl1 or [])])
+        out = [bid * 10000, name, cls, cat, sp]
+        for k in ("r1h", "r2h", "l1"):
+            st = m.get(k)
+            out += (["/".join(str(x[0]) for x in st), round(np.mean([x[0] for x in st]) / 60, 3),
+                     "/".join("+".join(str(h[0]) for h in x[2]) for x in st), "/".join(str(x[1]) for x in st)]
+                    if st else ["", "", "", ""])
+        wr.writerow(out)
+
+
+def chain_dps(A, steps, dfn):
+    """A: AR split (5 x n). Damage of the whole 3-step chain / its duration."""
+    dmg = 0
+    for frames, _, hits in steps:
+        for h in hits:
+            for e in range(5):
+                dmg = dmg + eff(A[e] * h[e] / 100, dfn)
+    return dmg / (sum(x[0] for x in steps) / 60)
+
 
 # ---------------------------------------------------------------- DPS
-# 1H R1 motion value is 100 for every weapon in the motion-value sheet; 2H R1 is 103 (105 for UGS, greataxes,
-# great hammers). Paired weapons and fists: 2H R1 is the single-blade 1H R1 clone (MV 100), L1 is the dual attack.
+# Motion values and hit counts come from the game (BehaviorParam_PC -> AtkParam_Pc), see tools/moves.py.
 results, BMODE = [], {}
 for w in WEAPONS:
-    if w["cls"] in SKIP_CLS or w["name"] in SKIP_W or w["name"] not in chains:
+    if w["cls"] in SKIP_CLS or w["name"] not in chains:
         continue
-    r1h, r2h, l1 = chains[w["name"]]
-    opts = []
-    if r2h:
-        mv = [100] if w["name"] in MV_L1 else [MV_R1_W.get(w["name"]) or MV_R1_CLASS.get(w["cls"], 103)]
-        opts.append(("2H R1", r2h, mv, True))
-    if r1h:
-        opts.append(("1H R1", r1h, [100], False))
-    if l1:
-        opts.append(("L1 dual", l1, MV_L1[w["name"]], True))
+    m = chains[w["name"]]
+    opts = [(LABEL[k], m[k], k != "r1h") for k in ("r2h", "r1h", "l1") if k in m]
     req = w["req"]
     best, per_mode, bbest = None, {}, {}
-    for mode, frames, mv, th in opts:
+    for mode, steps, th in opts:
         sm = 1.5 if th else 1.0
         ok = (G[:, 0] * sm >= req["str"]) & (G[:, 1] >= req["dex"]) & (G[:, 2] >= req["int"]) & (G[:, 3] >= req["fth"])
         if not ok.any():
             continue
         A = ar_vec(w, G, th)
-        secs = np.mean(frames) / 60
-        per = {dfn: np.where(ok, sum(eff(A[i] * m / 100, dfn) for m in mv for i in range(5)) / secs, -1) for dfn in DEFS}
+        secs = np.mean([x[0] for x in steps]) / 60
+        per = {dfn: np.where(ok, chain_dps(A, steps, dfn), -1) for dfn in DEFS}
         j = int(np.argmax(per[MAIN_DEF]))
         per_mode[mode] = round(float(per[MAIN_DEF][j]))
-        rec = dict(weapon=w["name"], infusion=w["inf"], cls=w["cls"], mode=mode, frames="/".join(map(str, frames)),
-                   seconds_per_attack=round(secs, 3), motion_values="+".join(map(str, mv)),
+        rec = dict(weapon=w["name"], infusion=w["inf"], cls=w["cls"], mode=mode, frames="/".join(str(x[0]) for x in steps),
+                   seconds_per_attack=round(secs, 3), motion_values="/".join("+".join(str(h[0]) for h in x[2]) for x in steps),
                    str=int(G[j, 0]), dex=int(G[j, 1]), int=int(G[j, 2]), fth=int(G[j, 3]), lck=int(G[j, 4]),
                    ar_total=round(float(A[:, j].sum())), **{f"ar_{e}": round(float(A[i, j])) for i, e in enumerate(ELEM)})
         for dfn in DEFS:
@@ -218,7 +186,7 @@ for w in WEAPONS:
         for bn, bs in BUILDS.items():
             okb = bs[0] * sm >= req["str"] and bs[1] >= req["dex"] and bs[2] >= req["int"] and bs[3] >= req["fth"]
             ab = ar_vec(w, np.array([bs]), th)
-            rec[f"build_{bn}"] = round(float(sum(eff(ab[i] * m / 100, MAIN_DEF) for m in mv for i in range(5))[0] / secs)) if okb else ""
+            rec[f"build_{bn}"] = round(float(chain_dps(ab, steps, MAIN_DEF)[0])) if okb else ""
         for bn in BUILDS:  # fixed builds: keep the best move for that build, independent of the free-stat winner
             v = rec[f"build_{bn}"]
             if v != "" and (bn not in bbest or v > bbest[bn][0]):

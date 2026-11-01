@@ -20,13 +20,13 @@ Against a flat 120 defense, SL120, +10 / +5 weapons, no buffs, no bleed:
 | 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 0.733 | 828 | 743 | 698 | 16/91/10/10/10 |
 | 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 0.733 | 747 | 669 | 630 | 22/85/10/10/10 |
 | 3 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 0.633 | 684 | 623 | 577 | 19/88/10/10/10 |
-| 4 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 0.944 | 680 | 616 | 569 | 16/58/40/13/10 |
-| 5 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 0.922 | 703 | 613 | 522 | 28/37/31/31/10 |
-| 6 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Sharp | 2H R1 | 0.656 | 661 | 603 | 558 | 22/85/10/10/10 |
-| 7 | [Rotten Ghru Curved Sword](https://darksouls3.wiki.fextralife.com/Rotten_Ghru_Curved_Sword) | Sharp | 2H R1 | 0.611 | 660 | 598 | 553 | 16/91/10/10/10 |
-| 8 | [Long Sword](https://darksouls3.wiki.fextralife.com/Long_Sword) | Sharp | 1H R1 | 0.633 | 656 | 596 | 551 | 19/88/10/10/10 |
-| 9 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Refined | L1 dual | 1.111 | 661 | 596 | 552 | 46/61/10/10/10 |
-| 10 | [Lothric Knight Sword](https://darksouls3.wiki.fextralife.com/Lothric_Knight_Sword) | Sharp | 1H R1 | 0.633 | 650 | 590 | 546 | 16/91/10/10/10 |
+| 4 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 0.922 | 703 | 613 | 522 | 28/37/31/31/10 |
+| 5 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Sharp | 2H R1 | 0.656 | 661 | 603 | 558 | 22/85/10/10/10 |
+| 6 | [Rotten Ghru Curved Sword](https://darksouls3.wiki.fextralife.com/Rotten_Ghru_Curved_Sword) | Sharp | 2H R1 | 0.611 | 660 | 598 | 553 | 16/91/10/10/10 |
+| 7 | [Long Sword](https://darksouls3.wiki.fextralife.com/Long_Sword) | Sharp | 1H R1 | 0.633 | 656 | 596 | 551 | 19/88/10/10/10 |
+| 8 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Refined | L1 dual | 1.111 | 661 | 596 | 552 | 46/61/10/10/10 |
+| 9 | [Lothric Knight Sword](https://darksouls3.wiki.fextralife.com/Lothric_Knight_Sword) | Sharp | 1H R1 | 0.633 | 650 | 590 | 546 | 16/91/10/10/10 |
+| 10 | [Exile Greatsword](https://darksouls3.wiki.fextralife.com/Exile_Greatsword) | Chaos | 2H R1 | 1.022 | 652 | 590 | 547 | 28/37/31/31/10 |
 
 Weapon names link to the Fextralife DS3 wiki (location, requirements, pictures). "L1 dual" means two-handing the paired weapon and chaining L1; "2H R1" means two-handing and chaining R1; "1H R1" means one-handing and chaining R1. Each weapon is listed with whichever of these gives it the highest DPS.
 
@@ -96,9 +96,9 @@ Same model, Deprived start (all stats 10), a fixed defensive spread per level an
 |---|---|---|---|---|---|
 | 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 652 | 10/62/10/10/10 |
 | 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 584 | 10/62/10/10/10 |
-| 3 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 557 | 10/40/31/11/10 |
-| 4 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 545 | 10/62/10/10/10 |
-| 5 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 545 | 59/13/10/10/10 |
+| 3 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 545 | 10/62/10/10/10 |
+| 4 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 545 | 59/13/10/10/10 |
+| 5 | [Exile Greatsword](https://darksouls3.wiki.fextralife.com/Exile_Greatsword) | Heavy | 2H R1 | 541 | 56/16/10/10/10 |
 
 **SL120** (Vig 27, End 20, Vit 15, 87 offensive points), full table: `results/dps_all_weapons.csv`
 
@@ -107,8 +107,8 @@ Same model, Deprived start (all stats 10), a fixed defensive spread per level an
 | 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 743 | 16/91/10/10/10 |
 | 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 669 | 22/85/10/10/10 |
 | 3 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 623 | 19/88/10/10/10 |
-| 4 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 616 | 16/58/40/13/10 |
-| 5 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 613 | 28/37/31/31/10 |
+| 4 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 613 | 28/37/31/31/10 |
+| 5 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Sharp | 2H R1 | 603 | 22/85/10/10/10 |
 
 **SL125** (Vig 27, End 20, Vit 15, 92 offensive points; the usual PvP meta level), full table: `results/sl/dps_all_weapons_sl125.csv`
 
@@ -117,8 +117,8 @@ Same model, Deprived start (all stats 10), a fixed defensive spread per level an
 | 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 747 | 18/94/10/10/10 |
 | 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 676 | 24/88/10/10/10 |
 | 3 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 629 | 24/88/10/10/10 |
-| 4 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 623 | 22/58/40/12/10 |
-| 5 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 620 | 28/40/30/34/10 |
+| 4 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 620 | 28/40/30/34/10 |
+| 5 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Sharp | 2H R1 | 609 | 24/88/10/10/10 |
 
 **SL150** (Vig 40, End 25, Vit 15, 99 offensive points), full table: `results/sl/dps_all_weapons_sl150.csv`
 
@@ -127,13 +127,75 @@ Same model, Deprived start (all stats 10), a fixed defensive spread per level an
 | 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 752 | 25/94/10/10/10 |
 | 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 683 | 28/91/10/10/10 |
 | 3 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 636 | 28/91/10/10/10 |
-| 4 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 629 | 25/61/40/13/10 |
-| 5 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 626 | 28/40/31/40/10 |
+| 4 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 626 | 28/40/31/40/10 |
+| 5 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Sharp | 2H R1 | 615 | 28/91/10/10/10 |
 
 At SL1 Fire and Deep tie because a flat defense is used for every damage type; against enemies weak to fire, Fire wins, against fire-resistant ones, Deep. Sellsword Twinblades need Dex 16, so they only show up from SL30.
 
 Reproduce a level with `--budget <offensive points>` and `--base <Str,Dex,Int,Fth,Lck>` (add ring bonuses to the base), e.g. `--budget 0 --base 10,15,10,10,10 --tag _sl1_hunters_ring`.
 
+
+## Bosses, bleed, frost and stamina
+
+The calculator can also rank weapons against a specific boss, using the boss's real HP, defense and per-damage-type
+absorption, adding bleed and frostbite procs, and optionally limiting attacks by stamina. All of it is read from the
+regulation (`Data0.bdt`) by `tools/ds3_params.py`:
+
+- **Boss HP and defense:** `NpcParam` HP and defenses times the area scaling spEffect (`Level Scaling - <area>`, NG).
+  The HP values match the wiki (Soul of Cinder 6,557, Nameless King 7,101, Midir 15,861, Gael 15,039).
+- **Absorption:** the `NpcParam` fields Paramdex calls `regainRate_*` are the damage multipliers per type (standard,
+  slash, strike, thrust, magic, fire, lightning, dark): Yhorm fire 0.0, Old Demon King fire 0.22, Nameless King
+  lightning 0.17, Aldrich dark 0.25. Each hit's physical type comes from its `AtkParam` (or the weapon's default).
+- **Bleed:** threshold = `resistBlood` x area scaling; each proc deals the weapon's bleed spEffect (15% max HP +
+  50/100) times the boss's `Blood Damage Rate` spEffect (50% for most bosses, 20% Gael), about 7.5-8% of a boss's
+  HP, which matches the community measurement of ~7.8%. Buildup per hit uses the weapon's bleed value and Luck.
+- **Frostbite:** proc = weapon's frost spEffect (11% max HP + 85), and the target takes 7% more damage for 14 s.
+  The boss bleed-damage rate is applied to frostbite too; that part is not confirmed in game.
+- **Stamina (optional):** each hit's stamina cost is `BehaviorParam_PC.stamina` x the weapon's `StaminaConsumeRate`.
+  With "stamina limited" on, stamina does not refill during attacks and refills at 45/s otherwise, so every point
+  costs 1/45 s. This is the long-fight rate; a fight that starts with a full bar is faster for the first few seconds.
+
+Best weapon per boss at SL125 (Vig 27, End 20, Vit 15), +10, no stamina limit, kill time = HP / DPS with nonstop
+attacking:
+
+| Boss | HP | Best weapon (SL125, +10) | Attack | DPS | of which bleed / frost | Kill time | 2nd best |
+|---|---|---|---|---|---|---|---|
+| Iudex Gundyr | 1,037 | Lightning [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 732 | - | 1 s | Lightning Warden Twinblades (728) |
+| Vordt of the Boreal Valley | 1,328 | Dark [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 809 | - | 2 s | Dark Warden Twinblades (768) |
+| Curse-rotted Greatwood | 5,406 | Chaos [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 1295 | - | 4 s | Chaos Gotthard Twinswords (1264) |
+| Crystal Sage | 2,723 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1003 | bleed 166 | 3 s | Sharp Sellsword Twinblades (924) |
+| Deacons of the Deep | 4,099 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 939 | bleed 106 | 4 s | Sharp Sellsword Twinblades (921) |
+| Abyss Watchers | 1,549 | Lightning [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 700 | - | 2 s | Lightning Warden Twinblades (673) |
+| High Lord Wolnir | 7,052 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 714 | - | 10 s | Sharp Warden Twinblades (647) |
+| Old Demon King | 5,302 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 776 | - | 7 s | Sharp Warden Twinblades (703) |
+| Pontiff Sulyvahn | 5,106 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 806 | bleed 126 | 6 s | Sharp Barbed Straight Sword (772) |
+| Aldrich, Devourer of Gods | 4,727 | Chaos [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 819 | bleed 114 | 6 s | Chaos Sellsword Twinblades (750) |
+| Yhorm the Giant | 27,823 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 725 | - | 38 s | Lightning Warden Twinblades (663) |
+| Dancer of the Boreal Valley | 5,112 | Dark [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 852 | bleed 123 | 6 s | Dark Sellsword Twinblades (775) |
+| Dragonslayer Armour | 4,582 | [Irithyll Straight Sword](https://darksouls3.wiki.fextralife.com/Irithyll_Straight_Sword) | 1H R1 | 612 | frost 269 | 7 s | Irithyll Rapier (586) |
+| Oceiros, the Consumed King | 8,088 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 896 | bleed 185 | 9 s | Irithyll Straight Sword (784) |
+| Champion Gundyr | 4,957 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 738 | bleed 117 | 7 s | Lightning Sellsword Twinblades (668) |
+| Lorian, Elder Prince | 4,294 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 734 | bleed 101 | 6 s | Lightning Sellsword Twinblades (683) |
+| Lothric, Younger Prince | 5,799 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 934 | bleed 134 | 6 s | Sharp Sellsword Twinblades (884) |
+| Nameless King | 7,101 | Dark [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 792 | bleed 160 | 9 s | Blood Sellsword Twinblades (709) |
+| Soul of Cinder | 6,557 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 770 | bleed 427 | 9 s | Blood Sellsword Twinblades (711) |
+| Gravetender's Greatwolf | 4,194 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1000 | bleed 648 | 4 s | Blood Sellsword Twinblades (886) |
+| Father Ariandel | 6,275 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1166 | bleed 673 | 5 s | Blood Sellsword Twinblades (1068) |
+| Sister Friede | 4,863 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 802 | bleed 112 | 6 s | Sharp Sellsword Twinblades (762) |
+| Blackflame Friede | 6,864 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 845 | bleed 155 | 8 s | Blood Sellsword Twinblades (785) |
+| Demon Prince | 7,046 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 809 | bleed 143 | 9 s | Blood Sellsword Twinblades (741) |
+| Darkeater Midir | 15,861 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 355 | - | 45 s | Sharp Long Sword (327) |
+| Slave Knight Gael | 15,038 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 571 | bleed 318 | 26 s | Blood Sellsword Twinblades (534) |
+
+Abyss Watchers HP is per watcher. Yhorm's Storm Ruler and Midir/Gael phase mechanics are not modelled. Warden
+Twinblades take over from Sellswords against almost every boss that can bleed; against bleed-immune bosses
+(Vordt, Wolnir, Old Demon King, Yhorm, Midir) Sellswords stay on top.
+
+**Two things the attack params show that the community motion-value sheet does not:**
+Dancer's Enchanted Swords' dual L1 hits carry magic on one blade and fire on the other (each blade's other element
+correction is 0), and Friede's Great Scythe's R1 hits have a magic correction of 0 (only its weapon art deals
+magic). Both cut those weapons' DPS a lot (Friede 616 -> 423, Dancer's 589 -> 433 at SL120); if in-game tests
+disagree, the param names in Paramdex would be the place to look.
 
 ## Files
 
@@ -142,11 +204,15 @@ Reproduce a level with `--budget <offensive points>` and `--base <Str,Dex,Int,Ft
 | `data/ds3_frames_full.txt` | Raw output of `tools/ds3_frames.py ... full` |
 | `data/tae_light_attack_frames.csv` | Every light-attack animation (1H R1, 2H R1, paired L1, R2 starts) in every player TAE: attack hitbox windows, R/L attack cancel frame, and the animation it imports events from |
 | `data/weapon_motion_categories.csv` | Weapon → `wepmotionCategory` (base moveset TAE) and `spAtkCategory` (weapon-specific override TAE), read from `EquipParamWeapon` |
-| `results/weapon_chains.csv` | Per weapon: resolved 1H R1, 2H R1 and dual L1 chain frames and the source animations |
+| `data/regulation_extract.json` | Output of `tools/ds3_params.py`: bosses, per-weapon behavior variation / stamina rate / status effects, behavior stamina and motion values |
+| `results/weapon_chains.csv` | Per weapon: 1H R1, 2H R1 and dual L1 chain frames, motion values per hit and stamina per step |
 | `results/dps_all_weapons.csv` | Per weapon and infusion: best move, timing, motion values, optimal stats, AR split, DPS at defense 80/120/160, DPS for 7 fixed builds, and the best DPS of each move (1H R1, 2H R1, L1 dual) at defense 120 |
 | `results/dps_best_per_build.csv` | Top 10 per fixed build (move = the best one for that build) |
 | `results/sl/dps_all_weapons_sl*.csv` | Same table for SL1 (with and without Hunter's Ring), SL30, SL60, SL80, SL125 and SL150 |
 | `tools/ds3_frames.py` | Extractor (read-only, pure Python 3, no dependencies; uses `cryptography` if installed, otherwise a built-in AES) |
+| `tools/ds3_params.py` | Regulation reader (bosses, behaviors, attack params, status effects); needs Paramdex for the param layouts |
+| `tools/moves.py` | Builds each weapon's chains from frame data + behaviors (hits, motion values, stamina) |
+| `tools/param_reader.py` | Small `.param` reader driven by Paramdex XML definitions |
 | `tools/compute_dps.py` | DPS model (Python 3 + numpy) |
 | `tools/export_web.py` | Builds `docs/data.json` for the calculator |
 | `docs/` | Interactive calculator (static page, same model in `docs/calc.js`) |
@@ -174,14 +240,21 @@ import of the 1H R1 (single blade), which matches the community frame data for G
 "Cancel - RH Attack" window (R1 chains) or "Cancel - LH Attack" window (L1 chains), i.e. the earliest frame the
 next attack can start with a buffered input. DPS uses the mean of the three steps.
 
+**Hits and motion values.** Each attack animation's `AttackBehavior` events carry a behavior judge id. That id is
+looked up in `BehaviorParam_PC` (weapon's behavior variation, then its motion category's base variation), which
+points to an `AtkParam_Pc` row whose `Atk*Correction` fields are the motion values per element. An R1 step deals its
+strongest hit (some swings have a weaker lead-in hitbox phase); a dual L1 step deals every hit (one per blade). The
+results match the community motion-value sheet: 1H R1 100, 2H R1 103, 105 for ultra greatswords / greataxes /
+great hammers, 98 halberds (95 one-handed), 115 Friede's Great Scythe, paired L1 85+85 / 90+90, Drang Twinspears
+65+90, Farron Greatsword 30+100.
+
 **Damage.** AR uses the standard DS3 formula from the DS3InventoryBuilder weapon data (base damage, scaling,
 CalcCorrectGraph). Each hit is AR × motion value, per element, through the DS-series attack/defense curve against
-a flat defense. Two-handing multiplies Str by 1.5 (also for the Str requirement); one-handing does not.
+a flat defense (the README tables) or a boss's defense and absorption (calculator). Two-handing multiplies Str by 1.5 (also for the Str requirement); one-handing does not.
 
 **Moves compared.** For every weapon and infusion the model computes 1H R1, 2H R1 and (paired weapons, fists)
-L1 dual separately, each with its own optimal stat spread, and keeps the highest. Motion values: 1H R1 = 100;
-2H R1 = 103 (105 for ultra greatswords, greataxes and great hammers; 98 halberds; 115 Friede's Great Scythe);
-2H R1 of paired weapons = single blade at 100. For straight swords the 1H R1 chain is 114 frames per three hits
+L1 dual separately, each with its own optimal stat spread, and keeps the highest. The 2H R1 of paired weapons is a
+single blade (motion value 100). For straight swords the 1H R1 chain is 114 frames per three hits
 against 128 two-handed, which outweighs the Str bonus on Dex builds (Sharp Broadsword: 1H 623 vs 2H 586).
 
 **Stats.** SL120 Deprived, Vigor 27 / Attunement 10 / Endurance 20 / Vitality 15 fixed, remaining 87 points spread
@@ -212,10 +285,9 @@ row may come from a different input sequence, and L1 chains in general would ben
 
 ## Not modelled
 
-Stamina (sustained L1 spam on paired weapons drains fast), bleed / poison / frost buildup, weapon buffs, damage rings
-(the Hunter's Ring row only adds its +5 Dex),
-the "sweet spot" bonus (flag 42), counter hits, hyper armor, reach and tracking. Motion values come from the
-community AtkParam motion-value sheet, not from this extraction. Ringed Knight Paired Greatswords, Giant Door
+In the README tables: stamina, bleed and frost (the calculator has them, see above). Everywhere: poison, buildup
+decay, weapon buffs, damage rings (the Hunter's Ring row only adds its +5 Dex),
+the "sweet spot" bonus (flag 42), counter hits, hyper armor, reach and tracking. Ringed Knight Paired Greatswords, Giant Door
 Shield and Dark Hand are left out (unclear motion values). A few chains could not be resolved because the
 middle step has no RH cancel flag (Farron Greatsword 1H/2H R1); those rows are empty.
 
@@ -225,6 +297,8 @@ middle step has no RH cancel flag (Farron Greatsword 1H/2H R1); those rows are e
 python3 tools/ds3_frames.py "<...>/DARK SOULS III/Game" discover            # sanity check
 python3 tools/ds3_frames.py "<...>/DARK SOULS III/Game" full data/ds3_frames_full.txt
 git clone https://github.com/Phil25/DS3InventoryBuilder
+git clone https://github.com/soulsmods/Paramdex
+python3 tools/ds3_params.py "<...>/DARK SOULS III/Game/Data0.bdt" Paramdex/DS3 data/regulation_extract.json
 python3 tools/compute_dps.py --frames data/ds3_frames_full.txt \
     --weapons DS3InventoryBuilder/DataGenerator/Raw --out results
 python3 tools/export_web.py --weapons DS3InventoryBuilder/DataGenerator/Raw   # calculator data
@@ -235,7 +309,7 @@ python3 tools/export_web.py --weapons DS3InventoryBuilder/DataGenerator/Raw   # 
 Archive keys and BHD5 layout: UXM Selective Unpacker (Nordgaren, TKGP). File formats (BHD5, DCX, BND4, TAE3,
 PARAM): SoulsFormats (TKGP). TAE event meanings: DSAnimStudio DS3 template (Meowmaritus). Param layout: Paramdex
 (soulsmods). Weapon damage and scaling data: DS3InventoryBuilder (Phil25), from the monrandira / pireax
-spreadsheet. Motion values: DS3 Motion Values sheet. Reference frame data: DS3 frame data sheets linked from the
+spreadsheet. Motion values cross-checked against the DS3 Motion Values sheet. Reference frame data: DS3 frame data sheets linked from the
 darksouls3.wikidot links page.
 
 No game files are included in this repository.

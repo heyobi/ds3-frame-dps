@@ -1,4 +1,4 @@
-// DS3 light-attack DPS model, same formulas as tools/compute_dps.py.
+// DS3 light-attack DPS model (same formulas as tools/compute_dps.py) plus boss targets, bleed/frost and stamina.
 // Works in the browser (window.DS3) and in node (module.exports) for testing.
 (function (root) {
   "use strict";
@@ -39,41 +39,81 @@
     ];
   }
 
-  function moveDps(A, frames, mv, def) {
-    const secs = frames.reduce((a, b) => a + b, 0) / frames.length / 60;
-    let dmg = 0;
-    for (const m of mv) for (let e = 0; e < 5; e++) dmg += eff(A[e] * m / 100, def);
-    return dmg / secs;
+  // Target: { def:[5 per element], mul:[std,slash,strike,thrust,magic,fire,lightning,dark] or null, hp, bleed,
+  //          frost (status thresholds, null = immune), bloodRate (% of bleed damage taken), stamina (bool) }
+  function flatTarget(def, stamina) {
+    return { def: [def, def, def, def, def], mul: null, hp: 0, bleed: null, frost: null, bloodRate: 100, stamina: !!stamina };
+  }
+  function bossTarget(b, stamina) {
+    return { def: b.df, mul: b.mul, hp: b.hp, bleed: b.bleed, frost: b.frost, bloodRate: b.bloodRate, stamina: !!stamina };
+  }
+  const REGEN = 45;          // stamina per second (equip load under 70%)
+  const FROST_AMP = 0.07, FROST_TIME = 14;   // frostbite: target takes 7% more damage for 14 s
+
+  // One full 3-step chain against target T. Returns dps and its parts.
+  function chainEval(D, w, key, li, st, T) {
+    const steps = D.moves[w.n][key];
+    const A = ar(D, w, li, st, { twoHand: key !== "r1h" });
+    let direct = 0, frames = 0, hits = 0, stam = 0;
+    for (const [f, sc, hs] of steps) {
+      frames += f; stam += sc;
+      for (const h of hs) {
+        hits++;
+        for (let e = 0; e < 5; e++) {
+          if (!h[e] || !A[e]) continue;
+          const m = T.mul ? T.mul[e === 0 ? h[5] : e + 3] : 1;
+          direct += eff(A[e] * h[e] / 100, T.def[e]) * m;
+        }
+      }
+    }
+    let t = frames / 60;
+    const stamUse = stam * (w.scr || 1);
+    if (T.stamina) t += stamUse / REGEN;     // no regen while attacking, so every point spent costs 1/45 s
+    let bleed = 0, frost = 0;
+    if (T.hp) {
+      const L = w.lv[li];
+      if (L[10] > 0 && T.bleed && w.pb) {
+        const luck = 1 + (w.lc || 0) / 100 * L[12] * (D.sats[w.sb] ? D.sats[w.sb][Math.min(99, st[4])] / 100 : 0);
+        const procs = hits * L[10] * luck / T.bleed;
+        bleed = procs * (w.pb[0] / 100 * T.hp + w.pb[1]) * T.bloodRate / 100;
+      }
+      if (L[11] > 0 && T.frost && w.pf) {
+        const procs = hits * L[11] / T.frost;
+        // the NPC bleed-damage rate (bosses: usually 50%) is applied to frostbite too; not confirmed in game
+        frost = procs * (w.pf[0] / 100 * T.hp + w.pf[1]) * T.bloodRate / 100;
+        const uptime = Math.min(1, FROST_TIME * procs / t);
+        direct *= 1 + FROST_AMP * uptime;
+      }
+    }
+    return { dps: (direct + bleed + frost) / t, ar: A, frames: steps.map(x => x[0]),
+             parts: { direct: direct / t, bleed: bleed / t, frost: frost / t }, stamina: stamUse / steps.length, secs: t / steps.length };
   }
 
   function wieldable(w, st, twoHand) {
     return st[0] * (twoHand ? 1.5 : 1) >= w.req[0] && st[1] >= w.req[1] && st[2] >= w.req[2] && st[3] >= w.req[3];
   }
 
-  // Which stats can change this weapon's AR at this level
-  function relevant(w, li) {
+  // Which stats can change this weapon's damage at this level
+  function relevant(w, li, T) {
     const L = w.lv[li], d = L.slice(0, 5), s = L.slice(5);
     const out = [];
     if (s[0] > 0 && d[0] > 0) out.push(0);
     if (s[1] > 0 && d[0] > 0) out.push(1);
     if (s[2] > 0 && (d[1] > 0 || d[2] > 0 || d[4] > 0)) out.push(2);
     if (s[3] > 0 && (d[2] > 0 || d[3] > 0 || d[4] > 0 || (w.i === "Blessed" && d[0] > 0))) out.push(3);
-    if (s[4] > 0 && d[0] > 0) out.push(4);
+    if ((s[4] > 0 && d[0] > 0) || (T && T.bleed && L[10] > 0 && w.lc > 0)) out.push(4);
     return out;
   }
 
   // Fixed stats: DPS of one move
-  function evalMove(D, w, key, st, up, def) {
+  function evalMove(D, w, key, st, up, T) {
     const mvset = D.moves[w.n][key];
-    const twoHand = key !== "r1h";
-    if (!mvset || !wieldable(w, st, twoHand)) return null;
-    const li = levelIndex(w, up);
-    const A = ar(D, w, li, st, { twoHand });
-    return { move: key, dps: moveDps(A, mvset[0], mvset[1], def), ar: A, stats: st.slice(), frames: mvset[0] };
+    if (!mvset || !wieldable(w, st, key !== "r1h")) return null;
+    return Object.assign({ move: key, stats: st.slice() }, chainEval(D, w, key, levelIndex(w, up), st, T));
   }
 
   // Free points: meet requirements first, then search the spread of the rest over the stats that matter
-  function optimizeMove(D, w, key, base, budget, up, def) {
+  function optimizeMove(D, w, key, base, budget, up, T) {
     const mvset = D.moves[w.n][key];
     if (!mvset) return null;
     const twoHand = key !== "r1h";
@@ -84,9 +124,9 @@
     for (let i = 0; i < 5; i++) if (st[i] < need[i]) { cost += need[i] - st[i]; st[i] = need[i]; }
     if (cost > budget) return null;
     const R = budget - cost;
-    const rel = relevant(w, li);
+    const rel = relevant(w, li, T);
     const k = rel.length;
-    const step = k <= 2 ? 1 : k === 3 ? 2 : 3;
+    const step = k <= 2 ? 1 : k === 3 ? 2 : k === 4 ? 3 : 5;
     const units = Math.floor(R / step), rem = R - units * step;
     let best = null;
     const cur = st.slice();
@@ -96,9 +136,8 @@
         const t = cur.slice();
         if (v >= 0) t[v] += rem;
         for (let i = 0; i < 5; i++) if (t[i] > 99) t[i] = 99;
-        const A = ar(D, w, li, t, { twoHand });
-        const dps = moveDps(A, mvset[0], mvset[1], def);
-        if (!best || dps > best.dps + 1e-9) best = { move: key, dps, ar: A, stats: t, frames: mvset[0] };
+        const r = chainEval(D, w, key, li, t, T);
+        if (!best || r.dps > best.dps + 1e-9) best = Object.assign({ move: key, stats: t }, r);
       }
     };
     const rec = (j, left) => {
@@ -135,7 +174,7 @@
   // Leveling path: meet the requirements, then add points one at a time to whichever stat gives the most DPS
   // per point (judged over the next 1 to 25 points, so slow-starting curves are not skipped). Every point in the
   // path extends the previous one, so the spread never jumps around between soul levels.
-  function levelPath(D, w, key, base, maxBudget, up, def, step) {
+  function levelPath(D, w, key, base, maxBudget, up, T, step) {
     step = step || 1;
     const mvset = D.moves[w.n][key];
     if (!mvset) return null;
@@ -147,8 +186,8 @@
     const chunks = [];
     for (let i = 0; i < 5; i++) if (st[i] < need[i]) { pts += need[i] - st[i]; chunks.push({ stat: i, from: st[i], to: need[i], req: true }); st[i] = need[i]; }
     if (pts > maxBudget) return { cost: pts, points: [], chunks };
-    const dpsOf = (t) => moveDps(ar(D, w, li, t, { twoHand }), mvset[0], mvset[1], def);
-    const rel = relevant(w, li);
+    const dpsOf = (t) => chainEval(D, w, key, li, t, T).dps;
+    const rel = relevant(w, li, T);
     let cur = dpsOf(st);
     const points = [{ pts, stats: st.slice(), dps: cur }];
     while (pts + step <= maxBudget) {
@@ -174,7 +213,7 @@
     return { cost: points[0].pts, points, chunks };
   }
 
-  const api = { eff, ar, rank, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
+  const api = { eff, ar, rank, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.DS3 = api;
 })(this);

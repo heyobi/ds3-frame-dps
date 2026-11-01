@@ -71,9 +71,11 @@ td.w small{display:block;color:var(--muted);font-size:12px;font-weight:400}
 .dps{position:relative;font-weight:650}
 .dps i{position:absolute;inset:6px auto 6px 0;background:var(--bar);border-radius:3px;z-index:0}
 .dps span{position:relative;z-index:1;padding-left:6px}
+.dps small.parts{position:relative;z-index:1;display:block;padding-left:6px;font-weight:400;font-size:11.5px;color:var(--ink2);margin-top:1px}
 .mv{display:inline-block;background:var(--chip);border-radius:5px;padding:1px 7px;font-size:12.5px;color:var(--ink2)}
 .alt{color:var(--muted);font-size:12.5px}
 .more{display:block;margin:14px auto 0;background:var(--chip);border:0;color:var(--ink);border-radius:8px;padding:8px 16px;font:inherit;font-size:14px;cursor:pointer}
+@media (max-width:1420px){.hide-m{display:none}}
 td.mvc small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
 .show-s{display:none}
 @media (max-width:640px){.hide-s{display:none}td.rank .tw{display:none}td.rank{width:22px}.show-s{display:inline}td,th{padding:8px 5px}td.w{white-space:normal;min-width:130px}td{font-size:13px}}
@@ -86,7 +88,8 @@ tr.main.open td{background:color-mix(in srgb,var(--accent) 9%,transparent)}
 td.rank .tw{display:inline-block;width:10px;color:var(--muted);transition:transform .15s}
 tr.open td.rank .tw{transform:rotate(90deg)}
 tr.detail>td{white-space:normal;padding:4px 8px 18px;background:var(--panel)!important}
-.det{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px}
+.det{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px}
+.det>div{min-width:0;overflow-x:auto}
 @media (max-width:900px){.det{grid-template-columns:1fr}}
 .det h3{font-size:14px;margin:6px 0 4px;font-weight:600}
 .det p{margin:0 0 8px;color:var(--ink2);font-size:13.5px}
@@ -160,12 +163,18 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       </div>
 
       <div class="group">
-        <div class="row2">
+        <div class="label">Target</div>
+        <select id="boss"><option value="">Flat defense (all damage types)</option></select>
+        <div class="row2" style="margin-top:8px">
           <label class="field"><span>Weapon upgrade</span>
             <select id="up"></select></label>
-          <label class="field"><span>Target defense</span><input type="number" id="def" min="1" max="2000" value="120"></label>
+          <label class="field" id="defBox"><span>Defense</span><input type="number" id="def" min="1" max="2000" value="120"></label>
         </div>
-        <div class="note">Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).</div>
+        <div class="note" id="bossNote">Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).</div>
+        <div class="checks" style="margin-top:8px">
+          <label><input type="checkbox" id="stam">Stamina limited</label>
+        </div>
+        <div class="note">Stamina limited: long fights where you keep attacking. Stamina does not refill while attacking and refills at 45/s otherwise, so each point spent costs 1/45 s.</div>
       </div>
 
       <div class="group">
@@ -198,8 +207,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       <div class="tablewrap">
         <table>
           <thead><tr>
-            <th>#</th><th>Weapon</th><th class="hide-s">Attack</th><th class="n hide-s">s / attack</th>
-            <th class="n hide-s">AR</th><th>DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
+            <th>#</th><th>Weapon</th><th class="hide-s">Attack</th><th class="n hide-s hide-m">s / attack</th>
+            <th class="n hide-s hide-m">AR</th><th>DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
@@ -209,11 +218,14 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </div>
 
   <footer>
-    <p><b>What the number means.</b> Damage per second while chaining the light attack, against a flat defense applied to every
-      damage type, no buffs. Bleed, poison and frost are not counted, nor stamina, hyper armor or reach.
+    <p><b>What the number means.</b> Damage per second while chaining the light attack, no buffs. Against a flat defense every
+      damage type uses the same defense and no absorption. Pick a boss to use its real HP, defense and absorption per damage
+      type (NG, read from the game's regulation), and to add bleed and frostbite procs. Poison, hyper armor and reach are not counted.
       "1H R1" is one-handed R1, "2H R1" two-handed R1, "L1 dual" the two-handed L1 of paired weapons and fists.</p>
     <p>The stat search here is finer than the 3-point grid used for the repo tables, so a weapon can come out 1 to 5 DPS higher than in the README.
-      Motion values come from the community AtkParam sheet; weapon damage and scaling from DS3InventoryBuilder.</p>
+      Motion values, hit counts and stamina costs come from the game's own attack params; weapon damage and scaling from DS3InventoryBuilder.
+      Bosses take a reduced share of bleed damage (usually 50%); the same share is applied to frostbite, which is not confirmed in game.
+      Status buildup is assumed not to decay between hits.</p>
     <p>Click a weapon to see a leveling path with a DPS chart. The link in the address bar keeps your inputs, so you can share a build.</p>
   </footer>
 </div>
@@ -225,8 +237,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   const $ = (id) => document.getElementById(id);
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
-  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","q","cls","inf"];
-  const boxes = ["m_r1h","m_r2h","m_l1","bestOnly"];
+  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","q","cls","inf"];
+  const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
   for (let i = 0; i <= 10; i++) { const o = document.createElement("option"); o.value = i; o.textContent = "+" + i; $("up").appendChild(o); }
   $("up").value = 10;
@@ -248,14 +260,17 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     if (h.get("mode")) mode = h.get("mode") === "fixed" ? "fixed" : "opt";
     for (const f of fields) if (h.has(f)) $(f).value = h.get(f);
     for (const b of boxes) if (h.has(b)) $(b).checked = h.get(b) === "1";
+    if (h.has("boss") && ![...$("boss").options].some(o => o.value === h.get("boss"))) $("boss").value = "";
   }
   function writeHash() {
     const h = new URLSearchParams();
     h.set("mode", mode);
     const keep = mode === "opt" ? ["sl","vig","att","end","vit"] : ["str","dex","int","fth","lck"];
     for (const f of keep.concat(["up","def"])) h.set(f, $(f).value);
+    if ($("boss").value) h.set("boss", $("boss").value);
+    if ($("stam").checked) h.set("stam", "1");
     for (const f of ["q","cls","inf"]) if ($(f).value) h.set(f, $(f).value);
-    for (const b of boxes) if (!$(b).checked) h.set(b, "0");
+    for (const b of boxes) if (b !== "stam" && !$(b).checked) h.set(b, "0");
     history.replaceState(null, "", "#" + h.toString());
   }
 
@@ -269,7 +284,12 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   function compute() {
     if (!D) return;
     const moves = { r1h: $("m_r1h").checked, r2h: $("m_r2h").checked, l1: $("m_l1").checked };
-    const up = num("up", 0, 10), def = num("def", 1, 2000);
+    const up = num("up", 0, 10), defN = num("def", 1, 2000);
+    const boss = D.bosses.find(x => x.n === $("boss").value);
+    const def = boss ? DS3.bossTarget(boss, $("stam").checked) : DS3.flatTarget(defN, $("stam").checked);
+    $("defBox").style.visibility = boss ? "hidden" : "visible";
+    $("bossNote").innerHTML = boss ? bossInfo(boss) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
+    const tgt = (boss ? `vs ${boss.n}` : `defense ${defN}`) + ($("stam").checked ? ", stamina limited" : "");
     const b = budgetInfo();
     $("budget").innerHTML = mode === "opt" ? `Offensive points to place: <b>${b.budget}</b>` : "";
     $("budget").classList.toggle("bad", b.budget < 0);
@@ -286,8 +306,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       rows = DS3.rank(D, opts);
       ctx = { opts, b, defUsed: mode === "opt" ? b.sl - 1 - b.budget : 0 };
       $("title").textContent = mode === "opt"
-        ? `SL${b.sl}, +${up} weapons, defense ${def}`
-        : `Str ${opts.stats[0]} / Dex ${opts.stats[1]} / Int ${opts.stats[2]} / Fth ${opts.stats[3]} / Lck ${opts.stats[4]}, +${up}, defense ${def}`;
+        ? `SL${b.sl}, +${up} weapons, ${tgt}`
+        : `Str ${opts.stats[0]} / Dex ${opts.stats[1]} / Int ${opts.stats[2]} / Fth ${opts.stats[3]} / Lck ${opts.stats[4]}, +${up}, ${tgt}`;
       render(null, Math.round(performance.now() - t));
       writeHash();
     }, 20);
@@ -431,6 +451,23 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     svg.addEventListener("pointerleave", () => { hv.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); });
   }
 
+  function partsHtml(r) {
+    const p = r.parts, bits = [];
+    if (p.bleed > 0.5) bits.push(`bleed ${Math.round(p.bleed)}`);
+    if (p.frost > 0.5) bits.push(`frost ${Math.round(p.frost)}`);
+    const boss = D.bosses.find(x => x.n === $("boss").value);
+    if (boss) bits.push(`kill ${Math.round(boss.hp / r.dps)} s`);
+    return bits.length ? `<small class="parts">${bits.join(" · ")}</small>` : "";
+  }
+
+  function bossInfo(b) {
+    const pct = (m) => Math.round((1 - m) * 100);
+    const typ = ["Std", "Slash", "Strike", "Thrust", "Magic", "Fire", "Light.", "Dark"];
+    const abs = b.mul.map((m, i) => `${typ[i]} ${pct(m)}%`).join(" · ");
+    const st = (v) => v == null ? "immune" : v;
+    return `HP ${b.hp.toLocaleString("en")} · defense ${Math.round(b.df[0])} · bleed ${st(b.bleed)} · frost ${st(b.frost)}<br>Absorption: ${abs}<br>Negative absorption = takes extra damage. NG values, from the game's regulation.`;
+  }
+
   function render(msg, ms) {
     const q = $("q").value.trim().toLowerCase(), cls = $("cls").value, inf = $("inf").value, bestOnly = $("bestOnly").checked;
     let list = rows;
@@ -455,9 +492,9 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       return `<tr class="main${open ? " open" : ""}" data-key="${esc(key)}"><td class="rank"><span class="tw">›</span> ${k}</td>
         <td class="w"><a href="${wikiUrl(r.w.n)}" target="_blank" rel="noopener">${esc(r.w.n)}</a><small>${r.w.i === "-" ? "" : esc(r.w.i) + " · "}${esc(r.w.c)}<span class="show-s"> · ${MOVE_LABEL[r.move]}</span></small></td>
         <td class="mvc hide-s"><span class="mv">${MOVE_LABEL[r.move]}</span>${others ? `<small>${others}</small>` : ""}</td>
-        <td class="n hide-s">${secs.toFixed(3)}</td>
-        <td class="n hide-s">${arT}</td>
-        <td class="dps"><i style="width:${pct.toFixed(1)}%"></i><span>${Math.round(r.dps)}</span></td>
+        <td class="n hide-s hide-m">${secs.toFixed(3)}</td>
+        <td class="n hide-s hide-m">${arT}</td>
+        <td class="dps"><i style="width:${pct.toFixed(1)}%"></i><span>${Math.round(r.dps)}</span>${partsHtml(r)}</td>
         <td class="n">${r.stats.join("/")}</td></tr>${open ? `<tr class="detail"><td colspan="7">${detailHtml(r)}</td></tr>` : ""}`;
     }).join("");
     hookDetail();
@@ -468,7 +505,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
 
   const schedule = () => { clearTimeout(timer); timer = setTimeout(compute, 250); };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def"].forEach(id => $(id).addEventListener("input", schedule));
-  ["up","m_r1h","m_r2h","m_l1"].forEach(id => $(id).addEventListener("change", compute));
+  ["up","m_r1h","m_r2h","m_l1","boss","stam"].forEach(id => $(id).addEventListener("change", compute));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
   $("more").addEventListener("click", () => { showAll = true; render(); });
@@ -489,6 +526,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     for (const c of classes) { const o = document.createElement("option"); o.value = o.textContent = c; $("cls").appendChild(o); }
     for (const c of infs) { const o = document.createElement("option"); o.value = o.textContent = c; $("inf").appendChild(o); }
     const o = document.createElement("option"); o.value = "-"; o.textContent = "none (unique)"; $("inf").appendChild(o);
+    for (const b of D.bosses) { const o = document.createElement("option"); o.value = o.textContent = b.n; $("boss").appendChild(o); }
     readHash(); setMode(mode); compute();
   }).catch(() => { $("status").textContent = "Could not load data.json"; });
 })();
