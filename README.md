@@ -108,6 +108,16 @@ Same model, Deprived start (all stats 10), a fixed defensive spread per level an
 | 4 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 616 | 16/58/40/13/10 |
 | 5 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 613 | 28/37/31/31/10 |
 
+**SL125** (Vig 27, End 20, Vit 15, 92 offensive points; the usual PvP meta level), full table: `results/sl/dps_all_weapons_sl125.csv`
+
+| # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 747 | 18/94/10/10/10 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 676 | 24/88/10/10/10 |
+| 3 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 629 | 24/88/10/10/10 |
+| 4 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 623 | 22/58/40/12/10 |
+| 5 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 620 | 28/40/30/34/10 |
+
 **SL150** (Vig 40, End 25, Vit 15, 99 offensive points), full table: `results/sl/dps_all_weapons_sl150.csv`
 
 | # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
@@ -133,7 +143,7 @@ Reproduce a level with `--budget <offensive points>` and `--base <Str,Dex,Int,Ft
 | `results/weapon_chains.csv` | Per weapon: resolved 1H R1, 2H R1 and dual L1 chain frames and the source animations |
 | `results/dps_all_weapons.csv` | Per weapon and infusion: best move, timing, motion values, optimal stats, AR split, DPS at defense 80/120/160, DPS for 7 fixed builds, and the best DPS of each move (1H R1, 2H R1, L1 dual) at defense 120 |
 | `results/dps_best_per_build.csv` | Top 10 per fixed build (move = the best one for that build) |
-| `results/sl/dps_all_weapons_sl*.csv` | Same table for SL1 (with and without Hunter's Ring), SL30, SL60, SL80 and SL150 |
+| `results/sl/dps_all_weapons_sl*.csv` | Same table for SL1 (with and without Hunter's Ring), SL30, SL60, SL80, SL125 and SL150 |
 | `tools/ds3_frames.py` | Extractor (read-only, pure Python 3, no dependencies; uses `cryptography` if installed, otherwise a built-in AES) |
 | `tools/compute_dps.py` | DPS model (Python 3 + numpy) |
 
