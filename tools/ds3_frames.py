@@ -258,16 +258,20 @@ if __name__ == "__main__":
         # Parry / defensive frame data: every animation that has ChrActionFlag 5 ("Parry Possible") anywhere,
         # plus the same animation id in every other TAE (they may import it). All type-0 flags are listed.
         parsed = [(os.path.basename(n.replace("\\", "/"))[:-4],) + tae_events(d) for n, d in taes]
+        # AttackBehavior (type 1) with AttackType 64 = "Parry" is the parry window; ChrActionFlag 5 marks the
+        # frames in which an attack can be parried by the opponent.
         ids = {aid % 1000000 for _, tid, res in parsed for aid, evs in res.items()
-               if any(e[0] == 0 and e[3] in (5, 73) for e in evs)}
+               if any(e[0] == 1 and ATKARGS.get((tid, aid, round(e[1] * 60)), (0,))[0] == 64 for e in evs)}
         lines.append("PARRY_IDS " + ",".join(map(str, sorted(ids))))
         for short, tid, res in parsed:
             for aid in sorted(res):
                 if aid % 1000000 not in ids:
                     continue
                 fl = "/".join(f"{a}:{round(st * 60)}-{round(en * 60)}" for t, st, en, a in res[aid] if t == 0)
+                pw = "/".join(f"{round(st * 60)}-{round(en * 60)}" for t, st, en, a in res[aid]
+                              if t == 1 and ATKARGS.get((tid, aid, round(st * 60)), (0,))[0] == 64)
                 rf = REFS.get((tid, aid), (0, 0, 0))
-                lines.append(f"{short}|{aid % 1000000}|{fl}|{rf[0]}:{rf[1]}:{rf[2]}")
+                lines.append(f"{short}|{aid % 1000000}|{pw}|{fl}|{rf[0]}:{rf[1]}:{rf[2]}")
         cats = weapon_motion_categories()
         lines.append("W " + " ".join(f"{k // 10000}:{v[0]}:{v[1]}:{v[2]}:{v[4]}" for k, v in sorted(cats.items()) if k % 10000 == 0 and k < 30000000))
     else:
