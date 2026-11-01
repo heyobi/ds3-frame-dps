@@ -1,0 +1,287 @@
+weapon_id,weapon,class,wepmotionCategory,spAtkCategory
+1000000,Dagger,Dagger,20,153
+1010000,Bandit's Knife,Dagger,20,72
+1020000,Parrying Dagger,Dagger,20,71
+1040000,Rotten Ghru Dagger,Dagger,20,72
+1060000,Harpe,Dagger,20,72
+1070000,Scholar's Candlestick,Dagger,20,206
+1080000,Tailbone Short Sword,Dagger,20,204
+1090000,Corvian Greatknife,Dagger,20,72
+1120000,Handmaid's Dagger,Dagger,20,153
+1140000,Aquamarine Dagger,Dagger,20,256
+1150000,Murky Hand Scythe,Dagger,20,72
+2000000,Shortsword,Straight Sword,23,54
+2010000,Long Sword,Straight Sword,23,0
+2020000,Broadsword,Straight Sword,23,53
+2030000,Broken Straight Sword,Straight Sword,23,53
+2060000,Lothric Knight Sword,Straight Sword,23,54
+2110000,Sunlight Straight Sword,Straight Sword,23,209
+2120000,Rotten Ghru Curved Sword,Curved Sword,28,151
+2140000,Irithyll Straight Sword,Straight Sword,23,208
+2160000,Cleric's Candlestick,Straight Sword,23,207
+2180000,Morion Blade,Straight Sword,23,0
+2200000,Astora Straight Sword,Straight Sword,23,0
+2210000,Barbed Straight Sword,Straight Sword,23,0
+2220000,Executioner's Greatsword,Greatsword,25,221
+2230000,Anri's Straight Sword,Straight Sword,23,0
+2240000,Onyx Blade,Greatsword,25,245
+2250000,Ringed Knight Straight Sword,Straight Sword,23,251
+2260000,Gael's Greatsword,Greatsword,25,263
+3000000,Estoc,Thrusting Sword,27,113
+3010000,Mail Breaker,Dagger,20,205
+3020000,Rapier,Thrusting Sword,27,218
+3030000,Ricard's Rapier,Thrusting Sword,27,115
+3040000,Crystal Sage's Rapier,Thrusting Sword,27,0
+3050000,Irithyll Rapier,Thrusting Sword,27,187
+4010000,Shotel,Curved Sword,28,99
+4030000,Scimitar,Curved Sword,28,151
+4040000,Falchion,Curved Sword,28,0
+4050000,Carthus Curved Sword,Curved Sword,28,0
+4060000,Carthus Curved Greatsword,Curved Greatsword,28,51
+4070000,Pontiff Knight Curved Sword,Curved Sword,28,164
+4080000,Storm Curved Sword,Curved Sword,28,212
+4090000,Painting Guardian's Curved Sword,Curved Sword,28,101
+4100000,Crescent Moon Sword,Curved Sword,28,165
+4110000,Carthus Shotel,Curved Sword,28,0
+4120000,Follower Sabre,Curved Sword,28,247
+4130000,Demon's Scar,Curved Sword,28,257
+5000000,Uchigatana,Katana,29,0
+5010000,Washing Pole,Katana,29,0
+5020000,Chaos Blade,Katana,29,0
+5030000,Black Blade,Katana,29,90
+5040000,Bloodlust,Katana,29,198
+5050000,Darkdrift,Katana,29,0
+5060000,Frayed Blade,Katana,29,258
+6000000,Bastard Sword,Greatsword,25,0
+6020000,Claymore,Greatsword,25,74
+6040000,Zweihander,Ultra Greatsword,26,203
+6050000,Greatsword,Ultra Greatsword,26,193
+6070000,Astora Greatsword,Ultra Greatsword,26,160
+6080000,Murakumo,Curved Greatsword,28,195
+6100000,Lothric Knight Greatsword,Ultra Greatsword,26,202
+6130000,Black Knight Greatsword,Ultra Greatsword,26,128
+6140000,Flamberge,Greatsword,25,0
+6150000,Exile Greatsword,Curved Greatsword,28,195
+6170000,Greatsword of Judgment,Greatsword,25,154
+6180000,Profaned Greatsword,Ultra Greatsword,26,162
+6190000,Cathedral Knight Greatsword,Ultra Greatsword,26,95
+6200000,Farron Greatsword,Ultra Greatsword (Unique),26,161
+6230000,Yhorm's Great Machete,Greataxe,32,169
+6240000,Dark Sword,Straight Sword,23,57
+6250000,Black Knight Sword,Greatsword,25,80
+6260000,Lorian's Greatsword,Ultra Greatsword,26,189
+6270000,Twin Princes' Greatsword,Greatsword,25,155
+6280000,Lothric's Holy Sword,Straight Sword,23,188
+6290000,Wolnir's Holy Sword,Greatsword,25,156
+6300000,Wolf Knight's Greatsword,Greatsword,25,131
+6310000,Hollowslayer Greatsword,Greatsword,25,157
+6320000,Moonlight Greatsword,Greatsword,25,158
+6330000,Drakeblood Greatsword,Greatsword,25,196
+6340000,Firelink Greatsword,Greatsword,25,159
+6350000,Fume Ultra Greatsword,Ultra Greatsword,26,163
+6360000,Old Wolf Curved Sword,Curved Greatsword,28,166
+6370000,Storm Ruler,Greatsword,25,0
+6380000,Harald Curved Greatsword,Curved Greatsword,28,264
+7000000,Hand Axe,Axe,30,102
+7010000,Battle Axe,Axe,30,0
+7020000,Brigand Axe,Axe,30,0
+7040000,Crescent Axe,Halberd,38,0
+7050000,Greataxe,Greataxe,32,0
+7070000,Butcher Knife,Axe,30,103
+7080000,Dragonslayer's Axe,Axe,30,0
+7100000,Thrall Axe,Axe,30,102
+7110000,Dragonslayer Greataxe,Greataxe,32,199
+7120000,Demon's Greataxe,Greataxe,32,168
+7130000,Eleonora,Axe,30,167
+7150000,Man Serpent Hatchet,Axe,30,0
+7170000,Millwood Battle Axe,Axe,30,241
+7180000,Earth Seeker,Greataxe,32,242
+8000000,Club,Hammer,33,59
+8010000,Mace,Hammer,33,0
+8020000,Morning Star,Hammer,33,0
+8030000,Reinforced Club,Hammer,33,210
+8060000,Large Club,Great Hammer,35,69
+8080000,Great Club,Great Hammer,35,213
+8110000,Great Mace,Great Hammer,35,0
+8160000,Great Wooden Hammer,Great Hammer,35,0
+8170000,Gargoyle Flame Hammer,Great Hammer,35,172
+8180000,Vordt's Great Hammer,Great Hammer,35,173
+8190000,Old King's Great Hammer,Great Hammer,35,174
+8220000,Heysel Pick,Hammer,33,220
+8240000,Warpick,Hammer,33,228
+8250000,Pickaxe,Great Hammer,35,171
+8260000,Dragon Tooth,Great Hammer,35,0
+8270000,Smough's Great Hammer,Great Hammer,35,70
+8280000,Blacksmith Hammer,Hammer,33,0
+8290000,Morne's Great Hammer,Great Hammer,35,211
+8300000,Spiked Mace,Great Hammer,35,0
+8310000,Quakestone Hammer,Great Hammer,35,243
+8320000,Ledo's Great Hammer,Great Hammer,35,259
+9000000,Spear,Spear,36,200
+9010000,Winged Spear,Spear,36,0
+9030000,Partizan,Spear,36,63
+9080000,Greatlance,Pike,36,177
+9090000,Lothric Knight Long Spear,Pike,36,67
+9100000,Four-Pronged Plow,Spear,36,134
+9110000,Gargoyle Flame Spear,Spear,36,175
+9120000,Rotten Ghru Spear,Spear,36,0
+9130000,Tailbone Spear,Spear,36,0
+9140000,Soldering Iron,Spear,36,0
+9160000,Dragonslayer Swordspear,Spear,36,176
+9170000,Arstor's Spear,Spear,36,200
+9180000,Saint Bident,Spear,36,0
+9190000,Yorshka's Spear,Spear,36,197
+9200000,Pike,Pike,36,67
+9220000,Dragonslayer Spear,Spear,36,68
+9230000,Follower Javelin,Spear,36,246
+9240000,Ringed Knight Spear,Pike,36,252
+9250000,Lothric War Banner,Pike,36,260
+9260000,Crucifix of the Mad King,Halberd,38,261
+10000000,Great Scythe,Reaper,38,50
+10010000,Lucerne,Halberd,38,0
+10020000,Glaive,Halberd,38,0
+10030000,Halberd,Halberd,38,108
+10050000,Black Knight Greataxe,Greataxe,32,107
+10070000,Pontiff Knight Great Scythe,Reaper,38,179
+10080000,Great Corvian Scythe,Reaper,38,50
+10090000,Winged Knight Halberd,Halberd,38,201
+10100000,Gundyr's Halberd,Halberd,38,215
+10140000,Red Hilted Halberd,Halberd,38,108
+10150000,Black Knight Glaive,Halberd,38,112
+10160000,Immolation Tinder,Halberd,38,217
+10170000,Splitleaf Greatsword,Halberd,38,248
+10180000,Friede's Great Scythe,Reaper,38,232
+11000000,Claw,Claw,42,146
+11010000,Caestus,Fist,42,152
+11020000,Manikin Claws,Claw,42,146
+11030000,Demon's Fist,Fist,42,152
+11040000,Dark Hand,Fist,42,123
+11050000,Crow Talons,Claw,42,235
+12000000,Whip,Whip,43,231
+12040000,Witch's Locks,Whip,43,229
+12050000,Notched Whip,Whip,43,231
+12060000,Spotted Whip,Whip,43,231
+12070000,Rose of Ariandel,Whip,43,234
+13050000,Talisman,Talisman,41,127
+13060000,Sorcerer's Staff,Staff,41,0
+13070000,Storyteller's Staff,Staff,41,224
+13080000,Mendicant's Staff,Staff,41,0
+13100000,Man-grub's Staff,Staff,41,0
+13110000,Archdeacon's Great Staff,Staff,41,0
+13120000,Golden Ritual Spear,Spear,36,178
+13140000,Yorshka's Chime,Sacred Chime,41,185
+13160000,Sage's Crystal Staff,Staff,41,223
+13170000,Heretic's Staff,Staff,41,0
+13180000,Court Sorcerer's Staff,Staff,41,0
+13190000,Witchtree Branch,Staff,41,0
+13200000,Izalith Staff,Staff,41,0
+13210000,Cleric's Sacred Chime,Sacred Chime,41,185
+13220000,Priest's Chime,Sacred Chime,41,185
+13230000,Saint-tree Bellvine,Sacred Chime,41,185
+13240000,Caitha's Chime,Sacred Chime,41,185
+13250000,Crystal Chime,Sacred Chime,41,185
+13260000,Sunlight Talisman,Talisman,41,127
+13270000,Canvas Talisman,Talisman,41,127
+13280000,Sunless Talisman,Talisman,41,127
+13290000,Saint's Talisman,Talisman,41,127
+13300000,White Hair Talisman,Talisman,41,127
+13400000,Pyromancy Flame,Pyromancy Flame,41,149
+13410000,Pyromancer's Parting Flame,Pyromancy Flame,41,239
+13420000,Murky Longstaff,Staff,41,266
+13430000,Sacred Chime of Filianore,Sacred Chime,41,267
+13440000,Preacher's Right Arm,Staff,41,265
+13600000,Dragonslayer Greatbow,Greatbow,45,83
+14010000,Short Bow,Bow,44,81
+14020000,Composite Bow,Bow,44,81
+14040000,Light Crossbow,Crossbow,46,0
+14050000,Arbalest,Crossbow,46,0
+14060000,Longbow,Bow,44,0
+14070000,Dragonrider Bow,Bow,44,0
+14090000,Avelyn,Crossbow,46,84
+14100000,Knight's Crossbow,Crossbow,46,0
+14110000,Heavy Crossbow,Crossbow,46,0
+14120000,White Birch Bow,Bow,44,249
+14130000,Darkmoon Longbow,Bow,44,230
+14140000,Onislayer Greatbow,Greatbow,45,184
+14150000,Black Bow of Pharis,Bow,44,82
+14170000,Sniper Crossbow,Crossbow,46,85
+14180000,Millwood Greatbow,Greatbow,45,244
+14190000,Repeating Crossbow,Crossbow,46,262
+16000000,Sellsword Twinblades,Curved Sword (Paired),28,137
+16020000,Warden Twinblades,Curved Sword (Paired),28,137
+16030000,Winged Knight Twinaxes,Axe (Paired),30,138
+16040000,Dancer's Enchanted Swords,Curved Sword (Paired),28,139
+16050000,Great Machete,Greataxe,32,0
+16060000,Brigand Twindaggers,Dagger (Paired),20,141
+16070000,Gotthard Twinswords,Sword (Paired),23,142
+16090000,Onikiri and Ubadachi,Katana (Paired),29,144
+16100000,Drang Twinspears,Spear (Paired),36,145
+16120000,Giant Door Shield,Spear (Paired),47,250
+16130000,Drang Hammers,Hammer (Paired),33,148
+16140000,Valorheart,Straight Sword,23,236
+16150000,Crow Quills,Spear (Paired),27,237
+16160000,Ringed Knight Paired Greatswords,Spear (Paired),26,253
+20000000,Buckler,Small Shield,48,91
+20010000,Small Leather Shield,Small Shield,48,91
+20030000,Round Shield,Shield,48,150
+20040000,Large Leather Shield,Shield,48,150
+20070000,Hawkwood's Shield,Small Shield,48,0
+20080000,Iron Round Shield,Small Shield,48,0
+20110000,Wooden Shield,Shield,48,150
+20120000,Kite Shield,Shield,48,150
+20130000,Ghru Rotshield,Small Shield,48,0
+20150000,Havel's Greatshield,Greatshield,47,94
+20160000,Target Shield,Small Shield,48,91
+20170000,Elkhorn Round Shield,Small Shield,48,0
+20180000,Warrior's Round Shield,Small Shield,48,0
+20190000,Caduceus Round Shield,Small Shield,48,0
+20200000,Red and White Shield,Small Shield,48,0
+20210000,Plank Shield,Small Shield,48,0
+20220000,Leather Shield,Small Shield,48,0
+20230000,Crimson Parma,Small Shield,48,0
+20240000,Eastern Iron Shield,Small Shield,48,0
+20250000,Llewellyn Shield,Small Shield,48,0
+20270000,Golden Falcon Shield,Small Shield,48,0
+20280000,Sacred Bloom Shield,Small Shield,48,214
+20290000,Ancient Dragon Greatshield,Greatshield,47,0
+20300000,Follower Shield,Shield,48,150
+20310000,Dragonhead Shield,Small Shield,48,254
+21010000,Lothric Knight Shield,Shield,48,150
+21040000,Knight Shield,Shield,48,150
+21060000,Pontiff Knight Shield,Shield,48,150
+21070000,Carthus Shield,Shield,48,150
+21100000,Black Knight Shield,Shield,48,150
+21120000,Silver Knight Shield,Shield,48,150
+21130000,Spiked Shield,Shield,48,227
+21140000,Pierce Shield,Shield,48,93
+21150000,East-West Shield,Shield,48,150
+21160000,Sunlight Shield,Shield,48,150
+21170000,Crest Shield,Shield,48,150
+21180000,Dragon Crest Shield,Shield,48,150
+21190000,Spider Shield,Shield,48,150
+21200000,Grass Crest Shield,Shield,48,150
+21210000,Sunset Shield,Shield,48,150
+21220000,Golden Wing Crest Shield,Shield,48,150
+21230000,Blue Wooden Shield,Shield,48,150
+21240000,Silver Eagle Kite Shield,Shield,48,150
+21250000,Stone Parma,Shield,48,150
+21260000,Spirit Tree Crest Shield,Shield,48,150
+21270000,Porcine Shield,Shield,48,150
+21280000,Shield of Want,Shield,48,150
+21290000,Wargod Wooden Shield,Shield,48,150
+21300000,Ethereal Oak Shield,Shield,48,150
+21310000,Dragonhead Greatshield,Greatshield,47,255
+22010000,Lothric Knight Greatshield,Greatshield,47,0
+22020000,Cathedral Knight Greatshield,Greatshield,47,0
+22040000,Dragonslayer Greatshield,Greatshield,47,225
+22050000,Moaning Shield,Greatshield,47,222
+22070000,Yhorm's Greatshield,Greatshield,47,0
+22080000,Black Iron Greatshield,Greatshield,47,0
+22090000,Wolf Knight's Greatshield,Greatshield,47,0
+22100000,Twin Dragon Greatshield,Greatshield,47,0
+22110000,Greatshield of Glory,Greatshield,47,0
+22120000,Curse Ward Greatshield,Greatshield,47,0
+22130000,Bonewheel Shield,Greatshield,47,126
+22140000,Stone Greatshield,Greatshield,47,0
+23000000,Torch,Torch,49,0
+23010000,Follower Torch,Torch,33,240
