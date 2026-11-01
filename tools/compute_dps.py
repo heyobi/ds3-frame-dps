@@ -115,7 +115,7 @@ for line in open(args.frames):
         for tok in line.split()[1:]:
             i, c, o, b, sp = map(int, tok.split(":")); WCAT[i] = (c, sp)
         continue
-    tae, aid, atk, rh, lh, rhi, ref = line.split("|")
+    tae, aid, atk, rh, lh, rhi, ref = line.split("|")[:7]
     f, imp, _ = map(int, ref.split(":"))
     TAE[(int(tae[1:]), int(aid))] = dict(
         hits=[tuple(map(int, x.split("-"))) for x in atk.split("/") if x],

@@ -187,6 +187,7 @@ def bnd4(data):
 
 # ---------------- TAE3 ----------------
 REFS = {}
+ATKARGS = {}   # (tae, anim, start frame) -> first three s32 args of AttackBehavior (incl. behavior judge id)
 
 def tae_events(t):
     assert t[:4] == b"TAE ", t[:4]
@@ -201,6 +202,8 @@ def tae_events(t):
             st = struct.unpack_from("<f", t, s_off)[0]; en = struct.unpack_from("<f", t, e_off)[0]
             etype = struct.unpack_from("<q", t, d_off)[0]
             arg = struct.unpack_from("<i", t, d_off + 16)[0] if etype in (0, 1) else None
+            if etype == 1:
+                ATKARGS[(tid, aid, round(st * 60))] = struct.unpack_from("<iii", t, d_off + 16)
             evs.append((etype, st, en, arg))
         ref_flag, _, _, imp, unk1c = struct.unpack_from("<qqqii", t, file_off)
         res[aid] = evs
@@ -264,7 +267,8 @@ if __name__ == "__main__":
                     lh = "/".join(str(round(st * 60)) for t, st, en, a in evs if t == 0 and a == 16)
                     rhi = "/".join(str(round(st * 60)) for t, st, en, a in evs if t == 0 and a == 1)
                     rf = REFS.get((tid, aid), (0, 0, 0))
-                    lines.append(f"{short[:-4]}|{aid % 1000000}|{atk}|{rh}|{lh}|{rhi}|{rf[0]}:{rf[1]}:{rf[2]}")
+                    ja = "/".join(",".join(map(str, ATKARGS.get((tid, aid, round(st * 60)), ()))) for t, st, en, a in evs if t == 1)
+                    lines.append(f"{short[:-4]}|{aid % 1000000}|{atk}|{rh}|{lh}|{rhi}|{rf[0]}:{rf[1]}:{rf[2]}|{ja}")
         cats = weapon_motion_categories()
         lines.append("W " + " ".join(f"{k // 10000}:{v[0]}:{v[1]}:{v[2]}:{v[4]}" for k, v in sorted(cats.items()) if k % 10000 == 0 and k < 30000000))
     text = "\n".join(lines)
