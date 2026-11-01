@@ -230,7 +230,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js"></script>
+<script src="calc.js?v=202611020022"></script>
 <script>
 (function(){
   "use strict";
@@ -519,7 +519,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611020022").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();
@@ -528,7 +528,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const o = document.createElement("option"); o.value = "-"; o.textContent = "none (unique)"; $("inf").appendChild(o);
     for (const b of D.bosses) { const o = document.createElement("option"); o.value = o.textContent = b.n; $("boss").appendChild(o); }
     readHash(); setMode(mode); compute();
-  }).catch(() => { $("status").textContent = "Could not load data.json"; });
+  }).catch((e) => { console.error(e); $("status").textContent = "Error: " + (e && e.message ? e.message : e) + " (try reloading)"; });
 })();
 </script>
 </body>
