@@ -254,6 +254,22 @@ if __name__ == "__main__":
                 lines.append(f"{os.path.basename(n)} n={len(ids)} " + ",".join(str(i % 1000000) for i in ids[:60]))
         cats = weapon_motion_categories()
         lines.append("W " + " ".join(f"{k // 10000}:{v[0]}:{v[1]}:{v[2]}:{v[3]}:{v[4]}" for k, v in sorted(cats.items()) if k % 10000 == 0 and k < 30000000))
+    elif MODE == "flags":
+        # Parry / defensive frame data: every animation that has ChrActionFlag 5 ("Parry Possible") anywhere,
+        # plus the same animation id in every other TAE (they may import it). All type-0 flags are listed.
+        parsed = [(os.path.basename(n.replace("\\", "/"))[:-4],) + tae_events(d) for n, d in taes]
+        ids = {aid % 1000000 for _, tid, res in parsed for aid, evs in res.items()
+               if any(e[0] == 0 and e[3] in (5, 73) for e in evs)}
+        lines.append("PARRY_IDS " + ",".join(map(str, sorted(ids))))
+        for short, tid, res in parsed:
+            for aid in sorted(res):
+                if aid % 1000000 not in ids:
+                    continue
+                fl = "/".join(f"{a}:{round(st * 60)}-{round(en * 60)}" for t, st, en, a in res[aid] if t == 0)
+                rf = REFS.get((tid, aid), (0, 0, 0))
+                lines.append(f"{short}|{aid % 1000000}|{fl}|{rf[0]}:{rf[1]}:{rf[2]}")
+        cats = weapon_motion_categories()
+        lines.append("W " + " ".join(f"{k // 10000}:{v[0]}:{v[1]}:{v[2]}:{v[4]}" for k, v in sorted(cats.items()) if k % 10000 == 0 and k < 30000000))
     else:
         KEEP = {30000, 30010, 30020, 30030, 32000, 32010, 32020, 33000, 33010, 33020, 33030, 34000, 34010, 34020, 34030}
         for n, d in taes:
