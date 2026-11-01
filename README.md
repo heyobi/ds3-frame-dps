@@ -198,6 +198,9 @@ comes from the weapon art. Both cut those weapons' DPS a lot (Friede 616 -> 423,
 Both match notes on the Fextralife wiki ("the main scythe the player uses only deals the physical portion";
 Dancer's: one blade physical + magic, the other physical + fire).
 
+More of these from the same params (elements that do not scale on some attacks, the hidden per-weapon stamina
+multiplier, R1s with two hitbox phases): [`results/hidden_mechanics.md`](results/hidden_mechanics.md).
+
 ## Files
 
 | File | What it is |
@@ -215,6 +218,7 @@ Dancer's: one blade physical + magic, the other physical + fire).
 | `tools/moves.py` | Builds each weapon's chains from frame data + behaviors (hits, motion values, stamina) |
 | `tools/param_reader.py` | Small `.param` reader driven by Paramdex XML definitions |
 | `tools/compute_dps.py` | DPS model (Python 3 + numpy) |
+| `tools/hidden_mechanics.py` | Writes `results/hidden_mechanics.md` |
 | `tools/export_web.py` | Builds `docs/data.json` for the calculator |
 | `docs/` | Interactive calculator (static page, same model in `docs/calc.js`) |
 
