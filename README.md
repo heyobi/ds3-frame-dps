@@ -9,7 +9,7 @@ early regulation. This set reads the attack and cancel frames for every weapon m
 
 **Interactive calculator:** [heyobi.github.io/ds3-frame-dps](https://heyobi.github.io/ds3-frame-dps/) (enter your own stats or soul level, weapon upgrade level and target defense; click a weapon for a leveling path with a DPS chart).
 
-**Elden Ring (beta):** [heyobi.github.io/ds3-frame-dps/er](https://heyobi.github.io/ds3-frame-dps/er/) (1H, 2H and powerstance light-attack chains for every weapon and infusion, boss targets with bleed and frost; details in [`er/`](er/)).
+**Elden Ring:** moved to its own repo, [heyobi/er-frame-dps](https://github.com/heyobi/er-frame-dps) (calculator: [heyobi.github.io/er-frame-dps](https://heyobi.github.io/er-frame-dps/)).
 
 **Game version:** App ver. 1.15.2, Regulation ver. 1.35, Ashes of Ariandel + The Ringed City (Steam, PC)
 
