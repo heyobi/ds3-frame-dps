@@ -26,6 +26,11 @@ ap.add_argument("--frames", required=True)
 ap.add_argument("--weapons", required=True)
 ap.add_argument("--out", default="results")
 ap.add_argument("--defense", default="80,120,160")
+ap.add_argument("--budget", type=int, default=87,
+                help="offensive points to spread over Str/Dex/Int/Fth/Lck (SL120 Deprived with Vig27/End20/Vit15 = 87)")
+ap.add_argument("--base", default="10,10,10,10,10",
+                help="starting Str,Dex,Int,Fth,Lck before spending points (add ring bonuses here, e.g. 10,15,10,10,10 for Hunter's Ring)")
+ap.add_argument("--tag", default="", help="suffix for output file names")
 args = ap.parse_args()
 os.makedirs(args.out, exist_ok=True)
 RAW = args.weapons
@@ -77,14 +82,15 @@ def eff(ar, dfn):
     return m * ar
 
 
-BUDGET, STEP = 87, 3
+BUDGET, STEP = args.budget, 3
+BASE = [int(x) for x in args.base.split(",")]
 grid = []
 for a in range(0, BUDGET + 1, STEP):
     for b in range(0, BUDGET + 1 - a, STEP):
         for c in range(0, BUDGET + 1 - a - b, STEP):
             for d in range(0, BUDGET + 1 - a - b - c, STEP):
                 grid.append((a, b, c, d, BUDGET - a - b - c - d))
-G = np.minimum(np.array(grid) + 10, 99)
+G = np.minimum(np.array(grid) + np.array(BASE), 99)
 
 BUILDS = {
     "pure_str": (66, 10, 10, 10, 10), "pure_dex": (18, 60, 10, 10, 10), "quality": (40, 40, 10, 10, 10),
@@ -146,7 +152,7 @@ SKIP_W = {"Giant Door Shield", "Dark Hand", "Ringed Knight Paired Greatswords"}
 
 # ---------------------------------------------------------------- per-weapon chains
 chains = {}
-with open(f"{args.out}/weapon_chains.csv", "w", newline="") as f:
+with open(f"{args.out}/weapon_chains{args.tag}.csv", "w", newline="") as f:
     wr = csv.writer(f)
     wr.writerow(["weapon_id", "weapon", "class", "wepmotionCategory", "spAtkCategory",
                  "1h_r1_frames", "2h_r1_frames", "2h_r1_seconds_per_attack", "l1_dual_frames",
@@ -202,11 +208,11 @@ for w in WEAPONS:
     results.append(best)
 
 results.sort(key=lambda r: -r[f"dps_def{MAIN_DEF}"])
-with open(f"{args.out}/dps_all_weapons.csv", "w", newline="") as f:
+with open(f"{args.out}/dps_all_weapons{args.tag}.csv", "w", newline="") as f:
     wr = csv.DictWriter(f, fieldnames=list(results[0].keys()))
     wr.writeheader(); wr.writerows(results)
 
-with open(f"{args.out}/dps_best_per_build.csv", "w", newline="") as f:
+with open(f"{args.out}/dps_best_per_build{args.tag}.csv", "w", newline="") as f:
     wr = csv.writer(f)
     wr.writerow(["build", "stats_str_dex_int_fth_lck", "rank", "weapon", "infusion", "mode", f"dps_def{MAIN_DEF}"])
     for bn, bs in BUILDS.items():

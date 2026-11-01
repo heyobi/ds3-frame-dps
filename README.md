@@ -40,7 +40,88 @@ Best weapon for fixed builds (defense 120):
 | Int+Faith 16/16/40/40/10 | Chaos [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 588 |
 | Luck 18/18/10/10/60 | [Anri's Straight Sword](https://darksouls3.wiki.fextralife.com/Anri%27s_Straight_Sword) (2H R1) | 479 |
 
+Bleed, poison and frost buildup are not included (Warden Twinblades, for example, have innate bleed that this table does not count).
+
 Full tables: `results/dps_all_weapons.csv` (1662 weapon/infusion rows) and `results/dps_best_per_build.csv`.
+
+## Other soul levels
+
+Same model, Deprived start (all stats 10), a fixed defensive spread per level and the remaining points placed for each weapon. DPS against 120 defense. Top 5 distinct weapons per level:
+
+**SL1** (all stats 10, no rings), full table: `results/sl/dps_all_weapons_sl1.csv`
+
+| # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|
+| 1 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Fire | 2H R1 | 394 | 10/10/10/10/10 |
+| 2 | [Long Sword](https://darksouls3.wiki.fextralife.com/Long_Sword) | Fire | 2H R1 | 368 | 10/10/10/10/10 |
+| 3 | [Hand Axe](https://darksouls3.wiki.fextralife.com/Hand+Axe) | Fire | 2H R1 | 367 | 10/10/10/10/10 |
+| 4 | [Millwood Battle Axe](https://darksouls3.wiki.fextralife.com/Millwood_Battle_Axe) | Fire | 2H R1 | 340 | 10/10/10/10/10 |
+| 5 | [Shortsword](https://darksouls3.wiki.fextralife.com/Shortsword) | Fire | 2H R1 | 337 | 10/10/10/10/10 |
+
+**SL1 + Hunter's Ring** (Dex 15 from the ring), full table: `results/sl/dps_all_weapons_sl1_hunters_ring.csv`
+
+| # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|
+| 1 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Fire | 2H R1 | 427 | 10/15/10/10/10 |
+| 2 | [Scimitar](https://darksouls3.wiki.fextralife.com/Scimitar) | Fire | 2H R1 | 398 | 10/15/10/10/10 |
+| 3 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Fire | 2H R1 | 394 | 10/15/10/10/10 |
+| 4 | [Rotten Ghru Curved Sword](https://darksouls3.wiki.fextralife.com/Rotten_Ghru_Curved_Sword) | Fire | 2H R1 | 386 | 10/15/10/10/10 |
+| 5 | [Long Sword](https://darksouls3.wiki.fextralife.com/Long_Sword) | Fire | 2H R1 | 368 | 10/15/10/10/10 |
+
+**SL30** (Vig 20, 19 offensive points), full table: `results/sl/dps_all_weapons_sl30.csv`
+
+| # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 519 | 10/28/10/10/11 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 471 | 10/28/10/10/11 |
+| 3 | [Demon's Fist](https://darksouls3.wiki.fextralife.com/Demon%27s_Fist) | none (unique) | L1 dual | 468 | 28/10/10/10/11 |
+| 4 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 465 | 25/13/10/10/11 |
+| 5 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Heavy | 2H R1 | 442 | 28/10/10/10/11 |
+
+**SL60** (Vig 27, End 15, 37 offensive points), full table: `results/sl/dps_all_weapons_sl60.csv`
+
+| # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 612 | 10/46/10/10/11 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 554 | 10/46/10/10/11 |
+| 3 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 514 | 43/13/10/10/11 |
+| 4 | [Exile Greatsword](https://darksouls3.wiki.fextralife.com/Exile_Greatsword) | Heavy | 2H R1 | 512 | 40/16/10/10/11 |
+| 5 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Sharp | 2H R1 | 497 | 10/46/10/10/11 |
+
+**SL80** (Vig 27, End 20, 52 offensive points), full table: `results/sl/dps_all_weapons_sl80.csv`
+
+| # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 647 | 10/61/10/10/11 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 580 | 10/61/10/10/11 |
+| 3 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 545 | 10/40/28/13/11 |
+| 4 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 543 | 58/13/10/10/11 |
+| 5 | [Exile Greatsword](https://darksouls3.wiki.fextralife.com/Exile_Greatsword) | Heavy | 2H R1 | 538 | 55/16/10/10/11 |
+
+**SL120** (Vig 27, End 20, Vit 15, 87 offensive points), full table: `results/dps_all_weapons.csv`
+
+| # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 743 | 16/91/10/10/10 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 669 | 22/85/10/10/10 |
+| 3 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 616 | 16/58/40/13/10 |
+| 4 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 613 | 28/37/31/31/10 |
+| 5 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Sharp | 2H R1 | 603 | 22/85/10/10/10 |
+
+**SL150** (Vig 40, End 25, Vit 15, 99 offensive points), full table: `results/sl/dps_all_weapons_sl150.csv`
+
+| # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 752 | 25/94/10/10/10 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 683 | 28/91/10/10/10 |
+| 3 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 629 | 25/61/40/13/10 |
+| 4 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 626 | 28/40/31/40/10 |
+| 5 | [Dancer's Enchanted Swords](https://darksouls3.wiki.fextralife.com/Dancer%27s_Enchanted_Swords) | none (unique) | L1 dual | 617 | 25/37/40/37/10 |
+
+At SL1 Fire and Deep tie because a flat defense is used for every damage type; against enemies weak to fire, Fire wins, against fire-resistant ones, Deep. Sellsword Twinblades need Dex 16, so they only show up from SL30.
+
+Reproduce a level with `--budget <offensive points>` and `--base <Str,Dex,Int,Fth,Lck>` (add ring bonuses to the base), e.g. `--budget 0 --base 10,15,10,10,10 --tag _sl1_hunters_ring`.
+
 
 ## Files
 
@@ -52,6 +133,7 @@ Full tables: `results/dps_all_weapons.csv` (1662 weapon/infusion rows) and `resu
 | `results/weapon_chains.csv` | Per weapon: resolved 1H R1, 2H R1 and dual L1 chain frames and the source animations |
 | `results/dps_all_weapons.csv` | Per weapon and infusion: best move, timing, motion values, optimal stats, AR split, DPS at defense 80/120/160, DPS for 7 fixed builds |
 | `results/dps_best_per_build.csv` | Top 10 per fixed build |
+| `results/sl/dps_all_weapons_sl*.csv` | Same table for SL1 (with and without Hunter's Ring), SL30, SL60, SL80 and SL150 |
 | `tools/ds3_frames.py` | Extractor (read-only, pure Python 3, no dependencies; uses `cryptography` if installed, otherwise a built-in AES) |
 | `tools/compute_dps.py` | DPS model (Python 3 + numpy) |
 
