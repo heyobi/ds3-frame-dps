@@ -84,12 +84,21 @@ def eff(ar, dfn):
 
 BUDGET, STEP = args.budget, 3
 BASE = [int(x) for x in args.base.split(",")]
-grid = []
-for a in range(0, BUDGET + 1, STEP):
-    for b in range(0, BUDGET + 1 - a, STEP):
-        for c in range(0, BUDGET + 1 - a - b, STEP):
-            for d in range(0, BUDGET + 1 - a - b - c, STEP):
-                grid.append((a, b, c, d, BUDGET - a - b - c - d))
+# Points are placed in steps of 3; when the budget is not a multiple of 3 the leftover (1 or 2) is tried on every
+# stat, so it never gets dumped into one fixed stat.
+B3, REM = BUDGET - BUDGET % STEP, BUDGET % STEP
+grid = set()
+for a in range(0, B3 + 1, STEP):
+    for b in range(0, B3 + 1 - a, STEP):
+        for c in range(0, B3 + 1 - a - b, STEP):
+            for d in range(0, B3 + 1 - a - b - c, STEP):
+                base = (a, b, c, d, B3 - a - b - c - d)
+                if REM == 0:
+                    grid.add(base)
+                else:
+                    for k in range(5):
+                        grid.add(tuple(v + REM * (i == k) for i, v in enumerate(base)))
+grid = sorted(grid)
 G = np.minimum(np.array(grid) + np.array(BASE), 99)
 
 BUILDS = {

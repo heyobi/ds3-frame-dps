@@ -72,31 +72,31 @@ Same model, Deprived start (all stats 10), a fixed defensive spread per level an
 
 | # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
 |---|---|---|---|---|---|
-| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 519 | 10/28/10/10/11 |
-| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 471 | 10/28/10/10/11 |
-| 3 | [Demon's Fist](https://darksouls3.wiki.fextralife.com/Demon%27s_Fist) | none (unique) | L1 dual | 468 | 28/10/10/10/11 |
-| 4 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 465 | 25/13/10/10/11 |
-| 5 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Heavy | 2H R1 | 442 | 28/10/10/10/11 |
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 526 | 10/29/10/10/10 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 479 | 10/29/10/10/10 |
+| 3 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 474 | 26/13/10/10/10 |
+| 4 | [Demon's Fist](https://darksouls3.wiki.fextralife.com/Demon%27s_Fist) | none (unique) | L1 dual | 469 | 29/10/10/10/10 |
+| 5 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Heavy | 2H R1 | 444 | 29/10/10/10/10 |
 
 **SL60** (Vig 27, End 15, 37 offensive points), full table: `results/sl/dps_all_weapons_sl60.csv`
 
 | # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
 |---|---|---|---|---|---|
-| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 612 | 10/46/10/10/11 |
-| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 554 | 10/46/10/10/11 |
-| 3 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 514 | 43/13/10/10/11 |
-| 4 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 513 | 10/46/10/10/11 |
-| 5 | [Exile Greatsword](https://darksouls3.wiki.fextralife.com/Exile_Greatsword) | Heavy | 2H R1 | 512 | 40/16/10/10/11 |
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 614 | 10/47/10/10/10 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 556 | 10/47/10/10/10 |
+| 3 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 515 | 10/47/10/10/10 |
+| 4 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 515 | 44/13/10/10/10 |
+| 5 | [Exile Greatsword](https://darksouls3.wiki.fextralife.com/Exile_Greatsword) | Heavy | 2H R1 | 512 | 41/16/10/10/10 |
 
 **SL80** (Vig 27, End 20, 52 offensive points), full table: `results/sl/dps_all_weapons_sl80.csv`
 
 | # | Weapon | Infusion | Move | DPS | Str/Dex/Int/Fth/Lck |
 |---|---|---|---|---|---|
-| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 647 | 10/61/10/10/11 |
-| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 580 | 10/61/10/10/11 |
-| 3 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 545 | 10/40/28/13/11 |
-| 4 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 543 | 58/13/10/10/11 |
-| 5 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 541 | 10/61/10/10/11 |
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 652 | 10/62/10/10/10 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 584 | 10/62/10/10/10 |
+| 3 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 557 | 10/40/31/11/10 |
+| 4 | [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) | Sharp | 1H R1 | 545 | 10/62/10/10/10 |
+| 5 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Heavy | L1 dual | 545 | 59/13/10/10/10 |
 
 **SL120** (Vig 27, End 20, Vit 15, 87 offensive points), full table: `results/dps_all_weapons.csv`
 
