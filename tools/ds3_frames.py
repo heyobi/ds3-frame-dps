@@ -188,6 +188,7 @@ def bnd4(data):
 # ---------------- TAE3 ----------------
 REFS = {}
 ATKARGS = {}   # (tae, anim, start frame) -> first three s32 args of AttackBehavior (incl. behavior judge id)
+ATKLIST = {}   # (tae, anim) -> [(start frame, end frame, args)] for every AttackBehavior (no collisions on equal frames)
 
 def tae_events(t):
     assert t[:4] == b"TAE ", t[:4]
@@ -204,6 +205,7 @@ def tae_events(t):
             arg = struct.unpack_from("<i", t, d_off + 16)[0] if etype in (0, 1) else None
             if etype == 1:
                 ATKARGS[(tid, aid, round(st * 60))] = struct.unpack_from("<iii", t, d_off + 16)
+                ATKLIST.setdefault((tid, aid), []).append((round(st * 60), round(en * 60), struct.unpack_from("<iii", t, d_off + 16)))
             evs.append((etype, st, en, arg))
         ref_flag, _, _, imp, unk1c = struct.unpack_from("<qqqii", t, file_off)
         res[aid] = evs
