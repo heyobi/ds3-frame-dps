@@ -22,4 +22,5 @@ The same light-attack DPS pipeline as the DS3 tables, ported to Elden Ring. It r
 - `er/er_load.py`: params + TAE → `er.pkl`. Set `ER_FILES` to the folder holding `c0000.anibnd` and `params/`, and `PARAMDEX_ER` to Paramdex's ER folder.
 - `er/er_model.py`: AR, chains, hit grouping, bosses, status, the time-to-kill simulation.
 - `er/er_rank2.py`: optimizes stats per weapon, infusion and move against a flat target or a named boss. Example: `python3 er/er_rank2.py "Malenia, Blade of Miquella"`.
+- `er/export_web.py`: writes `docs/er/data.json` for the calculator page at [heyobi.github.io/ds3-frame-dps/er](https://heyobi.github.io/ds3-frame-dps/er/) (`docs/er/calc.js` is the same model in JavaScript).
 - `er/validate_ar.py` + `validate_ar_ref.ts`: AR check against the reference calculator. Clone the calculator into `er/` and run with Node 22 or newer.
