@@ -13,30 +13,32 @@ early regulation. This set reads the attack and cancel frames for every weapon m
 
 Against a flat 120 defense, SL120, +10 / +5 weapons, no buffs, no bleed:
 
-| # | Weapon | Move | s / attack | DPS def 80 | DPS def 120 | DPS def 160 | Str/Dex/Int/Fth/Lck |
-|---|---|---|---|---|---|---|---|
-| 1 | Sharp Sellsword Twinblades | L1 dual | 0.733 | 828 | 743 | 698 | 16/91/10/10/10 |
-| 2 | Sharp Warden Twinblades | L1 dual | 0.733 | 747 | 669 | 630 | 22/85/10/10/10 |
-| 3 | Friede's Great Scythe | 2H R1 | 0.944 | 680 | 616 | 569 | 16/58/40/13/10 |
-| 4 | Chaos Gotthard Twinswords | L1 dual | 0.922 | 703 | 613 | 522 | 28/37/31/31/10 |
-| 5 | Sharp Falchion | 2H R1 | 0.656 | 661 | 603 | 558 | 22/85/10/10/10 |
-| 6 | Sharp Rotten Ghru Curved Sword | 2H R1 | 0.611 | 660 | 598 | 553 | 16/91/10/10/10 |
-| 7 | Refined Winged Knight Twinaxes | L1 dual | 1.111 | 661 | 596 | 552 | 46/61/10/10/10 |
-| 8 | Chaos Exile Greatsword | 2H R1 | 1.022 | 652 | 590 | 547 | 28/37/31/31/10 |
-| 9 | Dancer's Enchanted Swords | L1 dual | 0.956 | 724 | 589 | 457 | 25/37/40/25/10 |
-| 10 | Sharp Scimitar | 2H R1 | 0.611 | 649 | 588 | 544 | 10/97/10/10/10 |
+| # | Weapon (wiki) | Infusion | Move | s / attack | DPS def 80 | DPS def 120 | DPS def 160 | Str/Dex/Int/Fth/Lck |
+|---|---|---|---|---|---|---|---|---|
+| 1 | [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | Sharp | L1 dual | 0.733 | 828 | 743 | 698 | 16/91/10/10/10 |
+| 2 | [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | Sharp | L1 dual | 0.733 | 747 | 669 | 630 | 22/85/10/10/10 |
+| 3 | [Friede's Great Scythe](https://darksouls3.wiki.fextralife.com/Friede%27s_Great_Scythe) | none (unique) | 2H R1 | 0.944 | 680 | 616 | 569 | 16/58/40/13/10 |
+| 4 | [Gotthard Twinswords](https://darksouls3.wiki.fextralife.com/Gotthard_Twinswords) | Chaos | L1 dual | 0.922 | 703 | 613 | 522 | 28/37/31/31/10 |
+| 5 | [Falchion](https://darksouls3.wiki.fextralife.com/Falchion) | Sharp | 2H R1 | 0.656 | 661 | 603 | 558 | 22/85/10/10/10 |
+| 6 | [Rotten Ghru Curved Sword](https://darksouls3.wiki.fextralife.com/Rotten_Ghru_Curved_Sword) | Sharp | 2H R1 | 0.611 | 660 | 598 | 553 | 16/91/10/10/10 |
+| 7 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Refined | L1 dual | 1.111 | 661 | 596 | 552 | 46/61/10/10/10 |
+| 8 | [Exile Greatsword](https://darksouls3.wiki.fextralife.com/Exile_Greatsword) | Chaos | 2H R1 | 1.022 | 652 | 590 | 547 | 28/37/31/31/10 |
+| 9 | [Dancer's Enchanted Swords](https://darksouls3.wiki.fextralife.com/Dancer%27s_Enchanted_Swords) | none (unique) | L1 dual | 0.956 | 724 | 589 | 457 | 25/37/40/25/10 |
+| 10 | [Scimitar](https://darksouls3.wiki.fextralife.com/Scimitar) | Sharp | 2H R1 | 0.611 | 649 | 588 | 544 | 10/97/10/10/10 |
+
+Weapon names link to the Fextralife DS3 wiki (location, requirements, pictures). "L1 dual" means two-handing the paired weapon and chaining L1; "2H R1" means two-handing and chaining R1.
 
 Best weapon for fixed builds (defense 120):
 
 | Build (Str/Dex/Int/Fth/Lck) | Best | DPS |
 |---|---|---|
-| Pure Str 66/10/10/10/10 | Heavy Broadsword (2H R1) | 525 |
-| Pure Dex 18/60/10/10/10 | Sharp Sellsword Twinblades (L1) | 649 |
-| Quality 40/40/10/10/10 | Refined Sellsword Twinblades (L1) | 632 |
-| Int 18/18/60/10/10 | Crystal Sellsword Twinblades (L1) | 554 |
-| Faith 18/18/10/60/10 | Lightning Sellsword Twinblades (L1) | 554 |
-| Int+Faith 16/16/40/40/10 | Chaos Sellsword Twinblades (L1) | 588 |
-| Luck 18/18/10/10/60 | Anri's Straight Sword (2H R1) | 479 |
+| Pure Str 66/10/10/10/10 | Heavy [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) (2H R1) | 525 |
+| Pure Dex 18/60/10/10/10 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 649 |
+| Quality 40/40/10/10/10 | Refined [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 632 |
+| Int 18/18/60/10/10 | Crystal [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 554 |
+| Faith 18/18/10/60/10 | Lightning [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 554 |
+| Int+Faith 16/16/40/40/10 | Chaos [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 588 |
+| Luck 18/18/10/10/60 | [Anri's Straight Sword](https://darksouls3.wiki.fextralife.com/Anri%27s_Straight_Sword) (2H R1) | 479 |
 
 Full tables: `results/dps_all_weapons.csv` (1662 weapon/infusion rows) and `results/dps_best_per_build.csv`.
 
