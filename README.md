@@ -26,7 +26,7 @@ Against a flat 120 defense, SL120, +10 / +5 weapons, no buffs, no bleed:
 | 9 | [Winged Knight Twinaxes](https://darksouls3.wiki.fextralife.com/Winged_Knight_Twinaxes) | Refined | L1 dual | 1.111 | 661 | 596 | 552 | 46/61/10/10/10 |
 | 10 | [Lothric Knight Sword](https://darksouls3.wiki.fextralife.com/Lothric_Knight_Sword) | Sharp | 1H R1 | 0.633 | 650 | 590 | 546 | 16/91/10/10/10 |
 
-Weapon names link to the Fextralife DS3 wiki (location, requirements, pictures). "L1 dual" means two-handing the paired weapon and chaining L1; "2H R1" means two-handing and chaining R1; "1H R1" means one-handing and chaining R1. Each weapon is listed with whichever of these is fastest for it.
+Weapon names link to the Fextralife DS3 wiki (location, requirements, pictures). "L1 dual" means two-handing the paired weapon and chaining L1; "2H R1" means two-handing and chaining R1; "1H R1" means one-handing and chaining R1. Each weapon is listed with whichever of these gives it the highest DPS.
 
 Best weapon for fixed builds (defense 120):
 
@@ -172,13 +172,14 @@ against 128 two-handed, which outweighs the Str bonus on Dex builds (Sharp Broad
 
 **Stats.** SL120 Deprived, Vigor 27 / Attunement 10 / Endurance 20 / Vitality 15 fixed, remaining 87 points spread
 over Str/Dex/Int/Fth/Lck on a 3-point grid, maximising DPS at defense 120 for each weapon and infusion separately.
+When the budget is not a multiple of 3 (SL30, SL60, SL80) the leftover point is tried on every stat.
 
 ## Validation
 
 Weapon weights read from `EquipParamWeapon` match the known values (Dagger 1.5, Zweihander 10, etc.), and the
-param row size (608 bytes) matches the Paramdex definition. Chain timings agree with the regulation 1.08
-community frame data (startup + active + R1 cancel). For single-hit R1 chains the game data is 2 to 10 frames
-longer per step, never shorter:
+param row size (608 bytes) matches the Paramdex definition. Chain timings follow the regulation 1.08
+community frame data (startup + active + R1 cancel) with a consistent offset: for single-hit R1 chains the game data
+is 2 to 10 frames longer per step, never shorter:
 
 | Moveset (2H R1 1/2/3) | This data | Community sheet |
 |---|---|---|
@@ -197,7 +198,8 @@ row may come from a different input sequence, and L1 chains in general would ben
 
 ## Not modelled
 
-Stamina (sustained L1 spam on paired weapons drains fast), bleed / poison / frost buildup, weapon buffs, rings,
+Stamina (sustained L1 spam on paired weapons drains fast), bleed / poison / frost buildup, weapon buffs, damage rings
+(the Hunter's Ring row only adds its +5 Dex),
 the "sweet spot" bonus (flag 42), counter hits, hyper armor, reach and tracking. Motion values come from the
 community AtkParam motion-value sheet, not from this extraction. Ringed Knight Paired Greatswords, Giant Door
 Shield and Dark Hand are left out (unclear motion values). A few chains could not be resolved because the
