@@ -7,6 +7,8 @@ Existing community frame data covers a handful of reference weapons per class, m
 early regulation. This set reads the attack and cancel frames for every weapon moveset straight out of
 `c0000.anibnd.dcx`, including paired weapons, fists, claws, whips, reapers and DLC weapons.
 
+**Interactive calculator:** [heyobi.github.io/ds3-frame-dps](https://heyobi.github.io/ds3-frame-dps/) (enter your own stats or soul level, weapon upgrade level and target defense).
+
 **Game version:** App ver. 1.15.2, Regulation ver. 1.35, Ashes of Ariandel + The Ringed City (Steam, PC)
 
 ## Headline result
@@ -146,6 +148,8 @@ Reproduce a level with `--budget <offensive points>` and `--base <Str,Dex,Int,Ft
 | `results/sl/dps_all_weapons_sl*.csv` | Same table for SL1 (with and without Hunter's Ring), SL30, SL60, SL80, SL125 and SL150 |
 | `tools/ds3_frames.py` | Extractor (read-only, pure Python 3, no dependencies; uses `cryptography` if installed, otherwise a built-in AES) |
 | `tools/compute_dps.py` | DPS model (Python 3 + numpy) |
+| `tools/export_web.py` | Builds `docs/data.json` for the calculator |
+| `docs/` | Interactive calculator (static page, same model in `docs/calc.js`) |
 
 All frame numbers are at 60 fps.
 
@@ -223,6 +227,7 @@ python3 tools/ds3_frames.py "<...>/DARK SOULS III/Game" full data/ds3_frames_ful
 git clone https://github.com/Phil25/DS3InventoryBuilder
 python3 tools/compute_dps.py --frames data/ds3_frames_full.txt \
     --weapons DS3InventoryBuilder/DataGenerator/Raw --out results
+python3 tools/export_web.py --weapons DS3InventoryBuilder/DataGenerator/Raw   # calculator data
 ```
 
 ## Credits
