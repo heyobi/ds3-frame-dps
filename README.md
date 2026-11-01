@@ -191,11 +191,12 @@ Abyss Watchers HP is per watcher. Yhorm's Storm Ruler and Midir/Gael phase mecha
 Twinblades take over from Sellswords against almost every boss that can bleed; against bleed-immune bosses
 (Vordt, Wolnir, Old Demon King, Yhorm, Midir) Sellswords stay on top.
 
-**Two things the attack params show that the community motion-value sheet does not:**
+**Two things the attack params show that the community motion-value sheet does not.**
 Dancer's Enchanted Swords' dual L1 hits carry magic on one blade and fire on the other (each blade's other element
-correction is 0), and Friede's Great Scythe's R1 hits have a magic correction of 0 (only its weapon art deals
-magic). Both cut those weapons' DPS a lot (Friede 616 -> 423, Dancer's 589 -> 433 at SL120); if in-game tests
-disagree, the param names in Paramdex would be the place to look.
+correction is 0), and Friede's Great Scythe's normal attacks have a magic correction of 0, so its magic damage only
+comes from the weapon art. Both cut those weapons' DPS a lot (Friede 616 -> 423, Dancer's 589 -> 433 at SL120).
+Both match notes on the Fextralife wiki ("the main scythe the player uses only deals the physical portion";
+Dancer's: one blade physical + magic, the other physical + fire).
 
 ## Files
 
