@@ -14,11 +14,11 @@ pure_dex,18/60/10/10/10,2,Warden Twinblades,Sharp,L1 dual,589
 pure_dex,18/60/10/10/10,3,Sellsword Twinblades,-,L1 dual,577
 pure_dex,18/60/10/10/10,4,Sellsword Twinblades,Refined,L1 dual,573
 pure_dex,18/60/10/10/10,5,Sellsword Twinblades,Hollow,L1 dual,558
-pure_dex,18/60/10/10/10,6,Warden Twinblades,Refined,L1 dual,537
-pure_dex,18/60/10/10/10,7,Gotthard Twinswords,Sharp,L1 dual,535
-pure_dex,18/60/10/10/10,8,Falchion,Sharp,2H R1,533
-pure_dex,18/60/10/10/10,9,Warden Twinblades,-,L1 dual,523
-pure_dex,18/60/10/10/10,10,Rotten Ghru Curved Sword,Sharp,2H R1,522
+pure_dex,18/60/10/10/10,6,Broadsword,Sharp,1H R1,549
+pure_dex,18/60/10/10/10,7,Warden Twinblades,Refined,L1 dual,537
+pure_dex,18/60/10/10/10,8,Gotthard Twinswords,Sharp,L1 dual,535
+pure_dex,18/60/10/10/10,9,Falchion,Sharp,2H R1,533
+pure_dex,18/60/10/10/10,10,Long Sword,Sharp,1H R1,523
 quality,40/40/10/10/10,1,Sellsword Twinblades,Refined,L1 dual,632
 quality,40/40/10/10/10,2,Sellsword Twinblades,Sharp,L1 dual,610
 quality,40/40/10/10/10,3,Warden Twinblades,Refined,L1 dual,578
@@ -34,32 +34,32 @@ int,18/18/60/10/10,2,Warden Twinblades,Crystal,L1 dual,523
 int,18/18/60/10/10,3,Exile Greatsword,Crystal,2H R1,511
 int,18/18/60/10/10,4,Gotthard Twinswords,Crystal,L1 dual,510
 int,18/18/60/10/10,5,Winged Knight Twinaxes,Crystal,L1 dual,508
-int,18/18/60/10/10,6,Falchion,Crystal,2H R1,503
-int,18/18/60/10/10,7,Broadsword,Crystal,2H R1,496
+int,18/18/60/10/10,6,Broadsword,Crystal,1H R1,505
+int,18/18/60/10/10,7,Falchion,Crystal,2H R1,503
 int,18/18/60/10/10,8,Harald Curved Greatsword,Crystal,2H R1,494
-int,18/18/60/10/10,9,Sellsword Twinblades,Simple,L1 dual,477
-int,18/18/60/10/10,10,Rotten Ghru Curved Sword,Crystal,2H R1,471
+int,18/18/60/10/10,9,Lothric Knight Sword,Crystal,1H R1,480
+int,18/18/60/10/10,10,Long Sword,Crystal,1H R1,480
 faith,18/18/10/60/10,1,Sellsword Twinblades,Lightning,L1 dual,554
 faith,18/18/10/60/10,2,Warden Twinblades,Lightning,L1 dual,523
 faith,18/18/10/60/10,3,Exile Greatsword,Lightning,2H R1,511
 faith,18/18/10/60/10,4,Gotthard Twinswords,Lightning,L1 dual,510
 faith,18/18/10/60/10,5,Winged Knight Twinaxes,Lightning,L1 dual,508
-faith,18/18/10/60/10,6,Falchion,Lightning,2H R1,503
-faith,18/18/10/60/10,7,Broadsword,Lightning,2H R1,496
+faith,18/18/10/60/10,6,Broadsword,Lightning,1H R1,505
+faith,18/18/10/60/10,7,Falchion,Lightning,2H R1,503
 faith,18/18/10/60/10,8,Harald Curved Greatsword,Lightning,2H R1,494
 faith,18/18/10/60/10,9,Sellsword Twinblades,Blessed,L1 dual,486
-faith,18/18/10/60/10,10,Warden Twinblades,Blessed,L1 dual,473
+faith,18/18/10/60/10,10,Lothric Knight Sword,Lightning,1H R1,480
 int_faith,16/16/40/40/10,1,Sellsword Twinblades,Chaos,L1 dual,588
 int_faith,16/16/40/40/10,2,Sellsword Twinblades,Dark,L1 dual,588
 int_faith,16/16/40/40/10,3,Exile Greatsword,Chaos,2H R1,545
 int_faith,16/16/40/40/10,4,Exile Greatsword,Dark,2H R1,545
-int_faith,16/16/40/40/10,5,Broadsword,Chaos,2H R1,520
-int_faith,16/16/40/40/10,6,Broadsword,Dark,2H R1,520
+int_faith,16/16/40/40/10,5,Broadsword,Chaos,1H R1,536
+int_faith,16/16/40/40/10,6,Broadsword,Dark,1H R1,536
 int_faith,16/16/40/40/10,7,Falchion,Chaos,2H R1,519
 int_faith,16/16/40/40/10,8,Falchion,Dark,2H R1,519
 int_faith,16/16/40/40/10,9,Winged Knight Twinaxes,Chaos,L1 dual,516
 int_faith,16/16/40/40/10,10,Winged Knight Twinaxes,Dark,L1 dual,516
-luck,18/18/10/10/60,1,Anri's Straight Sword,-,2H R1,479
+luck,18/18/10/10/60,1,Anri's Straight Sword,-,1H R1,503
 luck,18/18/10/10/60,2,Sellsword Twinblades,Hollow,L1 dual,465
 luck,18/18/10/10/60,3,Warden Twinblades,Hollow,L1 dual,460
 luck,18/18/10/10/60,4,Sellsword Twinblades,Heavy,L1 dual,452

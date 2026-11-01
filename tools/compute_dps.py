@@ -12,8 +12,8 @@ Model
   Damage   : per hit, per element, DS-series attack/defense curve against a flat defense value
   Timing   : 3-step chain, each step lasts from the start of the attack until the first frame the next attack
              can be started (TAE ChrActionFlag 4 "Cancel - RH Attack" for R1, flag 16 "Cancel - LH Attack" for L1)
-  Moves    : 2H R1 chain (anims 34000/34010/34020); for paired weapons and fists also the dual L1 chain
-             (anims 33000/33010/33020); the faster of the two is reported
+  Moves    : 1H R1 chain (anims 30000/30010/30020, no Str bonus), 2H R1 chain (34000/34010/34020, Str x 1.5) and,
+             for paired weapons and fists, the dual L1 chain (33000/33010/33020); the best one is reported
   Stats    : SL120 Deprived (Vig 27, Att 10, End 20, Vit 15), remaining 87 points spread over Str/Dex/Int/Fth/Lck
              on a 3-point grid to maximise DPS for that weapon and infusion
   Excluded : stamina, bleed/poison/frost buildup, buffs, rings, counter/backstab bonuses
@@ -59,11 +59,11 @@ WEAPONS = [dict(id=int(r[ID]), bid=int(r[ID]) // 10000, name=base_name[int(r[ID]
                 scl={k: float(r[v]) for k, v in SCL.items()}, sat=sat_idx[r[ID]]) for r in rows]
 
 
-def ar_vec(w, G):
+def ar_vec(w, G, two_hand=True):
     d, s, si = w["dmg"], w["scl"], w["sat"]
     S = lambda k, v: sats[si[k]][v] / 100
     st, dx, it, ft, lk = G.T
-    st2 = np.minimum((st * 1.5).astype(int), 99)
+    st2 = np.minimum((st * 1.5).astype(int), 99) if two_hand else st
     phys = d["physical"] * (1 + s["str"] / 100 * S("physical", st2) + s["dex"] / 100 * S("physical", dx)
                             + s["lck"] / 100 * S("physical", lk)
                             + (s["fth"] / 100 * S("physical", ft) if w["inf"] == "Blessed" else 0))
@@ -155,44 +155,51 @@ chains = {}
 with open(f"{args.out}/weapon_chains{args.tag}.csv", "w", newline="") as f:
     wr = csv.writer(f)
     wr.writerow(["weapon_id", "weapon", "class", "wepmotionCategory", "spAtkCategory",
-                 "1h_r1_frames", "2h_r1_frames", "2h_r1_seconds_per_attack", "l1_dual_frames",
-                 "l1_dual_seconds_per_attack", "2h_r1_source_anims", "l1_source_anims"])
+                 "1h_r1_frames", "1h_r1_seconds_per_attack", "2h_r1_frames", "2h_r1_seconds_per_attack",
+                 "l1_dual_frames", "l1_dual_seconds_per_attack", "1h_r1_source_anims", "2h_r1_source_anims",
+                 "l1_source_anims"])
     for bid, name in sorted(base_name.items()):
         cls = next(w["cls"] for w in WEAPONS if w["bid"] == bid)
         if bid not in WCAT or cls in SKIP_CLS:
             continue
         cat, sp = WCAT[bid]
-        r1h, _ = chain(cat, sp, 30000, "rh")
+        r1h, s1h = chain(cat, sp, 30000, "rh")
         r2h, s2h = chain(cat, sp, 34000, "rh")
         l1, sl1 = chain(cat, sp, 33000, "lh") if name in MV_L1 else (None, None)
-        chains[name] = (r2h, l1)
+        chains[name] = (r1h, r2h, l1)
         fmt = lambda x: "/".join(map(str, x)) if x else ""
-        wr.writerow([bid * 10000, name, cls, cat, sp, fmt(r1h), fmt(r2h),
-                     round(np.mean(r2h) / 60, 3) if r2h else "", fmt(l1), round(np.mean(l1) / 60, 3) if l1 else "",
-                     " ".join(s2h or []), " ".join(sl1 or [])])
+        sec = lambda x: round(np.mean(x) / 60, 3) if x else ""
+        wr.writerow([bid * 10000, name, cls, cat, sp, fmt(r1h), sec(r1h), fmt(r2h), sec(r2h), fmt(l1), sec(l1),
+                     " ".join(s1h or []), " ".join(s2h or []), " ".join(sl1 or [])])
 
 # ---------------------------------------------------------------- DPS
-results = []
+# 1H R1 motion value is 100 for every weapon in the motion-value sheet; 2H R1 is 103 (105 for UGS, greataxes,
+# great hammers). Paired weapons and fists: 2H R1 is the single-blade 1H R1 clone (MV 100), L1 is the dual attack.
+results, BMODE = [], {}
 for w in WEAPONS:
     if w["cls"] in SKIP_CLS or w["name"] in SKIP_W or w["name"] not in chains:
         continue
-    r2h, l1 = chains[w["name"]]
+    r1h, r2h, l1 = chains[w["name"]]
     opts = []
     if r2h:
         mv = [100] if w["name"] in MV_L1 else [MV_R1_W.get(w["name"]) or MV_R1_CLASS.get(w["cls"], 103)]
-        opts.append(("2H R1", r2h, mv))
+        opts.append(("2H R1", r2h, mv, True))
+    if r1h:
+        opts.append(("1H R1", r1h, [100], False))
     if l1:
-        opts.append(("L1 dual", l1, MV_L1[w["name"]]))
+        opts.append(("L1 dual", l1, MV_L1[w["name"]], True))
     req = w["req"]
-    ok = (G[:, 0] * 1.5 >= req["str"]) & (G[:, 1] >= req["dex"]) & (G[:, 2] >= req["int"]) & (G[:, 3] >= req["fth"])
-    if not opts or not ok.any():
-        continue
-    A = ar_vec(w, G)
-    best = None
-    for mode, frames, mv in opts:
+    best, per_mode, bbest = None, {}, {}
+    for mode, frames, mv, th in opts:
+        sm = 1.5 if th else 1.0
+        ok = (G[:, 0] * sm >= req["str"]) & (G[:, 1] >= req["dex"]) & (G[:, 2] >= req["int"]) & (G[:, 3] >= req["fth"])
+        if not ok.any():
+            continue
+        A = ar_vec(w, G, th)
         secs = np.mean(frames) / 60
         per = {dfn: np.where(ok, sum(eff(A[i] * m / 100, dfn) for m in mv for i in range(5)) / secs, -1) for dfn in DEFS}
         j = int(np.argmax(per[MAIN_DEF]))
+        per_mode[mode] = round(float(per[MAIN_DEF][j]))
         rec = dict(weapon=w["name"], infusion=w["inf"], cls=w["cls"], mode=mode, frames="/".join(map(str, frames)),
                    seconds_per_attack=round(secs, 3), motion_values="+".join(map(str, mv)),
                    str=int(G[j, 0]), dex=int(G[j, 1]), int=int(G[j, 2]), fth=int(G[j, 3]), lck=int(G[j, 4]),
@@ -200,11 +207,22 @@ for w in WEAPONS:
         for dfn in DEFS:
             rec[f"dps_def{dfn}"] = round(float(per[dfn][j]))
         for bn, bs in BUILDS.items():
-            okb = bs[0] * 1.5 >= req["str"] and bs[1] >= req["dex"] and bs[2] >= req["int"] and bs[3] >= req["fth"]
-            ab = ar_vec(w, np.array([bs]))
+            okb = bs[0] * sm >= req["str"] and bs[1] >= req["dex"] and bs[2] >= req["int"] and bs[3] >= req["fth"]
+            ab = ar_vec(w, np.array([bs]), th)
             rec[f"build_{bn}"] = round(float(sum(eff(ab[i] * m / 100, MAIN_DEF) for m in mv for i in range(5))[0] / secs)) if okb else ""
+        for bn in BUILDS:  # fixed builds: keep the best move for that build, independent of the free-stat winner
+            v = rec[f"build_{bn}"]
+            if v != "" and (bn not in bbest or v > bbest[bn][0]):
+                bbest[bn] = (v, mode)
         if best is None or rec[f"dps_def{MAIN_DEF}"] > best[f"dps_def{MAIN_DEF}"]:
             best = rec
+    if best is None:
+        continue
+    for bn in BUILDS:
+        best[f"build_{bn}"] = bbest[bn][0] if bn in bbest else ""
+    BMODE[(w["name"], w["inf"])] = {bn: m for bn, (v, m) in bbest.items()}
+    for m in ("1H R1", "2H R1", "L1 dual"):
+        best[f"dps_{m.replace(' ', '_').lower()}_def{MAIN_DEF}"] = per_mode.get(m, "")
     results.append(best)
 
 results.sort(key=lambda r: -r[f"dps_def{MAIN_DEF}"])
@@ -218,7 +236,7 @@ with open(f"{args.out}/dps_best_per_build{args.tag}.csv", "w", newline="") as f:
     for bn, bs in BUILDS.items():
         rb = sorted([r for r in results if r[f"build_{bn}"] != ""], key=lambda r: -r[f"build_{bn}"])[:10]
         for k, r in enumerate(rb, 1):
-            wr.writerow([bn, "/".join(map(str, bs)), k, r["weapon"], r["infusion"], r["mode"], r[f"build_{bn}"]])
+            wr.writerow([bn, "/".join(map(str, bs)), k, r["weapon"], r["infusion"], BMODE[(r["weapon"], r["infusion"])][bn], r[f"build_{bn}"]])
 
 print(f"wrote {len(results)} weapon/infusion rows to {args.out}")
 for r in results[:5]:
