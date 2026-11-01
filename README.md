@@ -132,3 +132,7 @@ spreadsheet. Motion values: DS3 Motion Values sheet. Reference frame data: DS3 f
 darksouls3.wikidot links page.
 
 No game files are included in this repository.
+
+## License
+
+MIT, see `LICENSE`. Dark Souls III and its data belong to FromSoftware / Bandai Namco; no game files are included here.
