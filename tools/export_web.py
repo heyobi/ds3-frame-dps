@@ -78,6 +78,6 @@ for i, r10 in levels[10].items():
 md = open(args.readme).read()
 links = dict(re.findall(r"\[([^\]]+)\]\((https://darksouls3\.wiki\.fextralife\.com/[^)]+)\)", md))
 used = sorted({s for w in weapons for s in w["sat"]} | {w["sb"] for w in weapons})
-out = dict(sats={k: sats[k] for k in used}, moves=moves, weapons=weapons, links=links, bosses=REG["bosses"])
+out = dict(sats={k: sats[k] for k in used}, moves=moves, weapons=weapons, links=links, bosses=REG["bosses"], cc=REG["cc"])
 json.dump(out, open(args.out, "w"), separators=(",", ":"))
 print(f"{len(weapons)} weapon/infusion rows, {len(moves)} movesets -> {args.out}")

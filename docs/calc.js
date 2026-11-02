@@ -44,8 +44,15 @@
   function flatTarget(def, stamina) {
     return { def: [def, def, def, def, def], mul: null, hp: 0, bleed: null, frost: null, bloodRate: 100, stamina: !!stamina };
   }
-  function bossTarget(b, stamina) {
-    return { def: b.df, mul: b.mul, hp: b.hp, bleed: b.bleed, frost: b.frost, bloodRate: b.bloodRate, stamina: !!stamina };
+  // ng: 0 = NG, 1..7 = NG+..NG+7 (the boss's NG+ effect on top of its NG scaling, then ClearCountCorrectParam HP / status per cycle).
+  // zone: body part damage rate (1 = body; weak points 1.5 to 2.0 on some bosses), applied to direct damage.
+  function bossTarget(b, stamina, ng, zone, cc) {
+    ng = ng || 0;
+    const base = ng > 0 && b.ngp ? b.ngp : b;
+    const k = ng > 0 && cc ? cc[Math.min(ng, cc.length) - 1] : [1, 1, 1];
+    return { def: base.df, mul: b.mul, hp: Math.round(base.hp * k[0]),
+             bleed: base.bleed == null ? null : base.bleed * k[1], frost: base.frost == null ? null : base.frost * k[2],
+             bloodRate: b.bloodRate, stamina: !!stamina, zone: zone || 1 };
   }
   const REGEN = 45;          // stamina per second (equip load under 70%)
   const FROST_AMP = 0.07, FROST_TIME = 14;   // frostbite: target takes 7% more damage for 14 s
@@ -62,7 +69,7 @@
         for (let e = 0; e < 5; e++) {
           if (!h[e] || !A[e]) continue;
           const m = T.mul ? T.mul[e === 0 ? h[5] : e + 3] : 1;
-          direct += eff(A[e] * h[e] / 100, T.def[e]) * m;
+          direct += eff(A[e] * h[e] / 100, T.def[e]) * m * (T.zone || 1);
         }
       }
     }

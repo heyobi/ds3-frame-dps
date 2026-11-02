@@ -15,7 +15,8 @@ L1_WEAPONS = {"Sellsword Twinblades", "Warden Twinblades", "Winged Knight Twinax
               "Brigand Twindaggers", "Gotthard Twinswords", "Onikiri and Ubadachi", "Drang Twinspears", "Drang Hammers",
               "Crow Quills", "Caestus", "Demon's Fist", "Claw", "Manikin Claws", "Crow Talons", "Farron Greatsword"}
 SKIP_W = {"Giant Door Shield", "Dark Hand", "Ringed Knight Paired Greatswords"}
-PHYS_TYPE = {0: 1, 1: 2, 2: 3, 3: 0}     # AtkAttribute -> index in boss multipliers (0 std, 1 slash, 2 strike, 3 thrust)
+PHYS_TYPE = {0: 0, 1: 1, 2: 2, 3: 3}     # DS3 AtkAttribute: 0 standard, 1 slash (scimitar, katana), 2 strike (mace, club),
+                                          # 3 thrust (spear, rapier), 4 = weapon default; same order as the boss multipliers
 
 
 def load_frames(path):

@@ -171,6 +171,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       <div class="group">
         <div class="label">Target</div>
         <select id="boss"><option value="">Flat defense (all damage types)</option></select>
+        <div class="row2" id="bossOpts" style="margin-top:8px" hidden>
+          <label class="field"><span>Journey</span><select id="ng"></select></label>
+          <label class="field"><span>Hit zone</span><select id="zone"><option value="">Body</option></select></label>
+        </div>
         <div class="row2" style="margin-top:8px">
           <label class="field"><span>Weapon upgrade</span>
             <select id="up"></select></label>
@@ -226,7 +230,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   <footer>
     <p><b>What the number means.</b> Damage per second while chaining the light attack, no buffs. Against a flat defense every
       damage type uses the same defense and no absorption. Pick a boss to use its real HP, defense and absorption per damage
-      type (NG, read from the game's regulation), and to add bleed and frostbite procs. Poison, hyper armor and reach are not counted.
+      type (read from the game's regulation, NG or any NG+ cycle), and to add bleed and frostbite procs. Hit zone: some bosses take extra damage on a weak point or body part (Midir x2.0, King of the Storm x1.3); the rates come from the boss's NpcParam, but which part is which you have to know. Poison, hyper armor and reach are not counted.
       "1H R1" is one-handed R1, "2H R1" two-handed R1, "L1 dual" the two-handed L1 of paired weapons and fists.</p>
     <p>The stat search here is finer than the 3-point grid used for the repo tables, so a weapon can come out 1 to 5 DPS higher than in the README.
       Motion values, hit counts and stamina costs come from the game's own attack params; weapon damage and scaling from DS3InventoryBuilder.
@@ -236,16 +240,18 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611020520"></script>
+<script src="calc.js?v=202611020615"></script>
 <script>
 (function(){
   "use strict";
   const $ = (id) => document.getElementById(id);
+  let pendingZone = "";
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
-  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","q","cls","inf"];
+  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf"];
   const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
+  for (let i = 0; i <= 7; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i ? "NG+" + i : "NG"; $("ng").appendChild(o); }
   for (let i = 0; i <= 10; i++) { const o = document.createElement("option"); o.value = i; o.textContent = "+" + i; $("up").appendChild(o); }
   $("up").value = 10;
 
@@ -267,13 +273,14 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     for (const f of fields) if (h.has(f)) $(f).value = h.get(f);
     for (const b of boxes) if (h.has(b)) $(b).checked = h.get(b) === "1";
     if (h.has("boss") && ![...$("boss").options].some(o => o.value === h.get("boss"))) $("boss").value = "";
+    pendingZone = h.get("zone") || "";
   }
   function writeHash() {
     const h = new URLSearchParams();
     h.set("mode", mode);
     const keep = mode === "opt" ? ["sl","vig","att","end","vit"] : ["str","dex","int","fth","lck"];
     for (const f of keep.concat(["up","def"])) h.set(f, $(f).value);
-    if ($("boss").value) h.set("boss", $("boss").value);
+    if ($("boss").value) { h.set("boss", $("boss").value); if ($("ng").value !== "0") h.set("ng", $("ng").value); if ($("zone").value) h.set("zone", $("zone").value); }
     if ($("stam").checked) h.set("stam", "1");
     for (const f of ["q","cls","inf"]) if ($(f).value) h.set(f, $(f).value);
     for (const b of boxes) if (b !== "stam" && !$(b).checked) h.set(b, "0");
@@ -292,10 +299,21 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const moves = { r1h: $("m_r1h").checked, r2h: $("m_r2h").checked, l1: $("m_l1").checked };
     const up = num("up", 0, 10), defN = num("def", 1, 2000);
     const boss = D.bosses.find(x => x.n === $("boss").value);
-    const def = boss ? DS3.bossTarget(boss, $("stam").checked) : DS3.flatTarget(defN, $("stam").checked);
+    // hit zone list follows the boss
+    const zs = boss ? (boss.zones || []) : [];
+    const zkey = JSON.stringify(zs);
+    if ($("zone").dataset.k !== zkey) {
+      const keep = pendingZone || $("zone").value;
+      $("zone").innerHTML = `<option value="">Body</option>` + zs.map(z => `<option value="${z[0]}">${z[0]} ×${z[1]}</option>`).join("");
+      $("zone").value = zs.some(z => z[0] === keep) ? keep : ""; $("zone").dataset.k = zkey; pendingZone = "";
+    }
+    $("bossOpts").hidden = !boss;
+    const zr = (zs.find(z => z[0] === $("zone").value) || [0, 1])[1];
+    const ng = num("ng", 0, 7);
+    const def = boss ? DS3.bossTarget(boss, $("stam").checked, ng, zr, D.cc) : DS3.flatTarget(defN, $("stam").checked);
     $("defBox").style.visibility = boss ? "hidden" : "visible";
-    $("bossNote").innerHTML = boss ? bossInfo(boss) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
-    const tgt = (boss ? `vs ${boss.n}` : `defense ${defN}`) + ($("stam").checked ? ", stamina limited" : "");
+    $("bossNote").innerHTML = boss ? bossInfo(boss, def, ng, zr) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
+    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? ", stamina limited" : "");
     const b = budgetInfo();
     $("budget").innerHTML = mode === "opt" ? `Offensive points to place: <b>${b.budget}</b>` : "";
     $("budget").classList.toggle("bad", b.budget < 0);
@@ -461,17 +479,17 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const p = r.parts, bits = [];
     if (p.bleed > 0.5) bits.push(`bleed ${Math.round(p.bleed)}`);
     if (p.frost > 0.5) bits.push(`frost ${Math.round(p.frost)}`);
-    const boss = D.bosses.find(x => x.n === $("boss").value);
-    if (boss) bits.push(`kill ${Math.round(boss.hp / r.dps)} s`);
+    if (ctx && ctx.opts && ctx.opts.def && ctx.opts.def.hp) bits.push(`kill ${Math.round(ctx.opts.def.hp / r.dps)} s`);
     return bits.length ? `<small class="parts">${bits.join(" · ")}</small>` : "";
   }
 
-  function bossInfo(b) {
+  function bossInfo(b, T, ng, zr) {
     const pct = (m) => Math.round((1 - m) * 100);
     const typ = ["Std", "Slash", "Strike", "Thrust", "Magic", "Fire", "Light.", "Dark"];
     const abs = b.mul.map((m, i) => `${typ[i]} ${pct(m)}%`).join(" · ");
     const st = (v) => v == null ? "immune" : v;
-    return `HP ${b.hp.toLocaleString("en")} · defense ${Math.round(b.df[0])} · bleed ${st(b.bleed)} · frost ${st(b.frost)}<br>Absorption: ${abs}<br>Negative absorption = takes extra damage. NG values, from the game's regulation.`;
+    const r = (v) => v == null ? "immune" : Math.round(v);
+    return `HP ${T.hp.toLocaleString("en")} · defense ${Math.round(T.def[0])} · bleed ${r(T.bleed)} · frost ${r(T.frost)}<br>Absorption: ${abs}<br>Negative absorption = takes extra damage. ${ng ? `NG+${ng}: the boss's NG+ scaling effect on top of its NG scaling, plus the per-cycle HP and status scaling` : "NG values"}, from the game's regulation.${zr !== 1 ? ` Hits land on a part that takes ×${zr} damage.` : ""}`;
   }
 
   function render(msg, ms) {
@@ -511,7 +529,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
 
   const schedule = () => { clearTimeout(timer); timer = setTimeout(compute, 250); };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def"].forEach(id => $(id).addEventListener("input", schedule));
-  ["up","m_r1h","m_r2h","m_l1","boss","stam"].forEach(id => $(id).addEventListener("change", compute));
+  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone"].forEach(id => $(id).addEventListener("change", compute));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
   $("more").addEventListener("click", () => { showAll = true; render(); });
@@ -525,7 +543,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json?v=202611020022").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611020615").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();

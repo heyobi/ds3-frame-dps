@@ -147,7 +147,17 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   The HP values match the wiki (Soul of Cinder 6,557, Nameless King 7,101, Midir 15,861, Gael 15,039).
 - **Absorption:** the `NpcParam` fields Paramdex calls `regainRate_*` are the damage multipliers per type (standard,
   slash, strike, thrust, magic, fire, lightning, dark): Yhorm fire 0.0, Old Demon King fire 0.22, Nameless King
-  lightning 0.17, Aldrich dark 0.25. Each hit's physical type comes from its `AtkParam` (or the weapon's default).
+  lightning 0.17, Aldrich dark 0.25. Each hit's physical type comes from its `AtkParam` `AtkAttribute` (0 standard,
+  1 slash, 2 strike, 3 thrust, 4 = the weapon's default; Scimitar and Uchigatana R1 are 1, Mace and Club 2, Spear,
+  Estoc and Rapier 3). An earlier version used Elden Ring's numbering here, which put many hits on the wrong
+  multiplier against bosses (flat-defense tables were not affected); fixed on 2 Nov 2026.
+- **NG+ cycles:** each boss row names its NG+ scaling effect (`GameClearSpEffectID`, e.g. 7400 `NG+ Scaling -
+  Cemetery of Ash`), applied on top of the NG area scaling, and `ClearCountCorrectParam` scales HP and status resistance per
+  cycle (NG+7: HP x1.40, bleed/frost resistance x1.09). Its defense fields are not applied, because that is what
+  matches in-game measurements (below).
+- **Hit zones:** `NpcParam` also has `weakPartsDamageRate` and `partsDamageRate1-8` (Midir's weak point x2.0,
+  King of the Storm x1.3, most knights' weak point x1.5). Which body part is which zone is in the boss model files,
+  so the calculator lets you pick the zone instead of guessing.
 - **Bleed:** threshold = `resistBlood` x area scaling; each proc deals the weapon's bleed spEffect (15% max HP +
   50/100) times the boss's `Blood Damage Rate` spEffect (50% for most bosses, 20% Gael), about 7.5-8% of a boss's
   HP, which matches the community measurement of ~7.8%. Buildup per hit uses the weapon's bleed value and Luck.
@@ -162,36 +172,44 @@ attacking:
 
 | Boss | HP | Best weapon (SL125, +10) | Attack | DPS | of which bleed / frost | Kill time | 2nd best |
 |---|---|---|---|---|---|---|---|
-| Iudex Gundyr | 1,037 | Lightning [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 732 | - | 1 s | Lightning Warden Twinblades (728) |
-| Vordt of the Boreal Valley | 1,328 | Dark [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 809 | - | 2 s | Dark Warden Twinblades (768) |
-| Curse-rotted Greatwood | 5,406 | Chaos [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 1295 | - | 4 s | Chaos Gotthard Twinswords (1264) |
-| Crystal Sage | 2,723 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1003 | bleed 166 | 3 s | Sharp Sellsword Twinblades (924) |
-| Deacons of the Deep | 4,099 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 939 | bleed 106 | 4 s | Sharp Sellsword Twinblades (921) |
-| Abyss Watchers | 1,549 | Lightning [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 700 | - | 2 s | Lightning Warden Twinblades (673) |
-| High Lord Wolnir | 7,052 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 714 | - | 10 s | Sharp Warden Twinblades (647) |
-| Old Demon King | 5,302 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 776 | - | 7 s | Sharp Warden Twinblades (703) |
-| Pontiff Sulyvahn | 5,106 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 806 | bleed 126 | 6 s | Sharp Barbed Straight Sword (772) |
-| Aldrich, Devourer of Gods | 4,727 | Chaos [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 819 | bleed 114 | 6 s | Chaos Sellsword Twinblades (750) |
-| Yhorm the Giant | 27,823 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 725 | - | 38 s | Lightning Warden Twinblades (663) |
-| Dancer of the Boreal Valley | 5,112 | Dark [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 852 | bleed 123 | 6 s | Dark Sellsword Twinblades (775) |
-| Dragonslayer Armour | 4,582 | [Irithyll Straight Sword](https://darksouls3.wiki.fextralife.com/Irithyll_Straight_Sword) | 1H R1 | 612 | frost 269 | 7 s | Irithyll Rapier (586) |
-| Oceiros, the Consumed King | 8,088 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 896 | bleed 185 | 9 s | Irithyll Straight Sword (784) |
-| Champion Gundyr | 4,957 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 738 | bleed 117 | 7 s | Lightning Sellsword Twinblades (668) |
-| Lorian, Elder Prince | 4,294 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 734 | bleed 101 | 6 s | Lightning Sellsword Twinblades (683) |
-| Lothric, Younger Prince | 5,799 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 934 | bleed 134 | 6 s | Sharp Sellsword Twinblades (884) |
-| Nameless King | 7,101 | Dark [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 792 | bleed 160 | 9 s | Blood Sellsword Twinblades (709) |
-| Soul of Cinder | 6,557 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 770 | bleed 427 | 9 s | Blood Sellsword Twinblades (711) |
-| Gravetender's Greatwolf | 4,194 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1000 | bleed 648 | 4 s | Blood Sellsword Twinblades (886) |
-| Father Ariandel | 6,275 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1166 | bleed 673 | 5 s | Blood Sellsword Twinblades (1068) |
-| Sister Friede | 4,863 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 802 | bleed 112 | 6 s | Sharp Sellsword Twinblades (762) |
-| Blackflame Friede | 6,864 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 845 | bleed 155 | 8 s | Blood Sellsword Twinblades (785) |
-| Demon Prince | 7,046 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 809 | bleed 143 | 9 s | Blood Sellsword Twinblades (741) |
-| Darkeater Midir | 15,861 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 355 | - | 45 s | Sharp Long Sword (327) |
-| Slave Knight Gael | 15,038 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 571 | bleed 318 | 26 s | Blood Sellsword Twinblades (534) |
+| Iudex Gundyr | 1,037 | Lightning [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 715 | - | 1 s | Lightning Warden Twinblades (711) |
+| Vordt of the Boreal Valley | 1,328 | Dark [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 759 | - | 2 s | Dark Warden Twinblades (720) |
+| Curse-rotted Greatwood | 5,406 | Chaos [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 1434 | - | 4 s | Chaos Warden Twinblades (1358) |
+| Crystal Sage | 2,723 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1024 | bleed 166 | 3 s | Sharp Sellsword Twinblades (948) |
+| Deacons of the Deep | 4,099 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 967 | bleed 106 | 4 s | Sharp Sellsword Twinblades (952) |
+| Abyss Watchers | 1,549 | Lightning [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 688 | - | 2 s | Lightning Warden Twinblades (662) |
+| High Lord Wolnir | 7,052 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 518 | - | 14 s | Demon's Fist (511) |
+| Old Demon King | 5,302 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 746 | - | 7 s | Sharp Warden Twinblades (675) |
+| Pontiff Sulyvahn | 5,106 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 841 | bleed 126 | 6 s | Sharp Sellsword Twinblades (789) |
+| Aldrich, Devourer of Gods | 4,727 | Chaos [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 827 | bleed 114 | 6 s | Sharp Sellsword Twinblades (774) |
+| Yhorm the Giant | 27,823 | Lightning [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 679 | - | 41 s | Lightning Warden Twinblades (633) |
+| Dancer of the Boreal Valley | 5,112 | Dark [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 846 | bleed 123 | 6 s | Dark Sellsword Twinblades (768) |
+| Dragonslayer Armour | 4,582 | [Irithyll Straight Sword](https://darksouls3.wiki.fextralife.com/Irithyll_Straight_Sword) | 1H R1 | 612 | frost 269 | 7 s | Vordt's Great Hammer (606) |
+| Oceiros, the Consumed King | 8,088 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 886 | bleed 185 | 9 s | Irithyll Straight Sword (784) |
+| Champion Gundyr | 4,957 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 723 | bleed 117 | 7 s | Lightning Sellsword Twinblades (652) |
+| Lorian, Elder Prince | 4,294 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 725 | bleed 101 | 6 s | Irithyll Straight Sword (675) |
+| Lothric, Younger Prince | 5,799 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 961 | bleed 134 | 6 s | Sharp Sellsword Twinblades (914) |
+| King of the Storm | 4,578 | Lightning [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 767 | bleed 106 | 6 s | Lightning Sellsword Twinblades (714) |
+| Nameless King | 7,101 | Dark [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 786 | bleed 160 | 9 s | Blood Sellsword Twinblades (697) |
+| Soul of Cinder | 6,557 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 751 | bleed 427 | 9 s | Blood Sellsword Twinblades (691) |
+| Gravetender's Greatwolf | 4,194 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1031 | bleed 648 | 4 s | Blood Sellsword Twinblades (919) |
+| Father Ariandel | 6,275 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 1181 | bleed 673 | 5 s | Blood Sellsword Twinblades (1085) |
+| Sister Friede | 4,863 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 843 | bleed 112 | 6 s | Sharp Sellsword Twinblades (807) |
+| Blackflame Friede | 6,864 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 886 | bleed 155 | 8 s | Blood Sellsword Twinblades (811) |
+| Demon in Pain / from Below | 7,046 | Sharp [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 936 | bleed 143 | 8 s | Sharp Sellsword Twinblades (875) |
+| Darkeater Midir | 15,861 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) | L1 dual | 347 | - | 46 s | Sharp Gotthard Twinswords (336) |
+| Slave Knight Gael | 15,038 | Blood [Warden Twinblades](https://darksouls3.wiki.fextralife.com/Warden_Twinblades) | L1 dual | 555 | bleed 318 | 27 s | Blood Sellsword Twinblades (517) |
 
 Abyss Watchers HP is per watcher. Yhorm's Storm Ruler and Midir/Gael phase mechanics are not modelled. Warden
 Twinblades take over from Sellswords against almost every boss that can bleed; against bleed-immune bosses
 (Vordt, Wolnir, Old Demon King, Yhorm, Midir) Sellswords stay on top.
+
+**Checked against in-game measurements.** u/himheart measured damage per L1 of Warden Twinblades at SL802, NG+7,
+on every boss. With the boss's NG+7 values above, the model's Sharp numbers land within 4% of his on 21 of the 22
+bosses where the model knows which entity is hit (2.8% average difference), and the three big gaps (King of the Storm,
+Demon in Pain, Midir) close once the zone rate is applied. Elemental infusions (Chaos, Lightning, Crystal, Dark)
+match too, within 1.7% on average. Bosses with several hittable parts (Greatwood, Twin Princes,
+Demon Prince) are not modelled well.
 
 **Two things the attack params show that the community motion-value sheet does not.**
 Dancer's Enchanted Swords' dual L1 hits carry magic on one blade and fire on the other (each blade's other element

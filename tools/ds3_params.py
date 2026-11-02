@@ -31,6 +31,7 @@ sp, _, _ = P.read_param("SpEffectParam", "SP_EFFECT_PARAM_ST")
 wep, _, _ = P.read_param("EquipParamWeapon", "EQUIP_PARAM_WEAPON_ST")
 beh, _, _ = P.read_param("BehaviorParam_PC", "BEHAVIOR_PARAM_ST")
 atk, _, _ = P.read_param("AtkParam_Pc", "ATK_PARAM_ST")
+cc, _, _ = P.read_param("ClearCountCorrectParam", "CLEAR_COUNT_CORRECT_PARAM_ST")
 
 # Main boss entries (NpcParam ids). Multi-entity fights use the main body.
 BOSSES = [("Iudex Gundyr", 511000), ("Vordt of the Boreal Valley", 224000), ("Curse-rotted Greatwood", 518000),
@@ -38,9 +39,9 @@ BOSSES = [("Iudex Gundyr", 511000), ("Vordt of the Boreal Valley", 224000), ("Cu
           ("High Lord Wolnir", 516000), ("Old Demon King", 305000), ("Pontiff Sulyvahn", 514000),
           ("Aldrich, Devourer of Gods", 515000), ("Yhorm the Giant", 526000), ("Dancer of the Boreal Valley", 527000),
           ("Dragonslayer Armour", 316000), ("Oceiros, the Consumed King", 209000), ("Champion Gundyr", 511100),
-          ("Lorian, Elder Prince", 525000), ("Lothric, Younger Prince", 525100), ("Nameless King", 501000),
+          ("Lorian, Elder Prince", 525000), ("Lothric, Younger Prince", 525100), ("King of the Storm", 503000), ("Nameless King", 501000),
           ("Soul of Cinder", 528000), ("Gravetender's Greatwolf", 603000), ("Father Ariandel", 601000),
-          ("Sister Friede", 602000), ("Blackflame Friede", 602001), ("Demon Prince", 502001),
+          ("Sister Friede", 602000), ("Blackflame Friede", 602001), ("Demon in Pain / from Below", 502001),
           ("Darkeater Midir", 621100), ("Slave Knight Gael", 620000)]
 
 
@@ -62,7 +63,26 @@ def boss(name, rid):
                                        "regainRate_Thunder", "regainRate_Dark")],
         bleed=None if (30020 in off or r["resistBlood"] >= 999) else round(r["resistBlood"] * g("registBloodChangeRate")),
         frost=None if (30040 in off or r["resistFrost"] >= 999) else round(r["resistFrost"] * g("registFrostChangeRate")),
-        bloodRate=blood)
+        bloodRate=blood,
+        # NG+ (any cycle): the boss row names its NG+ scaling effect (GameClearSpEffectID), applied on top of the NG one.
+        # ClearCountCorrectParam then scales HP and status resistance per cycle (see "cc"); its defense fields are not
+        # applied, which is what matches in-game NG+7 measurements.
+        ngp=ngplus(r, area, off),
+        # per body part damage rates (which part is which lives in the boss model files)
+        zones=[["Weak point", round(r["weakPartsDamageRate"], 2)]] * (abs(r["weakPartsDamageRate"] - 1) > 1e-6)
+              + [[f"Part {i}", round(r[f"partsDamageRate{i}"], 2)] for i in range(1, 9) if abs(r[f"partsDamageRate{i}"] - 1) > 1e-6])
+
+
+def ngplus(r, area, off):
+    # the NG+ effect stacks on top of the NG area scaling (Cemetery of Ash has none on NG, the DLC areas a lot)
+    gc = sp.get(r["GameClearSpEffectID"], {})
+    g = lambda k: gc.get(k, 1.0) * area.get(k, 1.0)
+    return dict(hp=round(r["Hp"] * g("maxHpRate")),
+                df=[round(r["defPhys"] * g("physDefRate"), 1), round(r["defMag"] * g("magicDefRate"), 1),
+                    round(r["defFire"] * g("fireDefRate"), 1), round(r["defThunder"] * g("thunderDefRate"), 1),
+                    round(r["defDark"] * g("darkDefRate"), 1)],
+                bleed=None if (30020 in off or r["resistBlood"] >= 999) else round(r["resistBlood"] * g("registBloodChangeRate")),
+                frost=None if (30040 in off or r["resistFrost"] >= 999) else round(r["resistFrost"] * g("registFrostChangeRate")))
 
 
 def status(r):
@@ -97,6 +117,8 @@ for bid, r in beh.items():
     behaviors.setdefault(str(v), {})[str(j)] = [r["stamina"], a["AtkPhysCorrection"], a["AtkMagCorrection"],
                                                 a["AtkFireCorrection"], a["AtkThunCorrection"], a["atkDarkCorrection"],
                                                 a["AtkAttribute"]]
-res = dict(bosses=[boss(n, i) for n, i in BOSSES], weapons=weapons, behaviors=behaviors)
+# per NG+ cycle (1..7): HP, bleed resist, frost resist multipliers on top of the NG+ effect
+ccs = [[round(cc[k]["HP"], 3), round(cc[k]["BleedResist"], 3), round(cc[k]["FrostResist"], 3)] for k in range(1, 8)]
+res = dict(bosses=[boss(n, i) for n, i in BOSSES], weapons=weapons, behaviors=behaviors, cc=ccs)
 json.dump(res, open(out, "w"), separators=(",", ":"))
 print(f"{len(res['bosses'])} bosses, {len(weapons)} weapon rows, {sum(len(v) for v in behaviors.values())} behaviors -> {out}")
