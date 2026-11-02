@@ -223,7 +223,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <table>
           <thead><tr>
             <th>#</th><th>Weapon</th><th class="hide-s">Attack</th><th class="n hide-s hide-m">s / attack</th>
-            <th class="n hide-s hide-m">AR</th><th class="n hide-s" title="Weapon reach: hand to the far end of the hitbox, in metres (the step forward is not included)">Reach</th><th id="metricTh">DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
+            <th class="n hide-s hide-m">AR</th><th class="n hide-s" title="Weapon reach: hand to the far end of the hitbox, in metres. Second line: plus how far the character has stepped forward when the hit starts.">Reach</th><th id="metricTh">DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
@@ -235,7 +235,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   <footer>
     <p><b>What the number means.</b> Damage per second while chaining the light attack, no buffs. Against a flat defense every
       damage type uses the same defense and no absorption. Pick a boss to use its real HP, defense and absorption per damage
-      type (read from the game's regulation, NG or any NG+ cycle), and to add bleed and frostbite procs. Hit zone: some bosses take extra damage on a weak point or body part (Midir x2.0, King of the Storm x1.3); the rates come from the boss's NpcParam, but which part is which you have to know. Poison and hyper armor are not counted. Reach = hand to the far end of the light attack's hitbox (weapon model + attack params), without the step forward the animation takes; it does not change the DPS.
+      type (read from the game's regulation, NG or any NG+ cycle), and to add bleed and frostbite procs. Hit zone: some bosses take extra damage on a weak point or body part (Midir x2.0, King of the Storm x1.3); the rates come from the boss's NpcParam, but which part is which you have to know. Poison and hyper armor are not counted. Reach = hand to the far end of the light attack's hitbox (weapon model + attack params), and with the step: plus how far the character has moved forward (root motion of the attack animation) when the hit starts. The arm reaching out is in neither. Reach does not change the DPS.
       "1H R1" is one-handed R1, "2H R1" two-handed R1, "L1 dual" the two-handed L1 of paired weapons and fists.</p>
     <p>The stat search here is finer than the 3-point grid used for the repo tables, so a weapon can come out 1 to 5 DPS higher than in the README.
       Motion values, hit counts and stamina costs come from the game's own attack params; weapon damage and scaling from DS3InventoryBuilder.
@@ -444,7 +444,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const cur = o.mode === "opt" ? DS3.optimizeMove(D, r.w, move, [10, 10, 10, 10, 10], o.budget, o.up, o.def)
                                  : DS3.evalMove(D, r.w, move, o.stats, o.up, o.def);
     const rv = D.reach && D.reach[r.w.n];
-    const reachLine = rv ? `<p><b>Weapon reach</b> (hand to the far end of the hitbox, longest swing; the step forward is not included): ${Object.keys(MOVE_LABEL).filter(m => rv[m]).map(m => `${MOVE_LABEL[m]} ${rv[m][1].toFixed(2)} m`).join(" · ")}</p>` : "";
+    const reachLine = rv ? `<p><b>Reach</b> (hand to the far end of the hitbox, longest swing; "with step" adds how far the character has moved forward when the hit starts): ${Object.keys(MOVE_LABEL).filter(m => rv[m]).map(m => `${MOVE_LABEL[m]} ${rv[m][1].toFixed(2)} m` + (rv[m].length > 3 ? ` (${rv[m][3].toFixed(2)} m with step)` : "")).join(" · ")}</p>` : "";
     const hitsLine = cur ? `<p><b>Damage per attack</b> (each press of the chain, every hit rounded down like the game): ${cur.stepDmg.join(" → ")} · <b>${Math.round(cur.rate)} DPS</b> at ${cur.stats.join("/")}</p>` : "";
     return `${tabs}<div class="det">
       <div>
@@ -494,7 +494,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
 
   function reachOf(n, move) {
     const v = D.reach && D.reach[n] && D.reach[n][move];
-    return v ? `${v[1].toFixed(2)} m` : "";
+    if (!v) return "";
+    return `${v[1].toFixed(2)} m` + (v.length > 3 ? `<small style="display:block;color:var(--muted);font-size:11.5px">${v[3].toFixed(2)} with step</small>` : "");
   }
 
   function partsHtml(r) {
@@ -568,7 +569,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json?v=202611021310").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611021320").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();

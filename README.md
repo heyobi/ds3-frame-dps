@@ -208,13 +208,15 @@ Twinblades take over from Sellswords against almost every boss that can bleed; a
 `tools/ds3_reach.py` measures how far each light attack reaches from the hand: every hit is a sphere or capsule on
 the weapon model (`AtkParam_Pc` `Hit*_DmyPoly1/2` and `Hit*_Radius`), and the dummy points' positions come from the
 weapon's `.flver` (`tools/ds3_models.py`, read-only). Reach = hand to the far end of the hitbox, radius included.
-The step forward the animation takes is not included. Full table: [`results/reach.md`](results/reach.md); the
-calculator shows it as a column.
+A second set of columns adds how far the character has moved forward when each hit starts, read from the root
+motion of the attack animation (`tools/ds3_rootmotion.py`, Havok reference frame samples). The arm reaching out
+from the body is in neither. Full table: [`results/reach.md`](results/reach.md); the calculator shows both.
 
 ![Reach per weapon class](results/reach.png)
 
 Longest: Lothric Knight Greatsword 2.62 m, Dragonslayer Swordspear 2.61 m, whips 2.52 m. Shortest: Dagger 0.81 m.
-Lothric Knight Sword 1.38 m vs Long Sword 1.25 m vs Broadsword 1.11 m.
+Lothric Knight Sword 1.38 m vs Long Sword 1.25 m vs Broadsword 1.11 m. With the step the gaps change: Uchigatana's
+one-handed R1 lunges to 3.02 m (1.58 m weapon), Long Sword 2.50 m, Rapier only 1.97 m.
 
 **Checked against in-game measurements.** u/himheart measured damage per L1 of Sellsword Twinblades at SL802, NG+7,
 on every boss (Clutch rings on for the elemental infusions, which the regulation gives as x1.15 damage of that
