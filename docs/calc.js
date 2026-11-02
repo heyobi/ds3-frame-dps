@@ -126,7 +126,8 @@
     return { sb: best.sb, name: best.c.n, up };
   }
   function effStats(w, li, st, T) { return hollowSt(w, li, addSt(st, T), T); }
-  function buffable(w, li) { const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
+  // EquipParamWeapon isEnhance (tools/ds3_buffable.py marks rows that can't be buffed with nb); elemental damage as fallback
+  function buffable(w, li) { if (w.nb) return false; const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
   function applyBuff(w, li, A, buff, st, D) {
     const b = buff && BUFFS[buff.id];
     if (!b || !buffable(w, li)) return A;

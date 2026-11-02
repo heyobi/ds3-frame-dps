@@ -235,7 +235,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
           <label title="+5 Intelligence"><input type="checkbox" data-ring="scholar">Scholar +5 Int</label>
           <label title="+5 Faith"><input type="checkbox" data-ring="priestess">Priestess +5 Fth</label>
         </div>
-        <div class="note" id="buffNote">Values from the game files. Clutch rings ×1.15 damage of their element, Crown of Dusk ×1.05 magic. Lloyd's, Pontiff's and Flynn's raise attack, Red Tearstone and Clutch rings raise damage. Stat rings count for requirements and are added on top of the spread shown. Buffs only go on weapons with no elemental damage; paired weapons get less from resins and Blessed Weapon (fitted to in-game measurements), spell buffs are not reduced. Great Swamp Ring and Witch's Ring do not raise spell buff or buff damage (tested in game).</div>
+        <div class="note" id="buffNote">Values from the game files. Clutch rings ×1.15 damage of their element, Crown of Dusk ×1.05 magic. Lloyd's, Pontiff's and Flynn's raise attack, Red Tearstone and Clutch rings raise damage. Stat rings count for requirements and are added on top of the spread shown. Buffs only go on weapons the game lets you buff (no elemental, Blood, Poison, Blessed or Simple infusion, and not unique weapons such as Storm Ruler); paired weapons get less from resins and Blessed Weapon (fitted to in-game measurements), spell buffs are not reduced. Great Swamp Ring and Witch's Ring do not raise spell buff or buff damage (tested in game).</div>
       </div>
 
       <div class="group">
@@ -296,7 +296,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611022000"></script>
+<script src="calc.js?v=202611022010"></script>
 <script>
 (function(){
   "use strict";
@@ -358,9 +358,9 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const chl = $("stam").checked && $("ring").value !== "0";
     const auto = $("autoRings").checked;
     const n = ringIds().length + (chl ? 1 : 0), full = !auto && n >= 4;
-    $("ringHead").innerHTML = auto ? `Rings to choose from (none ticked = all but Red Tearstone; Chloranthy Ring+3 is tried when stamina limited), 4 slots` : `Rings <b id="ringCount"></b> (Chloranthy Ring counts too)`;
+    $("ringHead").innerHTML = auto ? `Rings to choose from (none ticked = all but Red Tearstone), ${4 - (chl ? 1 : 0)} slots${chl ? " after the Chloranthy Ring" : "; Chloranthy Ring+3 is tried when stamina limited"}` : `Rings <b id="ringCount"></b> (Chloranthy Ring counts too)`;
     document.querySelectorAll("#ringBox input").forEach(x => { x.disabled = full && !x.checked; x.parentElement.classList.toggle("off", x.disabled); });
-    $("ring").disabled = auto || (!chl && ringIds().length >= 4);
+    $("ring").disabled = !auto && !chl && ringIds().length >= 4;
     if ($("ringCount")) $("ringCount").textContent = `${n}/4`;
   }
   function writeHash() {
@@ -418,10 +418,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const crownAuto = $("crown").value === "auto", crownOn = $("crown").value === "1";
     const rids = ringIds(), rm = DS3.ringMods(autoR ? [] : rids, crownOn);
     def.emul = rm.dmg; def.armul = rm.ar; def.sbon = rm.st; def.status = rm.status;
-    const chl = !autoR && $("stam").checked && $("ring").value !== "0";
-    if (autoR) def.regen = 45 + num("blos", 0, 9);          // the ring picker decides on the Chloranthy Ring itself
+    const chl = $("stam").checked && $("ring").value !== "0";   // a Chloranthy Ring chosen above is kept and takes a slot
+    if (autoR && !chl) def.regen = 45 + num("blos", 0, 9);       // otherwise the ring picker decides on it
     const auto = (autoBuff || autoR || crownAuto) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), cat: catSel, cup, rings: autoR,
-      pool: (rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts" && x !== "chl")).concat($("stam").checked ? ["chl"] : []), slots: 4 - (chl ? 1 : 0), crown: crownOn, crownAuto } : null;
+      pool: (rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts" && x !== "chl")).concat($("stam").checked && !chl ? ["chl"] : []), slots: 4 - (chl ? 1 : 0), crown: crownOn, crownAuto } : null;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
     $("metricTh").textContent = by === "hit" ? "Damage / attack" : "Damage / second";
@@ -465,7 +465,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const b = T.buff && DS3.BUFFS[T.buff.id];
     if (b) {
       const bn = BUFF_NAME[T.buff.id];
-      if (!DS3.buffable(r.w, li)) parts.push(`${bn}: this infusion can't be buffed`);
+      if (!DS3.buffable(r.w, li)) parts.push(`${bn}: ${r.w.i === "-" ? "this weapon" : "this infusion"} can't be buffed`);
       else if (b.pct) {
         const si = DS3.spellInfo(D, T.buff, est);
         const reqTxt = b.req ? ` (needs ${[b.req[0] ? b.req[0] + " Int" : "", b.req[1] ? b.req[1] + " Fth" : ""].filter(Boolean).join(", ")})` : "";
@@ -711,7 +711,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json?v=202611022010").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611022015").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();
