@@ -222,8 +222,10 @@ one-handed R1 lunges to 3.02 m (1.58 m weapon), Long Sword 2.50 m, Rapier only 1
 on every boss (Clutch rings on for the elemental infusions, which the regulation gives as x1.15 damage of that
 element). With the boss's NG+7 values above, the model gives the same number he measured on almost every boss
 (Iudex Sharp 430 = 430, Lightning 534 = 534, Midir 464 = 464 with the x2.0 weak point, King of the Storm 516 vs
-515 with the x1.3 head). Crystal comes out 3% low everywhere, which is still open. Bosses with several hittable
-parts (Greatwood, Twin Princes, Demon Prince) are not modelled well.
+515 with the x1.3 head). Crystal matches too once Crown of Dusk is counted (he had it on from spell testing; the
+regulation gives it x1.05 magic damage). On the Twin Princes his numbers match Lorian's row exactly on all four
+infusions, so the hits land on Lorian. Bosses with several hittable parts (Greatwood, Wolnir, Demon Prince) are not
+modelled well.
 
 **Two things the attack params show that the community motion-value sheet does not.**
 Dancer's Enchanted Swords' dual L1 hits carry magic on one blade and fire on the other (each blade's other element
