@@ -165,6 +165,8 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
 - **Stamina (optional):** each hit's stamina cost is `BehaviorParam_PC.stamina` x the weapon's `StaminaConsumeRate`.
   With "stamina limited" on, stamina does not refill during attacks and refills at 45/s otherwise, so every point
   costs 1/45 s. This is the long-fight rate; a fight that starts with a full bar is faster for the first few seconds.
+  Chloranthy Ring adds +7/+8/+9/+10 per second (+0 to +3) and Green Blossom / Budding Green Blossom +6 / +9 for
+  60 s (SpEffect staminaRecoverChangeSpeed); the calculator has both as options under stamina limited.
 
 Best weapon per boss at SL125 (Vig 27, End 20, Vit 15), +10, no stamina limit, kill time = HP / DPS with nonstop
 attacking:

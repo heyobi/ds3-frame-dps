@@ -184,7 +184,14 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <div class="checks" style="margin-top:8px">
           <label><input type="checkbox" id="stam">Stamina limited</label>
         </div>
-        <div class="note">Stamina limited: long fights where you keep attacking. Stamina does not refill while attacking and refills at 45/s otherwise, so each point spent costs 1/45 s.</div>
+        <div class="row2" id="stamOpts" style="margin-top:8px" hidden>
+          <label class="field"><span>Ring</span><select id="ring">
+            <option value="0">None</option><option value="7">Chloranthy Ring (+7/s)</option><option value="8">Chloranthy Ring+1 (+8/s)</option>
+            <option value="9">Chloranthy Ring+2 (+9/s)</option><option value="10">Chloranthy Ring+3 (+10/s)</option></select></label>
+          <label class="field"><span>Consumable</span><select id="blos">
+            <option value="0">None</option><option value="6">Green Blossom (+6/s)</option><option value="9">Budding Green Blossom (+9/s)</option></select></label>
+        </div>
+        <div class="note" id="stamNote">Stamina limited: long fights where you keep attacking. Stamina does not refill while attacking and refills at 45/s otherwise, so each point spent costs 1/45 s.</div>
       </div>
 
       <div class="group">
@@ -245,7 +252,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021310"></script>
+<script src="calc.js?v=202611021345"></script>
 <script>
 (function(){
   "use strict";
@@ -254,7 +261,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   const ML = () => by === "hit" ? "dmg" : "DPS";
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
-  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf"];
+  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos"];
   const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
   for (let i = 0; i <= 7; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i ? "NG+" + i : "NG"; $("ng").appendChild(o); }
@@ -289,7 +296,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const keep = mode === "opt" ? ["sl","vig","att","end","vit"] : ["str","dex","int","fth","lck"];
     for (const f of keep.concat(["up","def"])) h.set(f, $(f).value);
     if ($("boss").value) { h.set("boss", $("boss").value); if ($("ng").value !== "0") h.set("ng", $("ng").value); if ($("zone").value) h.set("zone", $("zone").value); }
-    if ($("stam").checked) h.set("stam", "1");
+    if ($("stam").checked) { h.set("stam", "1"); if ($("ring").value !== "0") h.set("ring", $("ring").value); if ($("blos").value !== "0") h.set("blos", $("blos").value); }
     for (const f of ["q","cls","inf"]) if ($(f).value) h.set(f, $(f).value);
     for (const b of boxes) if (b !== "stam" && !$(b).checked) h.set(b, "0");
     history.replaceState(null, "", "#" + h.toString());
@@ -319,12 +326,16 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const zr = (zs.find(z => z[0] === $("zone").value) || [0, 1])[1];
     const ng = num("ng", 0, 7);
     const def = boss ? DS3.bossTarget(boss, $("stam").checked, ng, zr, D.cc) : DS3.flatTarget(defN, $("stam").checked);
+    const regen = 45 + num("ring", 0, 10) + num("blos", 0, 9);
+    def.regen = regen;
+    $("stamOpts").hidden = !$("stam").checked;
+    $("stamNote").textContent = `Stamina limited: long fights where you keep attacking. Stamina does not refill while attacking and refills at ${regen}/s otherwise (base 45${regen > 45 ? " + ring / blossom" : ""}), so each point spent costs 1/${regen} s.`;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
     $("metricTh").textContent = by === "hit" ? "Damage / attack" : "DPS";
     $("defBox").style.visibility = boss ? "hidden" : "visible";
     $("bossNote").innerHTML = boss ? bossInfo(boss, def, ng, zr) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
-    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? ", stamina limited" : "");
+    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? `, stamina limited (${regen}/s)` : "");
     const b = budgetInfo();
     $("budget").innerHTML = mode === "opt" ? `Offensive points to place: <b>${b.budget}</b>` : "";
     $("budget").classList.toggle("bad", b.budget < 0);
@@ -554,7 +565,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
 
   const schedule = () => { clearTimeout(timer); timer = setTimeout(compute, 250); };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def"].forEach(id => $(id).addEventListener("input", schedule));
-  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone"].forEach(id => $(id).addEventListener("change", compute));
+  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos"].forEach(id => $(id).addEventListener("change", compute));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
   document.querySelectorAll("#by button").forEach(b => b.addEventListener("click", () => { by = b.dataset.by; compute(); }));

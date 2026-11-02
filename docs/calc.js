@@ -55,7 +55,7 @@
              bleed: base.bleed == null ? null : base.bleed * k[1], frost: base.frost == null ? null : base.frost * k[2],
              bloodRate: b.bloodRate, stamina: !!stamina, zone: zone || 1 };
   }
-  const REGEN = 45;          // stamina per second (equip load under 70%)
+  const REGEN = 45;          // base stamina per second; Chloranthy Ring / Green Blossom add to it (T.regen)
   const FROST_AMP = 0.07, FROST_TIME = 14;   // frostbite: target takes 7% more damage for 14 s
 
   // One full 3-step chain against target T. Returns dps and its parts.
@@ -81,7 +81,7 @@
     }
     let t = frames / 60;
     const stamUse = stam * (w.scr || 1);
-    if (T.stamina) t += stamUse / REGEN;     // no regen while attacking, so every point spent costs 1/45 s
+    if (T.stamina) t += stamUse / (T.regen || REGEN);   // no regen while attacking, so every point spent costs 1/regen s
     let bleed = 0, frost = 0;
     if (T.hp) {
       const L = w.lv[li];
