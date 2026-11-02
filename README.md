@@ -36,7 +36,7 @@ Best weapon for fixed builds (defense 120):
 
 | Build (Str/Dex/Int/Fth/Lck) | Best | DPS |
 |---|---|---|
-| Pure Str 66/10/10/10/10 | Heavy [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) (2H R1) | 525 |
+| Pure Str 66/10/10/10/10 | Heavy [Broadsword](https://darksouls3.wiki.fextralife.com/Broadsword) (2H R1), tied with Heavy [Millwood Battle Axe](https://darksouls3.wiki.fextralife.com/Millwood_Battle_Axe) (2H R1) | 525 |
 | Pure Dex 18/60/10/10/10 | Sharp [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 649 |
 | Quality 40/40/10/10/10 | Refined [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 632 |
 | Int 18/18/60/10/10 | Crystal [Sellsword Twinblades](https://darksouls3.wiki.fextralife.com/Sellsword_Twinblades) (L1) | 554 |
