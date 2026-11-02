@@ -209,9 +209,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
           <label class="field" id="catBox" hidden><span>Catalyst</span><select id="cat"><option value="best">Best I can use</option></select></label>
         </div>
         <div class="row2" id="sbRow" style="margin-top:8px" hidden>
+          <label class="field" id="cupBox"><span>Catalyst upgrade</span><select id="cup"></select></label>
           <label class="field" id="sbBox"><span>Spell buff</span><input type="number" id="sb" min="0" max="600" value="200"></label>
         </div>
-        <div class="note" id="sbNote" hidden>Spell buff comes from the catalyst (fully upgraded) and your Int / Faith, as the equipment screen shows it; a catalyst whose requirements you don't meet adds nothing. "Best I can use" takes the strongest one of the spell's school that your stats allow.</div>
+        <div class="note" id="sbNote" hidden>Spell buff comes from the catalyst, its upgrade and your Int / Faith, as the equipment screen shows it; a catalyst whose requirements you don't meet adds nothing. "Best I can use" takes the strongest one of the spell's school that your stats allow. Catalysts that stop at +5 use half the upgrade shown, like weapons.</div>
         <div class="row2" style="margin-top:8px">
           <label class="field"><span>Head</span><select id="crown"><option value="">Other</option><option value="1">Crown of Dusk</option></select></label>
           <div class="checks" style="align-self:end"><label title="Hollow-infused weapons add Luck (+2 at +0 up to +5 at +10) while you are hollow with 15 or more hollowing"><input type="checkbox" id="hollow">Hollow (15+ hollowing)</label></div>
@@ -294,7 +295,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021900"></script>
+<script src="calc.js?v=202611021930"></script>
 <script>
 (function(){
   "use strict";
@@ -303,13 +304,15 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   const ML = () => by === "hit" ? "dmg" : "DPS";
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
-  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown","cat"];
+  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown","cat","cup"];
   const flags = ["autoRings","hollow"];
   const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
   for (let i = 0; i <= 7; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i ? "NG+" + i : "NG"; $("ng").appendChild(o); }
   for (let i = 0; i <= 10; i++) { const o = document.createElement("option"); o.value = i; o.textContent = "+" + i; $("up").appendChild(o); }
   $("up").value = 10;
+  for (let i = 0; i <= 10; i++) { const o = document.createElement("option"); o.value = i; o.textContent = "+" + i; $("cup").appendChild(o); }
+  $("cup").value = 10;
 
   const num = (id, lo, hi) => { let v = parseInt($(id).value, 10); if (isNaN(v)) v = lo; return Math.max(lo, Math.min(hi, v)); };
 
@@ -358,7 +361,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     for (const f of ["q","cls","inf","buff","crown"]) if ($(f).value) h.set(f, $(f).value);
     const rg = ringIds(); if (rg.length) h.set("rg", rg.join(","));
     for (const f of flags) if ($(f).checked) h.set(f, "1");
-    if ($("buff").value === "auto" || (DS3.BUFFS[$("buff").value] && DS3.BUFFS[$("buff").value].pct)) { if ($("cat").value !== "best") h.set("cat", $("cat").value); if ($("cat").value === "custom") h.set("sb", $("sb").value); }
+    if ($("buff").value === "auto" || (DS3.BUFFS[$("buff").value] && DS3.BUFFS[$("buff").value].pct)) { if ($("cat").value !== "best") h.set("cat", $("cat").value); if ($("cat").value === "custom") h.set("sb", $("sb").value); else if ($("cup").value !== "10") h.set("cup", $("cup").value); }
     for (const b of boxes) if (b !== "stam" && !$(b).checked) h.set(b, "0");
     history.replaceState(null, "", "#" + h.toString());
   }
@@ -394,14 +397,15 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const bid = $("buff").value, binfo = DS3.BUFFS[bid], autoBuff = bid === "auto", autoR = $("autoRings").checked;
     const spellOn = autoBuff || !!(binfo && binfo.pct);
     $("catBox").hidden = $("sbNote").hidden = !spellOn;
-    $("sbRow").hidden = !(spellOn && $("cat").value === "custom");
-    const cv = $("cat").value, catSel = cv === "custom" ? undefined : cv === "best" ? "best" : +cv;
-    def.buff = binfo ? { id: bid, sb: num("sb", 0, 600), cat: catSel } : null;
+    const custom = $("cat").value === "custom";
+    $("sbRow").hidden = !spellOn; $("sbBox").hidden = !custom; $("cupBox").hidden = custom;
+    const cv = $("cat").value, catSel = custom ? undefined : cv === "best" ? "best" : +cv, cup = num("cup", 0, 10);
+    def.buff = binfo ? { id: bid, sb: num("sb", 0, 600), cat: catSel, cup } : null;
     def.hollow = $("hollow").checked;
     const rids = ringIds(), rm = DS3.ringMods(autoR ? [] : rids, !!$("crown").value);
     def.emul = rm.dmg; def.armul = rm.ar; def.sbon = rm.st; def.status = rm.status;
     const chl = $("stam").checked && $("ring").value !== "0";
-    const auto = (autoBuff || autoR) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), cat: catSel, rings: autoR,
+    const auto = (autoBuff || autoR) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), cat: catSel, cup, rings: autoR,
       pool: rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts"), slots: 4 - (chl ? 1 : 0), crown: !!$("crown").value } : null;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
@@ -649,7 +653,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def","sb"].forEach(id => $(id).addEventListener("input", () => schedule(350)));
   document.querySelectorAll("#ringBox input").forEach(x => x.addEventListener("change", () => { ringLimit(); schedule(450); }));
-  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown","autoRings","hollow","cat"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
+  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown","autoRings","hollow","cat","cup"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
   document.querySelectorAll("#by button").forEach(b => b.addEventListener("click", () => { by = b.dataset.by; compute(); }));
@@ -664,7 +668,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json?v=202611021900").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611021930").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();

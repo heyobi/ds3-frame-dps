@@ -51,7 +51,9 @@ for wid in sorted(wep):
     maxlv = max(l for l in range(11) if r["reinforceTypeId"] + l in rw)
     t = rw[r["reinforceTypeId"] + maxlv]
     g = [r["Unk21"], r["Unk26"]]; graphs |= set(g)
-    cats.append(dict(n=names.get(wid, str(wid)), school=school, up=maxlv,
+    cl = [[round(r["corretMagic"] * rw[r["reinforceTypeId"] + l]["correctMagicRate"], 3),
+           round(r["corretFaith"] * rw[r["reinforceTypeId"] + l]["correctFaithRate"], 3)] for l in range(maxlv + 1)]
+    cats.append(dict(n=names.get(wid, str(wid)), school=school, up=maxlv, cl=cl,
                      c=[round(r["corretMagic"] * t["correctMagicRate"], 3), round(r["corretFaith"] * t["correctFaithRate"], 3)],
                      g=g, req=[r["properStrength"], r["properMagic"], r["properFaith"]]))
 D = json.load(open(out))
@@ -60,4 +62,4 @@ for g in graphs:
 D["cats"] = cats
 json.dump(D, open(out, "w"), separators=(",", ":"))
 print(len(cats), "catalysts, graphs", sorted(graphs))
-for c in cats: print(" ", c["n"], c)
+for c in cats: print(" ", c["n"], c["up"], c["cl"][0], c["cl"][-1])

@@ -96,17 +96,19 @@
   // Catalyst spell buff from the player's stats (tools/ds3_catalysts.py): 100 x (1 + (cInt x S(Int) + cFth x S(Fth)) / 10000),
   // rounded down; Archdeacon's Great Staff counts as 100 for weapon buffs (wiki). buff.cat: "best" = strongest catalyst of
   // the spell's school whose requirements the stats meet (fully upgraded), a catalyst index, or undefined = buff.sb as typed.
-  function catSB(D, c, st) {
+  // up: catalyst upgrade as on the weapon menu, 0..10; catalysts that stop at +5 use half (like weapons); default max
+  function catSB(D, c, st, up) {
     if (c.n === "Archdeacon's Great Staff") return 100;
     const S = (g, v) => (D.sats[g] ? D.sats[g][Math.max(0, Math.min(99, v))] : 0);
-    return Math.floor(100 * (1 + (c.c[0] * S(c.g[0], st[2]) + c.c[1] * S(c.g[1], st[3])) / 10000));
+    const k = up == null ? c.c : (c.cl ? c.cl[Math.min(c.up, c.up === 5 ? Math.floor(up / 2) : up)] : c.c);
+    return Math.floor(100 * (1 + (k[0] * S(c.g[0], st[2]) + k[1] * S(c.g[1], st[3])) / 10000));
   }
   function spellBuff(D, buff, st) {
     const b = BUFFS[buff.id];
     if (buff.cat == null || !D || !D.cats) return Math.floor(buff.sb || 0);
     const ok = (c) => c.school[b.sch] && st[0] >= c.req[0] && st[2] >= c.req[1] && st[3] >= c.req[2];
-    if (buff.cat === "best") { let m = 0; for (const c of D.cats) if (ok(c)) m = Math.max(m, catSB(D, c, st)); return m; }
-    const c = D.cats[buff.cat]; return c && ok(c) ? catSB(D, c, st) : 0;
+    if (buff.cat === "best") { let m = 0; for (const c of D.cats) if (ok(c)) m = Math.max(m, catSB(D, c, st, buff.cup)); return m; }
+    const c = D.cats[buff.cat]; return c && ok(c) ? catSB(D, c, st, buff.cup) : 0;
   }
   function buffable(w, li) { const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
   function applyBuff(w, li, A, buff, st, D) {
@@ -350,53 +352,53 @@
   }
   function autoPick(D, w, opts, auto) {
     const T0 = opts.def;
-    let buff = T0.buff || null, rings = (auto.fixed || []).slice();
-    const start = bestFor(D, w, opts, withPicks(T0, buff, rings, auto));
-    if (!start) return null;
-    // choose with the stats fixed at the current best spread (fast), re-optimize the spread at the end
-    const key = start.move, li = levelIndex(w, opts.up);
-    let st = start.stats.slice();
-    const score = (b, rg) => {
-      const T = withPicks(T0, b, rg, auto);
-      if (opts.mode === "opt") {                       // keep the spell's stat requirement inside the budget
+    const fixedBuff = T0.buff || null, fixedRings = (auto.fixed || []).slice();
+    let cur = bestFor(D, w, opts, withPicks(T0, fixedBuff, fixedRings, auto));
+    if (!cur) return null;
+    cur.picks = { buff: fixedBuff && fixedBuff.id, rings: fixedRings };
+    // pick buff and rings at the current stat spread, re-optimize the spread with them, and repeat while it helps:
+    // a stat ring or a catalyst can free points for another stat, so picks and spread are found together
+    for (let pass = 0; pass < 3; pass++) {
+      const key = cur.move, li = levelIndex(w, opts.up), st = cur.stats.slice();
+      const score = (b, rg) => {
+        const T = withPicks(T0, b, rg, auto);
+        const t = st.slice();
         const sp = b && BUFFS[b.id] && BUFFS[b.id].req;
-        if (sp) {
-          const t = st.slice(), sb = T.sbon || [0, 0, 0, 0, 0];
-          // quick estimate: take the missing Int / Faith from the stat that has the most points (the final pass re-optimizes)
-          const need = [Math.max(0, sp[0] - sb[2] - t[2]), Math.max(0, sp[1] - sb[3] - t[3])];
-          let extra = need[0] + need[1];
-          if (extra > 0) {
-            t[2] += need[0]; t[3] += need[1];
-            for (const i of [1, 0, 4, 2, 3]) { const free = Math.max(0, t[i] - Math.max(opts.base[i], i < 4 ? needOf(w, key !== "r1h", T)[i] : 0)); const a = Math.min(free, extra); t[i] -= a; extra -= a; }
-            if (extra > 0) return -1;
-            return wieldable(w, t, key !== "r1h", T) ? chainEval(D, w, key, li, t, T).dps : -1;
+        if (opts.mode === "opt") {
+          // move points freed by stat rings, or missing for a spell, from/to the stat with the most points (estimate)
+          const sb = T.sbon || [0, 0, 0, 0, 0], need = needOf(w, key !== "r1h", T);
+          let extra = 0;
+          if (sp) { const a = Math.max(0, sp[0] - sb[2] - t[2]), f = Math.max(0, sp[1] - sb[3] - t[3]); t[2] += a; t[3] += f; extra = a + f; }
+          for (const i of [1, 0, 4, 2, 3]) { const free = Math.max(0, t[i] - Math.max(opts.base[i], need[i])); const a = Math.min(free, extra); t[i] -= a; extra -= a; }
+          if (extra > 0) return -1;
+        }
+        return wieldable(w, t, key !== "r1h", T) ? chainEval(D, w, key, li, t, T).dps : -1;
+      };
+      let buff = fixedBuff, rings = fixedRings.slice(), curS = score(buff, rings);
+      if (auto.buff) {
+        for (const id of auto.buffs) {
+          const b = { id, sb: auto.sb, cat: auto.cat, cup: auto.cup }, v = score(b, rings);
+          if (v > curS + 1e-9) { curS = v; buff = b; }
+        }
+      }
+      if (auto.rings) {
+        while (rings.length < auto.slots) {
+          let pick = null, pv = curS;
+          for (const id of auto.pool) {
+            if (rings.includes(id) || (id === "lloyd" && rings.includes("rts")) || (id === "rts" && rings.includes("lloyd"))) continue;
+            const v = score(buff, rings.concat([id]));
+            if (v > pv + 1e-9) { pv = v; pick = id; }
           }
+          if (!pick) break;
+          rings.push(pick); curS = pv;
         }
       }
-      return wieldable(w, st, key !== "r1h", T) ? chainEval(D, w, key, li, st, T).dps : -1;
-    };
-    let curS = score(buff, rings);
-    if (auto.buff) {
-      for (const id of auto.buffs) {
-        const b = { id, sb: auto.sb, cat: auto.cat }, v = score(b, rings);
-        if (v > curS + 1e-9) { curS = v; buff = b; }
-      }
+      const r = bestFor(D, w, opts, withPicks(T0, buff, rings, auto));
+      if (!r || r.dps <= cur.dps + 1e-9) break;
+      r.picks = { buff: buff && buff.id, rings };
+      cur = r;
+      if (opts.mode !== "opt") break;               // fixed stats: one pass is exact
     }
-    if (auto.rings) {
-      while (rings.length < auto.slots) {
-        let pick = null, pv = curS;
-        for (const id of auto.pool) {
-          if (rings.includes(id) || (id === "lloyd" && rings.includes("rts")) || (id === "rts" && rings.includes("lloyd"))) continue;
-          const v = score(buff, rings.concat([id]));
-          if (v > pv + 1e-9) { pv = v; pick = id; }
-        }
-        if (!pick) break;
-        rings.push(pick); curS = pv;
-      }
-    }
-    const cur = bestFor(D, w, opts, withPicks(T0, buff, rings, auto));
-    if (!cur) return start;
-    cur.picks = { buff: buff && buff.id, rings };
     return cur;
   }
   // Re-rank with auto picks: every weapon is ranked normally first, then the top `n` get their own picks

@@ -189,11 +189,14 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   Unk26). It reproduces every value checked: Pyromancy Flame +10 116 / 207 / 221 at 10 / 40 / 60 Int and Faith (116 from an
   in-game screenshot), Court Sorcerer's Staff +10 150 / 202 / 220 / 238 at 35 / 50 / 55 / 60 Int, Saint's Talisman +10 187 /
   242 at 45 / 60 Faith. The calculator works out the spell buff from your stats, either for a chosen catalyst or for the
-  strongest one of the spell's school your stats can use (fully upgraded); its requirements count, and the optimizer can
+  strongest one of the spell's school your stats can use, at the catalyst upgrade you set (Pyromancy Flame +0
+  gives 111 at 10/10, as the wiki lists); its requirements count, and the optimizer can
   put points into Int / Faith when the spell buff makes that worth it. Archdeacon's Great Staff counts as 100 (wiki).
 - **Auto-pick** (calculator options). "Best for each weapon" in the buff list tries every resin and spell (spells take
   their spell buff from the catalyst as above and need their Int / Faith, which the optimizer then spends points on). "Pick the best rings"
-  adds rings one at a time, each time the one that adds the most damage, until the free slots are full (four, minus the
+  adds rings one at a time, each time the one that adds the most damage, until the free slots are full; buff and rings
+  are picked at the current stat spread, the spread is re-optimized with them, and this repeats while it helps (checked
+  against all 495 four-ring combinations for Sellsword Twinblades and Broadsword at SL125: same best set) (four, minus the
   Chloranthy Ring; Lloyd's and Red Tearstone are never combined). Every weapon is ranked first, then the top 60 get
   their own picks and the list is re-ranked.
 - **Hollow infusion** gets +Luck from its resident effect (+2 at +0 up to +5 at +10), but only while the character is
