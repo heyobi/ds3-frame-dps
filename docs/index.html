@@ -188,6 +188,11 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       </div>
 
       <div class="group">
+        <div class="label">Rank by</div>
+        <div class="seg" id="by" style="margin-bottom:12px">
+          <button data-by="dps" class="on">DPS</button>
+          <button data-by="hit">Damage per attack</button>
+        </div>
         <div class="label">Attacks</div>
         <div class="checks">
           <label><input type="checkbox" id="m_r1h" checked>1H R1</label>
@@ -218,7 +223,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <table>
           <thead><tr>
             <th>#</th><th>Weapon</th><th class="hide-s">Attack</th><th class="n hide-s hide-m">s / attack</th>
-            <th class="n hide-s hide-m">AR</th><th>DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
+            <th class="n hide-s hide-m">AR</th><th id="metricTh">DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
@@ -240,12 +245,13 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611020615"></script>
+<script src="calc.js?v=202611020600hit"></script>
 <script>
 (function(){
   "use strict";
   const $ = (id) => document.getElementById(id);
-  let pendingZone = "";
+  let pendingZone = "", by = "dps";
+  const ML = () => by === "hit" ? "dmg" : "DPS";
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
   const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf"];
@@ -270,6 +276,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   function readHash() {
     const h = new URLSearchParams(location.hash.slice(1));
     if (h.get("mode")) mode = h.get("mode") === "fixed" ? "fixed" : "opt";
+    by = h.get("by") === "hit" ? "hit" : "dps";
     for (const f of fields) if (h.has(f)) $(f).value = h.get(f);
     for (const b of boxes) if (h.has(b)) $(b).checked = h.get(b) === "1";
     if (h.has("boss") && ![...$("boss").options].some(o => o.value === h.get("boss"))) $("boss").value = "";
@@ -278,6 +285,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   function writeHash() {
     const h = new URLSearchParams();
     h.set("mode", mode);
+    if (by === "hit") h.set("by", "hit");
     const keep = mode === "opt" ? ["sl","vig","att","end","vit"] : ["str","dex","int","fth","lck"];
     for (const f of keep.concat(["up","def"])) h.set(f, $(f).value);
     if ($("boss").value) { h.set("boss", $("boss").value); if ($("ng").value !== "0") h.set("ng", $("ng").value); if ($("zone").value) h.set("zone", $("zone").value); }
@@ -311,6 +319,9 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const zr = (zs.find(z => z[0] === $("zone").value) || [0, 1])[1];
     const ng = num("ng", 0, 7);
     const def = boss ? DS3.bossTarget(boss, $("stam").checked, ng, zr, D.cc) : DS3.flatTarget(defN, $("stam").checked);
+    def.metric = by;
+    document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
+    $("metricTh").textContent = by === "hit" ? "Damage / attack" : "DPS";
     $("defBox").style.visibility = boss ? "hidden" : "visible";
     $("bossNote").innerHTML = boss ? bossInfo(boss, def, ng, zr) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
     const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? ", stamina limited" : "");
@@ -429,9 +440,13 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       const gap = best ? (pp.dps / best.dps - 1) * 100 : 0;
       return `<tr class="${rowsAt.get(p) ? "cur" : ""}"><td>${xLabel(d, p)}</td><td class="n">${pp.stats.join("/")}</td><td class="n">${Math.round(pp.dps)}</td><td class="n">${gap > -0.05 ? "best" : gap.toFixed(1) + "%"}</td></tr>`;
     }).join("");
-    const capNote = lastPts < d.pts[d.pts.length - 1].p ? `<p>After ${xLabel(d, lastPts)} no stat raises this weapon's DPS any more; spend the rest on Vigor, Endurance and so on.</p>` : "";
+    const capNote = lastPts < d.pts[d.pts.length - 1].p ? `<p>After ${xLabel(d, lastPts)} no stat raises this weapon's ${by === "hit" ? "damage" : "DPS"} any more; spend the rest on Vigor, Endurance and so on.</p>` : "";
+    const cur = o.mode === "opt" ? DS3.optimizeMove(D, r.w, move, [10, 10, 10, 10, 10], o.budget, o.up, o.def)
+                                 : DS3.evalMove(D, r.w, move, o.stats, o.up, o.def);
+    const hitsLine = cur ? `<p><b>Damage per attack</b> (each press of the chain, every hit rounded down like the game): ${cur.stepDmg.join(" → ")} · <b>${Math.round(cur.rate)} DPS</b> at ${cur.stats.join("/")}</p>` : "";
     return `${tabs}<div class="det">
       <div>
+        ${hitsLine}
         <h3>Leveling path · ${MOVE_LABEL[move]}</h3>
         <div class="order">${order}</div>
         <div class="legend"><span><i></i>following this path</span><span><i class="o"></i>best spread at that level (respec)</span></div>
@@ -442,7 +457,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       </div>
       <div>
         <h3>Milestones</h3>
-        <table class="ms"><thead><tr><th>${d.opt ? "Level" : "Added"}</th><th class="n">Str/Dex/Int/Fth/Lck</th><th class="n">DPS</th><th class="n">gap</th></tr></thead><tbody>${ms}</tbody></table>
+        <table class="ms"><thead><tr><th>${d.opt ? "Level" : "Added"}</th><th class="n">Str/Dex/Int/Fth/Lck</th><th class="n">${ML()}</th><th class="n">gap</th></tr></thead><tbody>${ms}</tbody></table>
       </div></div>`;
   }
 
@@ -468,7 +483,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       const pt = pl.getPointAtLength(lo);
       hv.setAttribute("x1", X); hv.setAttribute("x2", X); hv.setAttribute("visibility", "visible");
       dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y); dot.setAttribute("visibility", "visible");
-      out.textContent = `${xLabel(d, best.p)}: ${best.path.stats.join("/")} → ${Math.round(best.path.dps)} DPS` + (best.best ? ` (best spread ${Math.round(best.best)})` : "");
+      out.textContent = `${xLabel(d, best.p)}: ${best.path.stats.join("/")} → ${Math.round(best.path.dps)} ${ML()}` + (best.best ? ` (best spread ${Math.round(best.best)})` : "");
     };
     svg.addEventListener("pointermove", move2);
     svg.addEventListener("pointerdown", move2);
@@ -477,9 +492,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
 
   function partsHtml(r) {
     const p = r.parts, bits = [];
+    if (by === "hit") bits.push(`${Math.round(r.rate)} DPS`); else bits.push(`hit ${r.hit}`);
     if (p.bleed > 0.5) bits.push(`bleed ${Math.round(p.bleed)}`);
     if (p.frost > 0.5) bits.push(`frost ${Math.round(p.frost)}`);
-    if (ctx && ctx.opts && ctx.opts.def && ctx.opts.def.hp) bits.push(`kill ${Math.round(ctx.opts.def.hp / r.dps)} s`);
+    if (ctx && ctx.opts && ctx.opts.def && ctx.opts.def.hp) bits.push(`kill ${Math.round(ctx.opts.def.hp / r.rate)} s`);
     return bits.length ? `<small class="parts">${bits.join(" · ")}</small>` : "";
   }
 
@@ -532,6 +548,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone"].forEach(id => $(id).addEventListener("change", compute));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
+  document.querySelectorAll("#by button").forEach(b => b.addEventListener("click", () => { by = b.dataset.by; compute(); }));
   $("more").addEventListener("click", () => { showAll = true; render(); });
   $("tb").addEventListener("click", (ev) => {
     const tab = ev.target.closest("button[data-move]");

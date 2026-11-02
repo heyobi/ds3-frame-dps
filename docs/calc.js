@@ -62,16 +62,21 @@
     const steps = D.moves[w.n][key];
     const A = ar(D, w, li, st, { twoHand: key !== "r1h" });
     let direct = 0, frames = 0, hits = 0, stam = 0;
+    const stepDmg = [];            // damage of each press as the game shows it (every hit rounded down)
     for (const [f, sc, hs] of steps) {
       frames += f; stam += sc;
+      let sd = 0;
       for (const h of hs) {
         hits++;
+        let hd = 0;
         for (let e = 0; e < 5; e++) {
           if (!h[e] || !A[e]) continue;
           const m = T.mul ? T.mul[e === 0 ? h[5] : e + 3] : 1;
-          direct += eff(A[e] * h[e] / 100, T.def[e]) * m * (T.zone || 1);
+          hd += eff(A[e] * h[e] / 100, T.def[e]) * m * (T.zone || 1);
         }
+        direct += hd; sd += Math.floor(hd);
       }
+      stepDmg.push(sd);
     }
     let t = frames / 60;
     const stamUse = stam * (w.scr || 1);
@@ -92,7 +97,9 @@
         direct *= 1 + FROST_AMP * uptime;
       }
     }
-    return { dps: (direct + bleed + frost) / t, ar: A, frames: steps.map(x => x[0]),
+    const rate = (direct + bleed + frost) / t;
+    // T.metric "hit": rank and optimize by the damage of one press (first attack of the chain) instead of DPS
+    return { dps: T.metric === "hit" ? stepDmg[0] : rate, rate, hit: stepDmg[0], stepDmg, ar: A, frames: steps.map(x => x[0]),
              parts: { direct: direct / t, bleed: bleed / t, frost: frost / t }, stamina: stamUse / steps.length, secs: t / steps.length };
   }
 
