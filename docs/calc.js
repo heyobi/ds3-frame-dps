@@ -110,6 +110,20 @@
     if (buff.cat === "best") { let m = 0; for (const c of D.cats) if (ok(c)) m = Math.max(m, catSB(D, c, st, buff.cup)); return m; }
     const c = D.cats[buff.cat]; return c && ok(c) ? catSB(D, c, st, buff.cup) : 0;
   }
+  // Which catalyst gives the spell buff, for the detail panel
+  function spellInfo(D, buff, st) {
+    const b = BUFFS[buff.id];
+    if (!b || !b.pct) return null;
+    if (buff.cat == null || !D.cats) return { sb: Math.floor(buff.sb || 0) };
+    const ok = (c) => c.school[b.sch] && st[0] >= c.req[0] && st[2] >= c.req[1] && st[3] >= c.req[2];
+    const list = buff.cat === "best" ? D.cats : [D.cats[buff.cat]];
+    let best = null;
+    for (const c of list) if (c && ok(c)) { const v = catSB(D, c, st, buff.cup); if (!best || v > best.sb) best = { c, sb: v }; }
+    if (!best) return { sb: 0, none: true };
+    const up = buff.cup == null ? best.c.up : Math.min(best.c.up, best.c.up === 5 ? Math.floor(buff.cup / 2) : buff.cup);
+    return { sb: best.sb, name: best.c.n, up };
+  }
+  function effStats(w, li, st, T) { return hollowSt(w, li, addSt(st, T), T); }
   function buffable(w, li) { const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
   function applyBuff(w, li, A, buff, st, D) {
     const b = buff && BUFFS[buff.id];
@@ -346,8 +360,8 @@
   }
   // Auto-pick: best buff, then rings added one at a time (each time the one that adds most), for one weapon.
   // auto: { buff: bool, buffs: [ids], sb, rings: bool, pool: [ids], slots, crown }
-  function withPicks(T, buff, rings, auto) {
-    const m = ringMods(rings, auto.crown);
+  function withPicks(T, buff, rings, auto, crown) {
+    const m = ringMods(rings, crown == null ? auto.crown : crown);
     return Object.assign({}, T, { buff, emul: m.dmg, armul: m.ar, sbon: m.st, status: m.status });
   }
   function autoPick(D, w, opts, auto) {
@@ -355,13 +369,14 @@
     const fixedBuff = T0.buff || null, fixedRings = (auto.fixed || []).slice();
     let cur = bestFor(D, w, opts, withPicks(T0, fixedBuff, fixedRings, auto));
     if (!cur) return null;
-    cur.picks = { buff: fixedBuff && fixedBuff.id, rings: fixedRings };
+    let crown = !!auto.crown;
+    cur.picks = { buff: fixedBuff && fixedBuff.id, rings: fixedRings, crown };
     // pick buff and rings at the current stat spread, re-optimize the spread with them, and repeat while it helps:
     // a stat ring or a catalyst can free points for another stat, so picks and spread are found together
     for (let pass = 0; pass < 3; pass++) {
       const key = cur.move, li = levelIndex(w, opts.up), st = cur.stats.slice();
-      const score = (b, rg) => {
-        const T = withPicks(T0, b, rg, auto);
+      const score = (b, rg, cr) => {
+        const T = withPicks(T0, b, rg, auto, cr == null ? crown : cr);
         const t = st.slice();
         const sp = b && BUFFS[b.id] && BUFFS[b.id].req;
         if (opts.mode === "opt") {
@@ -393,9 +408,10 @@
           rings.push(pick); curS = pv;
         }
       }
-      const r = bestFor(D, w, opts, withPicks(T0, buff, rings, auto));
+      if (auto.crownAuto) { const on = score(buff, rings, true), off = score(buff, rings, false); crown = on > off + 1e-9; }
+      const r = bestFor(D, w, opts, withPicks(T0, buff, rings, auto, crown));
       if (!r || r.dps <= cur.dps + 1e-9) break;
-      r.picks = { buff: buff && buff.id, rings };
+      r.picks = { buff: buff && buff.id, rings, crown };
       cur = r;
       if (opts.mode !== "opt") break;               // fixed stats: one pass is exact
     }
@@ -453,7 +469,7 @@
     return { cost: points[0].pts, points, chunks };
   }
 
-  const api = { eff, ar, rank, rankAuto, spellBuff, catSB, autoPick, BUFFS, RINGS, ringMods, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
+  const api = { eff, ar, rank, rankAuto, spellBuff, catSB, spellInfo, effStats, levelIndexOf: (w, up) => levelIndex(w, up), autoPick, BUFFS, RINGS, ringMods, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.DS3 = api;
 })(this);

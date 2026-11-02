@@ -214,7 +214,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         </div>
         <div class="note" id="sbNote" hidden>Spell buff comes from the catalyst, its upgrade and your Int / Faith, as the equipment screen shows it; a catalyst whose requirements you don't meet adds nothing. "Best I can use" takes the strongest one of the spell's school that your stats allow. Catalysts that stop at +5 use half the upgrade shown, like weapons.</div>
         <div class="row2" style="margin-top:8px">
-          <label class="field"><span>Head</span><select id="crown"><option value="">Other</option><option value="1">Crown of Dusk</option></select></label>
+          <label class="field"><span>Head</span><select id="crown"><option value="">Other</option><option value="1">Crown of Dusk</option><option value="auto">Best for each weapon</option></select></label>
           <div class="checks" style="align-self:end"><label title="Hollow-infused weapons add Luck (+2 at +0 up to +5 at +10) while you are hollow with 15 or more hollowing"><input type="checkbox" id="hollow">Hollow (15+ hollowing)</label></div>
         </div>
         <div class="checks" style="margin-top:8px"><label title="For each weapon, rings are added one at a time, each time the one that adds the most damage, until the slots are full"><input type="checkbox" id="autoRings">Pick the best rings for each weapon</label></div>
@@ -295,7 +295,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021930"></script>
+<script src="calc.js?v=202611021945"></script>
 <script>
 (function(){
   "use strict";
@@ -402,17 +402,18 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const cv = $("cat").value, catSel = custom ? undefined : cv === "best" ? "best" : +cv, cup = num("cup", 0, 10);
     def.buff = binfo ? { id: bid, sb: num("sb", 0, 600), cat: catSel, cup } : null;
     def.hollow = $("hollow").checked;
-    const rids = ringIds(), rm = DS3.ringMods(autoR ? [] : rids, !!$("crown").value);
+    const crownAuto = $("crown").value === "auto", crownOn = $("crown").value === "1";
+    const rids = ringIds(), rm = DS3.ringMods(autoR ? [] : rids, crownOn);
     def.emul = rm.dmg; def.armul = rm.ar; def.sbon = rm.st; def.status = rm.status;
     const chl = $("stam").checked && $("ring").value !== "0";
-    const auto = (autoBuff || autoR) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), cat: catSel, cup, rings: autoR,
-      pool: rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts"), slots: 4 - (chl ? 1 : 0), crown: !!$("crown").value } : null;
+    const auto = (autoBuff || autoR || crownAuto) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), cat: catSel, cup, rings: autoR,
+      pool: rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts"), slots: 4 - (chl ? 1 : 0), crown: crownOn, crownAuto } : null;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
     $("metricTh").textContent = by === "hit" ? "Damage / attack" : "Damage / second";
     $("defBox").style.visibility = boss ? "hidden" : "visible";
     $("bossNote").innerHTML = boss ? bossInfo(boss, def, ng, zr) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
-    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? `, stamina limited (${regen}/s)` : "") + (autoBuff ? ", best buff" : binfo ? `, ${$("buff").selectedOptions[0].textContent.split(" (")[0]}` : "") + (autoR ? ", best rings" : rids.length ? `, ${rids.length} ring${rids.length > 1 ? "s" : ""}` : "") + (def.hollow ? ", hollow" : "") + ($("crown").value ? ", Crown of Dusk" : "");
+    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? `, stamina limited (${regen}/s)` : "") + (autoBuff ? ", best buff" : binfo ? `, ${$("buff").selectedOptions[0].textContent.split(" (")[0]}` : "") + (autoR ? ", best rings" : rids.length ? `, ${rids.length} ring${rids.length > 1 ? "s" : ""}` : "") + (def.hollow ? ", hollow" : "") + (crownOn ? ", Crown of Dusk" : crownAuto ? ", best head" : "");
     const b = budgetInfo();
     $("budget").innerHTML = mode === "opt" ? `Offensive points to place: <b>${b.budget}</b>` : "";
     $("budget").classList.toggle("bad", b.budget < 0);
@@ -440,8 +441,34 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     rts: "Red Tearstone", flynn: "Flynn's", pontiff: "Pontiff's Right Eye", knight: "Knight's", hunter: "Hunter's", milk: "Carthus Milkring", scholar: "Scholar", priestess: "Priestess" };
   const BUFF_NAME = { charcoal: "Charcoal Pine Resin", gold: "Gold Pine Resin", pale: "Pale Pine Resin", human: "Human Pine Resin", mw: "Magic Weapon",
     gmw: "Great Magic Weapon", cmw: "Crystal Magic Weapon", lb: "Lightning Blade", dmb: "Darkmoon Blade", db: "Dark Blade", cfa: "Carthus Flame Arc", blessed: "Blessed Weapon" };
-  const pickText = (p) => [p.buff ? BUFF_NAME[p.buff] : null, p.rings.length ? p.rings.map(x => RING_NAME[x]).join(", ") : null].filter(Boolean).join(" · ");
+  const pickText = (p) => [p.buff ? BUFF_NAME[p.buff] : null, p.rings.length ? p.rings.map(x => RING_NAME[x]).join(", ") : null, p.crown ? "Crown of Dusk" : null].filter(Boolean).join(" · ");
   const SN = ["Str", "Dex", "Int", "Fth", "Lck"];
+  // full setup of this result: buff (with the catalyst it needs), rings, head, and the stats the game sees
+  function setupText(r, cur, T, o) {
+    const parts = [];
+    const li = DS3.levelIndexOf(r.w, o.up);
+    const est = DS3.effStats(r.w, li, cur.stats, T);
+    const b = T.buff && DS3.BUFFS[T.buff.id];
+    if (b) {
+      const bn = BUFF_NAME[T.buff.id];
+      if (!DS3.buffable(r.w, li)) parts.push(`${bn}: this infusion can't be buffed`);
+      else if (b.pct) {
+        const si = DS3.spellInfo(D, T.buff, est);
+        const reqTxt = b.req ? ` (needs ${[b.req[0] ? b.req[0] + " Int" : "", b.req[1] ? b.req[1] + " Fth" : ""].filter(Boolean).join(", ")})` : "";
+        parts.push(si && si.name ? `<b>${bn}</b>${reqTxt} cast with <b>${escH(si.name)} +${si.up}</b>, spell buff ${si.sb} → +${Math.round(b.pct / 100 * si.sb)} ${["", "magic", "fire", "lightning", "dark"][b.e]}`
+                   : si && si.none ? `<b>${bn}</b>${reqTxt}: no catalyst usable with these stats, adds nothing` : `<b>${bn}</b>${reqTxt}, spell buff ${si ? si.sb : 0}`);
+      } else if (b.phys) parts.push(`<b>${bn}</b>${b.req ? ` (needs ${b.req[1]} Fth)` : ""}`);
+      else parts.push(`<b>${bn}</b> → +${b.add}${/Paired/.test(r.w.c) ? ` (×0.826 on paired weapons)` : ""} ${["", "magic", "fire", "lightning", "dark"][b.e]}`);
+    }
+    const rings = r.picks ? r.picks.rings : (ctx && !$("autoRings").checked ? ringIds() : []);
+    if (rings.length) parts.push(`<b>Rings</b> ${rings.map(x => RING_NAME[x]).join(", ")}`);
+    const crown = r.picks ? r.picks.crown : $("crown").value === "1";
+    if (crown) parts.push("<b>Crown of Dusk</b>");
+    if (T.hollow && r.w.i === "Hollow") parts.push("<b>Hollow</b> (15+ hollowing)");
+    const bonus = est.some((v, i) => v !== cur.stats[i]);
+    if (!parts.length && !bonus) return "";
+    return `<p><b>Setup</b>: ${parts.join(" · ")}${bonus ? `${parts.length ? " · " : ""}stats with rings / Hollow: ${est.join("/")} (points placed: ${cur.stats.join("/")})` : ""}</p>`;
+  }
   const escH = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
   // Group the path's steps into readable phases ("Dex 40", "Int 33 + Fth 33")
@@ -539,9 +566,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const rv = D.reach && D.reach[r.w.n];
     const reachLine = rv ? `<p><b>Reach</b> (hand to the far end of the hitbox, longest swing; "with step" adds how far the character has moved forward when the hit starts): ${Object.keys(MOVE_LABEL).filter(m => rv[m]).map(m => `${MOVE_LABEL[m]} ${rv[m][1].toFixed(2)} m` + (rv[m].length > 3 ? ` (${rv[m][3].toFixed(2)} m with step)` : "")).join(" · ")}</p>` : "";
     const hitsLine = cur ? `<p><b>Damage per attack</b> (each press of the chain, every hit rounded down like the game): ${cur.stepDmg.join(" → ")} · <b>${Math.round(cur.rate)} damage per second</b> at ${cur.stats.join("/")}</p>` : "";
+    const setupLine = cur ? setupText(r, cur, r.T || o.def, o) : "";
     return `${tabs}<div class="det">
       <div>
-        ${hitsLine}${reachLine}
+        ${setupLine}${hitsLine}${reachLine}
         <h3>Leveling path · ${MOVE_LABEL[move]}</h3>
         <div class="order">${order}</div>
         <div class="legend"><span><i></i>following this path</span><span><i class="o"></i>best spread at that level (respec)</span></div>

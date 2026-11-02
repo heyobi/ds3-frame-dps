@@ -199,6 +199,11 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   against all 495 four-ring combinations for Sellsword Twinblades and Broadsword at SL125: same best set) (four, minus the
   Chloranthy Ring; Lloyd's and Red Tearstone are never combined). Every weapon is ranked first, then the top 60 get
   their own picks and the list is re-ranked.
+- **Crown of Dusk** has two effects in SpEffectParam: x1.05 magic damage (counted, also on magic weapon buffs; matches
+  the measurements) and x1.04 sorcery attack on the catalyst, the same kind of effect as Witch's Ring, which did not change
+  spell buff in game, so it is not counted. The head option can also be left to the calculator per weapon. Clicking a
+  weapon shows the full setup: buff, the catalyst and upgrade it is cast with and the spell buff that gives, rings, head
+  and the stats after ring / Hollow bonuses.
 - **Hollow infusion** gets +Luck from its resident effect (+2 at +0 up to +5 at +10), but only while the character is
   hollow with 15+ hollowing; the calculator has this as an option.
 
