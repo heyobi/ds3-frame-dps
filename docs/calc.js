@@ -66,6 +66,28 @@
     db: { e: 4, pct: 85 }, cfa: { e: 2, pct: 80 }, blessed: { phys: 1.075 },
   };
   const PAIRED_BUFF = 0.826, PAIRED_BLESSED = 0.8;
+  // Rings (SpEffectParam via EquipParamAccessory). ar: AtkPowerRate (on attack rating, before defense);
+  // dmg: DamageRate2 (on damage, after defense); st: stat bonus [str,dex,int,fth,lck] (counts for requirements).
+  const RINGS = {
+    clutchM: { dmg: [1, 1.15, 1, 1, 1] }, clutchF: { dmg: [1, 1, 1.15, 1, 1] }, clutchL: { dmg: [1, 1, 1, 1.15, 1] }, clutchD: { dmg: [1, 1, 1, 1, 1.15] },
+    lloyd: { ar: [1.1, 1.1, 1.1, 1.1, 1.1] },                 // at full HP
+    rts: { dmg: [1.2, 1.2, 1.2, 1.2, 1.2] },                  // HP at or below 20%
+    flynn: { ar: [1.15, 1, 1, 1, 1], status: 1.15 },          // max value (low equip load); also bleed / poison buildup x1.15
+    pontiff: { ar: [1.1, 1.1, 1.1, 1.1, 1.1] },               // top stack while attacking without a break (1.03 -> 1.05 -> 1.10)
+    knight: { st: [5, 0, 0, 0, 0] }, hunter: { st: [0, 5, 0, 0, 0] }, scholar: { st: [0, 0, 5, 0, 0] }, priestess: { st: [0, 0, 0, 5, 0] },
+    milk: { st: [0, 3, 0, 0, 0] },
+  };
+  function ringMods(ids, crown) {
+    const m = { ar: [1, 1, 1, 1, 1], dmg: [1, 1, 1, 1, 1], st: [0, 0, 0, 0, 0], status: 1 };
+    for (const id of ids || []) {
+      const r = RINGS[id]; if (!r) continue;
+      for (let i = 0; i < 5; i++) { if (r.ar) m.ar[i] *= r.ar[i]; if (r.dmg) m.dmg[i] *= r.dmg[i]; if (r.st) m.st[i] += r.st[i]; }
+      if (r.status) m.status *= r.status;
+    }
+    if (crown) m.dmg[1] *= 1.05;                              // Crown of Dusk
+    return m;
+  }
+  const addSt = (st, T) => T && T.sbon ? st.map((v, i) => Math.min(99, v + T.sbon[i])) : st;
   function buffable(w, li) { const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
   function applyBuff(w, li, A, buff) {
     const b = buff && BUFFS[buff.id];
@@ -82,7 +104,8 @@
   // One full 3-step chain against target T. Returns dps and its parts.
   function chainEval(D, w, key, li, st, T) {
     const steps = D.moves[w.n][key];
-    const A = applyBuff(w, li, ar(D, w, li, st, { twoHand: key !== "r1h" }), T.buff);
+    const stE = addSt(st, T);
+    const A = applyBuff(w, li, ar(D, w, li, stE, { twoHand: key !== "r1h" }), T.buff).map((v, i) => v * (T.armul ? T.armul[i] : 1));
     let direct = 0, frames = 0, hits = 0, stam = 0;
     const stepDmg = [];            // damage of each press as the game shows it (every hit rounded down)
     for (const [f, sc, hs] of steps) {
@@ -107,8 +130,8 @@
     if (T.hp) {
       const L = w.lv[li];
       if (L[10] > 0 && T.bleed && w.pb) {
-        const luck = 1 + (w.lc || 0) / 100 * L[12] * (D.sats[w.sb] ? D.sats[w.sb][Math.min(99, st[4])] / 100 : 0);
-        const procs = hits * L[10] * luck / T.bleed;
+        const luck = 1 + (w.lc || 0) / 100 * L[12] * (D.sats[w.sb] ? D.sats[w.sb][Math.min(99, stE[4])] / 100 : 0);
+        const procs = hits * L[10] * luck * (T.status || 1) / T.bleed;
         bleed = procs * (w.pb[0] / 100 * T.hp + w.pb[1]) * T.bloodRate / 100;
       }
       if (L[11] > 0 && T.frost && w.pf) {
@@ -125,9 +148,14 @@
              parts: { direct: direct / t, bleed: bleed / t, frost: frost / t }, stamina: stamUse / steps.length, secs: t / steps.length };
   }
 
-  function wieldable(w, st, twoHand) {
+  function wieldable(w, st, twoHand, T) {
+    st = addSt(st, T);
     return st[0] * (twoHand ? 1.5 : 1) >= w.req[0] && st[1] >= w.req[1] && st[2] >= w.req[2] && st[3] >= w.req[3];
   }
+  const needOf = (w, twoHand, T) => {
+    const b = (T && T.sbon) || [0, 0, 0, 0, 0];
+    return [twoHand ? Math.ceil(w.req[0] / 1.5) - b[0] : w.req[0] - b[0], w.req[1] - b[1], w.req[2] - b[2], w.req[3] - b[3], 0];
+  };
 
   // Which stats can change this weapon's damage at this level
   function relevant(w, li, T) {
@@ -144,7 +172,7 @@
   // Fixed stats: DPS of one move
   function evalMove(D, w, key, st, up, T) {
     const mvset = D.moves[w.n][key];
-    if (!mvset || !wieldable(w, st, key !== "r1h")) return null;
+    if (!mvset || !wieldable(w, st, key !== "r1h", T)) return null;
     return Object.assign({ move: key, stats: st.slice() }, chainEval(D, w, key, levelIndex(w, up), st, T));
   }
 
@@ -155,7 +183,7 @@
     const twoHand = key !== "r1h";
     const li = levelIndex(w, up);
     const st = base.slice();
-    const need = [twoHand ? Math.ceil(w.req[0] / 1.5) : w.req[0], w.req[1], w.req[2], w.req[3], 0];
+    const need = needOf(w, twoHand, T);
     let cost = 0;
     for (let i = 0; i < 5; i++) if (st[i] < need[i]) { cost += need[i] - st[i]; st[i] = need[i]; }
     if (cost > budget) return null;
@@ -223,7 +251,7 @@
     const twoHand = key !== "r1h";
     const li = levelIndex(w, up);
     const st = base.slice();
-    const need = [twoHand ? Math.ceil(w.req[0] / 1.5) : w.req[0], w.req[1], w.req[2], w.req[3], 0];
+    const need = needOf(w, twoHand, T);
     let pts = 0;
     const chunks = [];
     for (let i = 0; i < 5; i++) if (st[i] < need[i]) { pts += need[i] - st[i]; chunks.push({ stat: i, from: st[i], to: need[i], req: true }); st[i] = need[i]; }
@@ -255,7 +283,7 @@
     return { cost: points[0].pts, points, chunks };
   }
 
-  const api = { eff, ar, rank, BUFFS, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
+  const api = { eff, ar, rank, BUFFS, RINGS, ringMods, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.DS3 = api;
 })(this);

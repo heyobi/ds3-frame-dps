@@ -33,6 +33,7 @@ header p{margin:0;color:var(--ink2);max-width:760px}
 @media (max-width:860px){.layout{grid-template-columns:1fr}}
 .layout>*{min-width:0}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.ringchecks{flex-wrap:wrap}.ringchecks label{font-size:12.5px}.ringchecks label.off{opacity:.45}
 .controls{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 @media (max-width:860px){.controls{position:static;max-height:none;overflow:visible}}
 .group{margin-bottom:16px}
@@ -209,11 +210,25 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         </div>
         <div class="note" id="sbNote" hidden>Spell buff as shown in the equipment screen. Pyromancy Flame +10: 116 at 10 Int / 10 Faith, 207 at 40/40, 242 at 99/99.</div>
         <div class="row2" style="margin-top:8px">
-          <label class="field"><span>Clutch ring</span><select id="clutch"><option value="">None</option>
-            <option value="1">Magic Clutch Ring</option><option value="2">Fire Clutch Ring</option><option value="3">Lightning Clutch Ring</option><option value="4">Dark Clutch Ring</option></select></label>
           <label class="field"><span>Head</span><select id="crown"><option value="">Other</option><option value="1">Crown of Dusk</option></select></label>
         </div>
-        <div class="note" id="buffNote">Clutch rings: ×1.15 damage of their element. Crown of Dusk: ×1.05 magic damage. Buffs only go on weapons with no elemental damage; paired weapons get less from resins and Blessed Weapon (fitted to in-game measurements), spell buffs are not reduced. Great Swamp Ring and Witch's Ring do not raise spell buff or buff damage (tested in game).</div>
+        <div class="field" style="margin-top:8px"><span>Rings (up to 4)</span></div>
+        <div class="checks ringchecks" id="ringBox">
+          <label title="x1.15 magic damage"><input type="checkbox" data-ring="clutchM">Magic Clutch</label>
+          <label title="x1.15 fire damage"><input type="checkbox" data-ring="clutchF">Fire Clutch</label>
+          <label title="x1.15 lightning damage"><input type="checkbox" data-ring="clutchL">Lightning Clutch</label>
+          <label title="x1.15 dark damage"><input type="checkbox" data-ring="clutchD">Dark Clutch</label>
+          <label title="attack x1.10 while HP is full"><input type="checkbox" data-ring="lloyd">Lloyd's Sword (full HP)</label>
+          <label title="damage x1.20 while HP is at or below 20%"><input type="checkbox" data-ring="rts">Red Tearstone (HP ≤ 20%)</label>
+          <label title="physical attack up to x1.15 at low equip load; bleed and poison buildup x1.15"><input type="checkbox" data-ring="flynn">Flynn's (light load)</label>
+          <label title="attack x1.03 → x1.05 → x1.10 while you keep hitting; the top step is used"><input type="checkbox" data-ring="pontiff">Pontiff's Right Eye</label>
+          <label title="+5 Strength"><input type="checkbox" data-ring="knight">Knight's +5 Str</label>
+          <label title="+5 Dexterity"><input type="checkbox" data-ring="hunter">Hunter's +5 Dex</label>
+          <label title="+3 Dexterity"><input type="checkbox" data-ring="milk">Carthus Milkring +3 Dex</label>
+          <label title="+5 Intelligence"><input type="checkbox" data-ring="scholar">Scholar +5 Int</label>
+          <label title="+5 Faith"><input type="checkbox" data-ring="priestess">Priestess +5 Fth</label>
+        </div>
+        <div class="note" id="buffNote">Values from the game files. Clutch rings ×1.15 damage of their element, Crown of Dusk ×1.05 magic. Lloyd's, Pontiff's and Flynn's raise attack, Red Tearstone and Clutch rings raise damage. Stat rings count for requirements and are added on top of the spread shown. Buffs only go on weapons with no elemental damage; paired weapons get less from resins and Blessed Weapon (fitted to in-game measurements), spell buffs are not reduced. Great Swamp Ring and Witch's Ring do not raise spell buff or buff damage (tested in game).</div>
       </div>
 
       <div class="group">
@@ -274,7 +289,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021430b"></script>
+<script src="calc.js?v=202611021450"></script>
 <script>
 (function(){
   "use strict";
@@ -283,7 +298,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   const ML = () => by === "hit" ? "dmg" : "DPS";
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
-  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","clutch","crown"];
+  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown"];
   const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
   for (let i = 0; i <= 7; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i ? "NG+" + i : "NG"; $("ng").appendChild(o); }
@@ -310,7 +325,12 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     for (const b of boxes) if (h.has(b)) $(b).checked = h.get(b) === "1";
     if (h.has("boss") && ![...$("boss").options].some(o => o.value === h.get("boss"))) $("boss").value = "";
     pendingZone = h.get("zone") || "";
+    const rg = (h.get("rg") || "").split(",").concat(h.get("clutch") ? [["", "clutchM", "clutchF", "clutchL", "clutchD"][+h.get("clutch")]] : []);
+    document.querySelectorAll("#ringBox input").forEach(x => x.checked = rg.includes(x.dataset.ring));
+    ringLimit();
   }
+  function ringIds() { return [...document.querySelectorAll("#ringBox input:checked")].map(x => x.dataset.ring); }
+  function ringLimit() { const full = ringIds().length >= 4; document.querySelectorAll("#ringBox input").forEach(x => { x.disabled = full && !x.checked; x.parentElement.classList.toggle("off", x.disabled); }); }
   function writeHash() {
     const h = new URLSearchParams();
     h.set("mode", mode);
@@ -319,7 +339,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     for (const f of keep.concat(["up","def"])) h.set(f, $(f).value);
     if ($("boss").value) { h.set("boss", $("boss").value); if ($("ng").value !== "0") h.set("ng", $("ng").value); if ($("zone").value) h.set("zone", $("zone").value); }
     if ($("stam").checked) { h.set("stam", "1"); if ($("ring").value !== "0") h.set("ring", $("ring").value); if ($("blos").value !== "0") h.set("blos", $("blos").value); }
-    for (const f of ["q","cls","inf","buff","clutch","crown"]) if ($(f).value) h.set(f, $(f).value);
+    for (const f of ["q","cls","inf","buff","crown"]) if ($(f).value) h.set(f, $(f).value);
+    const rg = ringIds(); if (rg.length) h.set("rg", rg.join(","));
     if (DS3.BUFFS[$("buff").value] && DS3.BUFFS[$("buff").value].pct) h.set("sb", $("sb").value);
     for (const b of boxes) if (b !== "stam" && !$(b).checked) h.set(b, "0");
     history.replaceState(null, "", "#" + h.toString());
@@ -356,16 +377,14 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const bid = $("buff").value, binfo = DS3.BUFFS[bid];
     $("sbBox").hidden = $("sbNote").hidden = !(binfo && binfo.pct);
     def.buff = binfo ? { id: bid, sb: num("sb", 0, 600) } : null;
-    const em = [1, 1, 1, 1, 1], cl = num("clutch", 0, 4);
-    if (cl) em[cl] *= 1.15;
-    if ($("crown").value) em[1] *= 1.05;
-    def.emul = em;
+    const rids = ringIds(), rm = DS3.ringMods(rids, !!$("crown").value);
+    def.emul = rm.dmg; def.armul = rm.ar; def.sbon = rm.st; def.status = rm.status;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
     $("metricTh").textContent = by === "hit" ? "Damage / attack" : "Damage / second";
     $("defBox").style.visibility = boss ? "hidden" : "visible";
     $("bossNote").innerHTML = boss ? bossInfo(boss, def, ng, zr) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
-    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? `, stamina limited (${regen}/s)` : "") + (binfo ? `, ${$("buff").selectedOptions[0].textContent.split(" (")[0]}` : "") + (cl ? `, ${$("clutch").selectedOptions[0].textContent}` : "") + ($("crown").value ? ", Crown of Dusk" : "");
+    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? `, stamina limited (${regen}/s)` : "") + (binfo ? `, ${$("buff").selectedOptions[0].textContent.split(" (")[0]}` : "") + (rids.length ? `, ${rids.length} ring${rids.length > 1 ? "s" : ""}` : "") + ($("crown").value ? ", Crown of Dusk" : "");
     const b = budgetInfo();
     $("budget").innerHTML = mode === "opt" ? `Offensive points to place: <b>${b.budget}</b>` : "";
     $("budget").classList.toggle("bad", b.budget < 0);
@@ -595,7 +614,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
 
   const schedule = () => { clearTimeout(timer); timer = setTimeout(compute, 250); };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def","sb"].forEach(id => $(id).addEventListener("input", schedule));
-  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","clutch","crown"].forEach(id => $(id).addEventListener("change", compute));
+  document.querySelectorAll("#ringBox input").forEach(x => x.addEventListener("change", () => { ringLimit(); compute(); }));
+  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown"].forEach(id => $(id).addEventListener("change", compute));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
   document.querySelectorAll("#by button").forEach(b => b.addEventListener("click", () => { by = b.dataset.by; compute(); }));

@@ -178,6 +178,12 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   of his boss hits. Where the game stores the resin reduction was not found. Dagger light attacks show no sign of a
   reduction in the attack params and use the full value. Great Swamp Ring and Witch's Ring (x1.12 / x1.20
   catalyst attack in the regulation) change neither the catalyst's spell buff nor the buff's damage (checked in game).
+- **Rings** (up to four at once). Lloyd's Sword Ring attack x1.10 at full HP, Pontiff's Right Eye attack x1.03 / 1.05 /
+  1.10 while hitting without a break (top step used), Flynn's Ring physical attack x1.15 (its maximum, at low equip load)
+  and bleed / poison buildup x1.15, Red Tearstone Ring damage x1.20 at or below 20% HP, Clutch rings x1.15 damage of
+  their element. Attack-rate rings act on attack rating before defense, damage-rate rings on the damage after it.
+  Knight's / Hunter's / Scholar / Priestess Ring +5 Str / Dex / Int / Fth and Carthus Milkring +3 Dex add to the stats,
+  count for requirements, and come on top of the spread shown.
 
 Best weapon per boss at SL125 (Vig 27, End 20, Vit 15), +10, no stamina limit, kill time = HP / DPS with nonstop
 attacking:
