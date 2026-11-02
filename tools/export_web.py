@@ -15,6 +15,7 @@ ap.add_argument("--weapons", required=True)
 ap.add_argument("--frames", default="data/ds3_frames_full.txt")
 ap.add_argument("--regulation", default="data/regulation_extract.json")
 ap.add_argument("--readme", default="README.md")
+ap.add_argument("--reach", default="data/ds3_reach.json")
 ap.add_argument("--out", default="docs/data.json")
 args = ap.parse_args()
 RAW = args.weapons
@@ -78,6 +79,8 @@ for i, r10 in levels[10].items():
 md = open(args.readme).read()
 links = dict(re.findall(r"\[([^\]]+)\]\((https://darksouls3\.wiki\.fextralife\.com/[^)]+)\)", md))
 used = sorted({s for w in weapons for s in w["sat"]} | {w["sb"] for w in weapons})
-out = dict(sats={k: sats[k] for k in used}, moves=moves, weapons=weapons, links=links, bosses=REG["bosses"], cc=REG["cc"])
+reach = json.load(open(args.reach)) if os.path.exists(args.reach) else {}   # tools/ds3_reach.py: [first swing, longest] in m
+out = dict(sats={k: sats[k] for k in used}, moves=moves, weapons=weapons, links=links, bosses=REG["bosses"], cc=REG["cc"],
+           reach={k: v for k, v in reach.items() if k in moves})
 json.dump(out, open(args.out, "w"), separators=(",", ":"))
 print(f"{len(weapons)} weapon/infusion rows, {len(moves)} movesets -> {args.out}")

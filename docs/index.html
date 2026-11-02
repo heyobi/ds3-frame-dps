@@ -223,7 +223,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <table>
           <thead><tr>
             <th>#</th><th>Weapon</th><th class="hide-s">Attack</th><th class="n hide-s hide-m">s / attack</th>
-            <th class="n hide-s hide-m">AR</th><th id="metricTh">DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
+            <th class="n hide-s hide-m">AR</th><th class="n hide-s" title="Weapon reach: hand to the far end of the hitbox, in metres (the step forward is not included)">Reach</th><th id="metricTh">DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
@@ -235,7 +235,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   <footer>
     <p><b>What the number means.</b> Damage per second while chaining the light attack, no buffs. Against a flat defense every
       damage type uses the same defense and no absorption. Pick a boss to use its real HP, defense and absorption per damage
-      type (read from the game's regulation, NG or any NG+ cycle), and to add bleed and frostbite procs. Hit zone: some bosses take extra damage on a weak point or body part (Midir x2.0, King of the Storm x1.3); the rates come from the boss's NpcParam, but which part is which you have to know. Poison, hyper armor and reach are not counted.
+      type (read from the game's regulation, NG or any NG+ cycle), and to add bleed and frostbite procs. Hit zone: some bosses take extra damage on a weak point or body part (Midir x2.0, King of the Storm x1.3); the rates come from the boss's NpcParam, but which part is which you have to know. Poison and hyper armor are not counted. Reach = hand to the far end of the light attack's hitbox (weapon model + attack params), without the step forward the animation takes; it does not change the DPS.
       "1H R1" is one-handed R1, "2H R1" two-handed R1, "L1 dual" the two-handed L1 of paired weapons and fists.</p>
     <p>The stat search here is finer than the 3-point grid used for the repo tables, so a weapon can come out 1 to 5 DPS higher than in the README.
       Motion values, hit counts and stamina costs come from the game's own attack params; weapon damage and scaling from DS3InventoryBuilder.
@@ -443,10 +443,12 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const capNote = lastPts < d.pts[d.pts.length - 1].p ? `<p>After ${xLabel(d, lastPts)} no stat raises this weapon's ${by === "hit" ? "damage" : "DPS"} any more; spend the rest on Vigor, Endurance and so on.</p>` : "";
     const cur = o.mode === "opt" ? DS3.optimizeMove(D, r.w, move, [10, 10, 10, 10, 10], o.budget, o.up, o.def)
                                  : DS3.evalMove(D, r.w, move, o.stats, o.up, o.def);
+    const rv = D.reach && D.reach[r.w.n];
+    const reachLine = rv ? `<p><b>Weapon reach</b> (hand to the far end of the hitbox, longest swing; the step forward is not included): ${Object.keys(MOVE_LABEL).filter(m => rv[m]).map(m => `${MOVE_LABEL[m]} ${rv[m][1].toFixed(2)} m`).join(" · ")}</p>` : "";
     const hitsLine = cur ? `<p><b>Damage per attack</b> (each press of the chain, every hit rounded down like the game): ${cur.stepDmg.join(" → ")} · <b>${Math.round(cur.rate)} DPS</b> at ${cur.stats.join("/")}</p>` : "";
     return `${tabs}<div class="det">
       <div>
-        ${hitsLine}
+        ${hitsLine}${reachLine}
         <h3>Leveling path · ${MOVE_LABEL[move]}</h3>
         <div class="order">${order}</div>
         <div class="legend"><span><i></i>following this path</span><span><i class="o"></i>best spread at that level (respec)</span></div>
@@ -490,6 +492,11 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     svg.addEventListener("pointerleave", () => { hv.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); });
   }
 
+  function reachOf(n, move) {
+    const v = D.reach && D.reach[n] && D.reach[n][move];
+    return v ? `${v[1].toFixed(2)} m` : "";
+  }
+
   function partsHtml(r) {
     const p = r.parts, bits = [];
     if (by === "hit") bits.push(`${Math.round(r.rate)} DPS`); else bits.push(`hit ${r.hit}`);
@@ -519,7 +526,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const max = rows.length ? rows[0].dps : 1;
     const tb = $("tb");
     if (msg || !total) {
-      tb.innerHTML = `<tr><td colspan="7" class="empty">${msg || "No weapon matches. With these stats nothing in the filter can be wielded, or the filter is too narrow."}</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="8" class="empty">${msg || "No weapon matches. With these stats nothing in the filter can be wielded, or the filter is too narrow."}</td></tr>`;
       $("status").textContent = ""; $("more").hidden = true; return;
     }
     const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
@@ -534,8 +541,9 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <td class="mvc hide-s"><span class="mv">${MOVE_LABEL[r.move]}</span>${others ? `<small>${others}</small>` : ""}</td>
         <td class="n hide-s hide-m">${secs.toFixed(3)}</td>
         <td class="n hide-s hide-m">${arT}</td>
+        <td class="n hide-s">${reachOf(r.w.n, r.move)}</td>
         <td class="dps"><i style="width:${pct.toFixed(1)}%"></i><span>${Math.round(r.dps)}</span>${partsHtml(r)}</td>
-        <td class="n">${r.stats.join("/")}</td></tr>${open ? `<tr class="detail"><td colspan="7">${detailHtml(r)}</td></tr>` : ""}`;
+        <td class="n">${r.stats.join("/")}</td></tr>${open ? `<tr class="detail"><td colspan="8">${detailHtml(r)}</td></tr>` : ""}`;
     }).join("");
     hookDetail();
     $("more").hidden = showAll || total <= 100;
@@ -560,7 +568,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json?v=202611020615").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611021300").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();

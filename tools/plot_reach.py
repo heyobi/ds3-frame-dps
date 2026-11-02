@@ -10,7 +10,7 @@ out = sys.argv[2] if len(sys.argv) > 2 else "results/reach.png"
 by = collections.defaultdict(list)
 for line in open(src):
     c = [x.strip() for x in line.strip().strip("|").split("|")]
-    if len(c) == 8 and re.match(r"\d", c[3] or ""):
+    if len(c) >= 8 and re.match(r"\d", c[3] or ""):
         v = [float(x) for x in (c[5], c[7]) if x]
         if v:
             by[c[1].replace(" (Paired)", "")].append((max(v), c[0]))

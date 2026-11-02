@@ -21,6 +21,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("data0"); ap.add_argument("paramdex"); ap.add_argument("models")
 ap.add_argument("--weapons", required=True)
 ap.add_argument("--frames", default="data/ds3_frames_full.txt")
+ap.add_argument("--json", default="data/ds3_reach.json", help="per weapon reach for the calculator")
 a = ap.parse_args()
 
 raw = open(a.data0, "rb").read()
@@ -61,7 +62,7 @@ def reach_of(model, a_row):
             continue
         r = a_row[f"Hit{h}_Radius"]
         ds = [a_row[f"Hit{h}_DmyPoly{k}"] for k in (1, 2)]
-        ds = [d for d in ds if d >= 0]
+        ds = [d % 1000 if d >= 10000 else d for d in ds if d >= 0]   # 10xxx / 11xxx = right / left weapon's dummy xxx
         if not ds or r <= 0:
             continue
         if any(d < 100 for d in ds):          # dummy on the character (fists, kicks), not the weapon
@@ -85,7 +86,7 @@ for wid, (nm, cls) in sorted(names.items(), key=lambda kv: kv[1]):
     blade = max((math.dist((0, 0, 0), d[1:4]) for d in model["dummies"] if 100 <= d[0] < 200), default=0)
     cat, sp = WCAT[wid // 10000]
     out = {}
-    for key in ("r1h", "r2h"):
+    for key in ("r1h", "r2h", "l1"):
         steps = MV.chain(TAE, cat, sp, key)
         if not steps:
             continue
@@ -104,9 +105,11 @@ print("# Weapon reach (DS3, from the game files)\n")
 print("Distance from the hand to the far end of the light attack's hitbox, in metres, radius included. "
       "First = the first swing of the chain, Max = the longest-reaching swing. Weapon only: steps and lunges in the "
       "animation are not included.\n")
-print("| Weapon | Class | Model | Furthest blade point | 1H R1 first | 1H R1 max | 2H R1 first | 2H R1 max |")
-print("|---|---|---|---|---|---|---|---|")
+print("| Weapon | Class | Model | Furthest blade point | 1H R1 first | 1H R1 max | 2H R1 first | 2H R1 max | L1 dual max |")
+print("|---|---|---|---|---|---|---|---|---|")
 f = lambda o, k, i: f"{o[k][i]:.2f}" if k in o else ""
 for nm, cls, mid, blade, o in sorted(rows, key=lambda r: -max(v[1] for v in r[4].values())):
-    print(f"| {nm} | {cls} | {mid} | {blade:.2f} | {f(o, 'r1h', 0)} | {f(o, 'r1h', 1)} | {f(o, 'r2h', 0)} | {f(o, 'r2h', 1)} |")
+    print(f"| {nm} | {cls} | {mid} | {blade:.2f} | {f(o, 'r1h', 0)} | {f(o, 'r1h', 1)} | {f(o, 'r2h', 0)} | {f(o, 'r2h', 1)} | {f(o, 'l1', 1)} |")
+json.dump({nm: {k: [round(v[0], 2), round(v[1], 2)] for k, v in o.items()} for nm, cls, mid, blade, o in rows},
+          open(a.json, "w"), separators=(",", ":"))
 print(f"\n{len(rows)} weapons", file=sys.stderr)

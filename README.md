@@ -204,6 +204,19 @@ Abyss Watchers HP is per watcher. Yhorm's Storm Ruler and Midir/Gael phase mecha
 Twinblades take over from Sellswords against almost every boss that can bleed; against bleed-immune bosses
 (Vordt, Wolnir, Old Demon King, Yhorm, Midir) Sellswords stay on top.
 
+## Weapon reach
+
+`tools/ds3_reach.py` measures how far each light attack reaches from the hand: every hit is a sphere or capsule on
+the weapon model (`AtkParam_Pc` `Hit*_DmyPoly1/2` and `Hit*_Radius`), and the dummy points' positions come from the
+weapon's `.flver` (`tools/ds3_models.py`, read-only). Reach = hand to the far end of the hitbox, radius included.
+The step forward the animation takes is not included. Full table: [`results/reach.md`](results/reach.md); the
+calculator shows it as a column.
+
+![Reach per weapon class](results/reach.png)
+
+Longest: Lothric Knight Greatsword 2.62 m, Dragonslayer Swordspear 2.61 m, whips 2.52 m. Shortest: Dagger 0.81 m.
+Lothric Knight Sword 1.38 m vs Long Sword 1.25 m vs Broadsword 1.11 m.
+
 **Checked against in-game measurements.** u/himheart measured damage per L1 of Warden Twinblades at SL802, NG+7,
 on every boss. With the boss's NG+7 values above, the model's Sharp numbers land within 4% of his on 21 of the 22
 bosses where the model knows which entity is hit (2.8% average difference), and the three big gaps (King of the Storm,
