@@ -57,8 +57,9 @@
   }
   // Weapon buffs, all from SpEffectParam. Resins: flat AR (magicAtkPower etc.). Spells: the same fields hold the % of the
   // catalyst's Spell Buff (spell rows 1013xxxxx-1037xxxxx). Blessed Weapon: physAtkPowerRate x1.075. Only weapons with no elemental damage can be buffed.
-  // Paired weapons get a reduced buff (the wiki mentions hidden multipliers on daggers and paired weapons); the factors
-  // below were fitted to himheart's in-game measurements of Sellsword Twinblades L1 (resins 62/65 exact, Blessed 17/17).
+  // Paired weapons get less from resins and Blessed Weapon; the factors below were fitted to himheart's in-game
+  // measurements of Sellsword Twinblades L1 (resins 62/65 exact, Blessed 17/17). Spell buffs are not reduced: Carthus
+  // Flame Arc with the in-game spell buff (Pyromancy Flame +10 at 99/99 = 242) matches 16/16 at full value.
   const BUFFS = {
     charcoal: { e: 2, add: 85 }, gold: { e: 3, add: 95 }, pale: { e: 1, add: 90 }, human: { e: 4, add: 95 },
     mw: { e: 1, pct: 75 }, gmw: { e: 1, pct: 85 }, cmw: { e: 1, pct: 95 }, lb: { e: 3, pct: 95 }, dmb: { e: 1, pct: 95 },
@@ -71,7 +72,8 @@
     if (!b || !buffable(w, li)) return A;
     const paired = /Paired/.test(w.c), out = A.slice();
     if (b.phys) out[0] *= 1 + (b.phys - 1) * (paired ? PAIRED_BLESSED : 1);
-    else out[b.e] += (b.add != null ? b.add : b.pct / 100 * (buff.sb || 0)) * (paired ? PAIRED_BUFF : 1);
+    else if (b.add != null) out[b.e] += b.add * (paired ? PAIRED_BUFF : 1);          // resins: reduced on paired weapons
+    else out[b.e] += b.pct / 100 * Math.floor(buff.sb || 0);                        // spells: not reduced (measured)
     return out;
   }
   const REGEN = 45;          // base stamina per second; Chloranthy Ring / Green Blossom add to it (T.regen)

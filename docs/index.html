@@ -207,12 +207,13 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
               <option value="blessed">Blessed Weapon (physical ×1.075)</option></optgroup></select></label>
           <label class="field" id="sbBox" hidden><span>Catalyst spell buff</span><input type="number" id="sb" min="0" max="600" value="250"></label>
         </div>
+        <div class="note" id="sbNote" hidden>Spell buff as shown in the equipment screen. Pyromancy Flame +10: 116 at 10 Int / 10 Faith, 207 at 40/40, 242 at 99/99.</div>
         <div class="row2" style="margin-top:8px">
           <label class="field"><span>Clutch ring</span><select id="clutch"><option value="">None</option>
             <option value="1">Magic Clutch Ring</option><option value="2">Fire Clutch Ring</option><option value="3">Lightning Clutch Ring</option><option value="4">Dark Clutch Ring</option></select></label>
           <label class="field"><span>Head</span><select id="crown"><option value="">Other</option><option value="1">Crown of Dusk</option></select></label>
         </div>
-        <div class="note" id="buffNote">Clutch rings: ×1.15 damage of their element. Crown of Dusk: ×1.05 magic damage. Buffs only go on weapons with no elemental damage; paired weapons get a reduced buff (fitted to in-game measurements). Great Swamp Ring and Witch's Ring do not raise spell buff or buff damage (tested in game).</div>
+        <div class="note" id="buffNote">Clutch rings: ×1.15 damage of their element. Crown of Dusk: ×1.05 magic damage. Buffs only go on weapons with no elemental damage; paired weapons get less from resins and Blessed Weapon (fitted to in-game measurements), spell buffs are not reduced. Great Swamp Ring and Witch's Ring do not raise spell buff or buff damage (tested in game).</div>
       </div>
 
       <div class="group">
@@ -273,7 +274,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021440"></script>
+<script src="calc.js?v=202611021430b"></script>
 <script>
 (function(){
   "use strict";
@@ -353,7 +354,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     $("stamOpts").hidden = !$("stam").checked;
     $("stamNote").textContent = `Stamina limited: long fights where you keep attacking. Stamina does not refill while attacking and refills at ${regen}/s otherwise (base 45${regen > 45 ? " + ring / blossom" : ""}), so each point spent costs 1/${regen} s.`;
     const bid = $("buff").value, binfo = DS3.BUFFS[bid];
-    $("sbBox").hidden = !(binfo && binfo.pct);
+    $("sbBox").hidden = $("sbNote").hidden = !(binfo && binfo.pct);
     def.buff = binfo ? { id: bid, sb: num("sb", 0, 600) } : null;
     const em = [1, 1, 1, 1, 1], cl = num("clutch", 0, 4);
     if (cl) em[cl] *= 1.15;
