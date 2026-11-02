@@ -206,9 +206,12 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
               <option value="cmw">Crystal Magic Weapon (magic 95%)</option><option value="dmb">Darkmoon Blade (magic 95%)</option>
               <option value="lb">Lightning Blade (lightning 95%)</option><option value="db">Dark Blade (dark 85%)</option><option value="cfa">Carthus Flame Arc (fire 80%)</option>
               <option value="blessed">Blessed Weapon (physical ×1.075)</option></optgroup></select></label>
-          <label class="field" id="sbBox" hidden><span>Catalyst spell buff</span><input type="number" id="sb" min="0" max="600" value="250"></label>
+          <label class="field" id="catBox" hidden><span>Catalyst</span><select id="cat"><option value="best">Best I can use</option></select></label>
         </div>
-        <div class="note" id="sbNote" hidden>Spell buff as shown in the equipment screen. Pyromancy Flame +10: 116 at 10 Int / 10 Faith, 207 at 40/40, 242 at 99/99.</div>
+        <div class="row2" id="sbRow" style="margin-top:8px" hidden>
+          <label class="field" id="sbBox"><span>Spell buff</span><input type="number" id="sb" min="0" max="600" value="200"></label>
+        </div>
+        <div class="note" id="sbNote" hidden>Spell buff comes from the catalyst (fully upgraded) and your Int / Faith, as the equipment screen shows it; a catalyst whose requirements you don't meet adds nothing. "Best I can use" takes the strongest one of the spell's school that your stats allow.</div>
         <div class="row2" style="margin-top:8px">
           <label class="field"><span>Head</span><select id="crown"><option value="">Other</option><option value="1">Crown of Dusk</option></select></label>
           <div class="checks" style="align-self:end"><label title="Hollow-infused weapons add Luck (+2 at +0 up to +5 at +10) while you are hollow with 15 or more hollowing"><input type="checkbox" id="hollow">Hollow (15+ hollowing)</label></div>
@@ -291,7 +294,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021830"></script>
+<script src="calc.js?v=202611021900"></script>
 <script>
 (function(){
   "use strict";
@@ -300,7 +303,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   const ML = () => by === "hit" ? "dmg" : "DPS";
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
-  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown"];
+  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown","cat"];
   const flags = ["autoRings","hollow"];
   const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
@@ -355,7 +358,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     for (const f of ["q","cls","inf","buff","crown"]) if ($(f).value) h.set(f, $(f).value);
     const rg = ringIds(); if (rg.length) h.set("rg", rg.join(","));
     for (const f of flags) if ($(f).checked) h.set(f, "1");
-    if ($("buff").value === "auto" || (DS3.BUFFS[$("buff").value] && DS3.BUFFS[$("buff").value].pct)) h.set("sb", $("sb").value);
+    if ($("buff").value === "auto" || (DS3.BUFFS[$("buff").value] && DS3.BUFFS[$("buff").value].pct)) { if ($("cat").value !== "best") h.set("cat", $("cat").value); if ($("cat").value === "custom") h.set("sb", $("sb").value); }
     for (const b of boxes) if (b !== "stam" && !$(b).checked) h.set(b, "0");
     history.replaceState(null, "", "#" + h.toString());
   }
@@ -389,13 +392,16 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     $("stamOpts").hidden = !$("stam").checked;
     $("stamNote").textContent = `Stamina limited: long fights where you keep attacking. Stamina does not refill while attacking and refills at ${regen}/s otherwise (base 45${regen > 45 ? " + ring / blossom" : ""}), so each point spent costs 1/${regen} s.`;
     const bid = $("buff").value, binfo = DS3.BUFFS[bid], autoBuff = bid === "auto", autoR = $("autoRings").checked;
-    $("sbBox").hidden = $("sbNote").hidden = !(autoBuff || (binfo && binfo.pct));
-    def.buff = binfo ? { id: bid, sb: num("sb", 0, 600) } : null;
+    const spellOn = autoBuff || !!(binfo && binfo.pct);
+    $("catBox").hidden = $("sbNote").hidden = !spellOn;
+    $("sbRow").hidden = !(spellOn && $("cat").value === "custom");
+    const cv = $("cat").value, catSel = cv === "custom" ? undefined : cv === "best" ? "best" : +cv;
+    def.buff = binfo ? { id: bid, sb: num("sb", 0, 600), cat: catSel } : null;
     def.hollow = $("hollow").checked;
     const rids = ringIds(), rm = DS3.ringMods(autoR ? [] : rids, !!$("crown").value);
     def.emul = rm.dmg; def.armul = rm.ar; def.sbon = rm.st; def.status = rm.status;
     const chl = $("stam").checked && $("ring").value !== "0";
-    const auto = (autoBuff || autoR) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), rings: autoR,
+    const auto = (autoBuff || autoR) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), cat: catSel, rings: autoR,
       pool: rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts"), slots: 4 - (chl ? 1 : 0), crown: !!$("crown").value } : null;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
@@ -643,7 +649,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def","sb"].forEach(id => $(id).addEventListener("input", () => schedule(350)));
   document.querySelectorAll("#ringBox input").forEach(x => x.addEventListener("change", () => { ringLimit(); schedule(450); }));
-  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown","autoRings","hollow"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
+  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown","autoRings","hollow","cat"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
   document.querySelectorAll("#by button").forEach(b => b.addEventListener("click", () => { by = b.dataset.by; compute(); }));
@@ -658,7 +664,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json?v=202611021320").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611021900").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();
@@ -666,6 +672,14 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     for (const c of infs) { const o = document.createElement("option"); o.value = o.textContent = c; $("inf").appendChild(o); }
     const o = document.createElement("option"); o.value = "-"; o.textContent = "none (unique)"; $("inf").appendChild(o);
     for (const b of D.bosses) { const o = document.createElement("option"); o.value = o.textContent = b.n; $("boss").appendChild(o); }
+    const SCH = ["Sorcery", "Miracle", "Pyromancy"];
+    for (let k = 0; k < 3; k++) {
+      const g = document.createElement("optgroup"); g.label = SCH[k];
+      (D.cats || []).forEach((c, i) => { if (c.school.findIndex(x => x) !== k) return;
+        const o = document.createElement("option"); o.value = i; o.textContent = `${c.n} +${c.up}` + (c.req[1] || c.req[2] ? ` (${[c.req[1] ? c.req[1] + " Int" : "", c.req[2] ? c.req[2] + " Fth" : ""].filter(Boolean).join(", ")})` : ""); g.appendChild(o); });
+      $("cat").appendChild(g);
+    }
+    { const o = document.createElement("option"); o.value = "custom"; o.textContent = "Type a spell buff"; $("cat").appendChild(o); }
     readHash(); setMode(mode); compute();
   }).catch((e) => { console.error(e); $("status").textContent = "Error: " + (e && e.message ? e.message : e) + " (try reloading)"; });
 })();

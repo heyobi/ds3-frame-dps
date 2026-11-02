@@ -184,8 +184,15 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   their element. Attack-rate rings act on attack rating before defense, damage-rate rings on the damage after it.
   Knight's / Hunter's / Scholar / Priestess Ring +5 Str / Dex / Int / Fth and Carthus Milkring +3 Dex add to the stats,
   count for requirements, and come on top of the spread shown.
-- **Auto-pick** (calculator options). "Best for each weapon" in the buff list tries every resin and spell (spells use
-  the spell buff you enter and need their Int / Faith, which the optimizer then spends points on). "Pick the best rings"
+- **Catalyst spell buff** (`tools/ds3_catalysts.py`): 100 x (1 + (Int scaling x S(Int) + Faith scaling x S(Faith)) / 10000),
+  rounded down, where each catalyst names its own Int and Faith curves in two unnamed EquipParamWeapon fields (Unk21 /
+  Unk26). It reproduces every value checked: Pyromancy Flame +10 116 / 207 / 221 at 10 / 40 / 60 Int and Faith (116 from an
+  in-game screenshot), Court Sorcerer's Staff +10 150 / 202 / 220 / 238 at 35 / 50 / 55 / 60 Int, Saint's Talisman +10 187 /
+  242 at 45 / 60 Faith. The calculator works out the spell buff from your stats, either for a chosen catalyst or for the
+  strongest one of the spell's school your stats can use (fully upgraded); its requirements count, and the optimizer can
+  put points into Int / Faith when the spell buff makes that worth it. Archdeacon's Great Staff counts as 100 (wiki).
+- **Auto-pick** (calculator options). "Best for each weapon" in the buff list tries every resin and spell (spells take
+  their spell buff from the catalyst as above and need their Int / Faith, which the optimizer then spends points on). "Pick the best rings"
   adds rings one at a time, each time the one that adds the most damage, until the free slots are full (four, minus the
   Chloranthy Ring; Lloyd's and Red Tearstone are never combined). Every weapon is ranked first, then the top 60 get
   their own picks and the list is re-ranked.

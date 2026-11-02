@@ -63,9 +63,9 @@
   const BUFFS = {
     charcoal: { e: 2, add: 85 }, gold: { e: 3, add: 95 }, pale: { e: 1, add: 90 }, human: { e: 4, add: 95 },
     // req: [Int, Faith] to cast (Magic param)
-    mw: { e: 1, pct: 75, req: [10, 0] }, gmw: { e: 1, pct: 85, req: [15, 0] }, cmw: { e: 1, pct: 95, req: [30, 0] },
-    lb: { e: 3, pct: 95, req: [0, 30] }, dmb: { e: 1, pct: 95, req: [0, 30] }, db: { e: 4, pct: 85, req: [0, 25] },
-    cfa: { e: 2, pct: 80, req: [10, 10] }, blessed: { phys: 1.075, req: [0, 15] },
+    mw: { e: 1, pct: 75, req: [10, 0], sch: 0 }, gmw: { e: 1, pct: 85, req: [15, 0], sch: 0 }, cmw: { e: 1, pct: 95, req: [30, 0], sch: 0 },
+    lb: { e: 3, pct: 95, req: [0, 30], sch: 1 }, dmb: { e: 1, pct: 95, req: [0, 30], sch: 1 }, db: { e: 4, pct: 85, req: [0, 25], sch: 1 },
+    cfa: { e: 2, pct: 80, req: [10, 10], sch: 2 }, blessed: { phys: 1.075, req: [0, 15], sch: 1 },
   };
   const PAIRED_BUFF = 0.826, PAIRED_BLESSED = 0.8;
   // Rings (SpEffectParam via EquipParamAccessory). ar: AtkPowerRate (on attack rating, before defense);
@@ -93,15 +93,30 @@
   // Hollow infusion: +Luck while hollow with 15+ hollowing (resident SpEffect 1290015xx: +2 at +0 ... +5 at +10)
   const HOLLOW_LCK = [2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5];
   const hollowSt = (w, li, st, T) => T && T.hollow && w.i === "Hollow" ? st.map((v, i) => i === 4 ? Math.min(99, v + HOLLOW_LCK[Math.min(li, 10)]) : v) : st;
+  // Catalyst spell buff from the player's stats (tools/ds3_catalysts.py): 100 x (1 + (cInt x S(Int) + cFth x S(Fth)) / 10000),
+  // rounded down; Archdeacon's Great Staff counts as 100 for weapon buffs (wiki). buff.cat: "best" = strongest catalyst of
+  // the spell's school whose requirements the stats meet (fully upgraded), a catalyst index, or undefined = buff.sb as typed.
+  function catSB(D, c, st) {
+    if (c.n === "Archdeacon's Great Staff") return 100;
+    const S = (g, v) => (D.sats[g] ? D.sats[g][Math.max(0, Math.min(99, v))] : 0);
+    return Math.floor(100 * (1 + (c.c[0] * S(c.g[0], st[2]) + c.c[1] * S(c.g[1], st[3])) / 10000));
+  }
+  function spellBuff(D, buff, st) {
+    const b = BUFFS[buff.id];
+    if (buff.cat == null || !D || !D.cats) return Math.floor(buff.sb || 0);
+    const ok = (c) => c.school[b.sch] && st[0] >= c.req[0] && st[2] >= c.req[1] && st[3] >= c.req[2];
+    if (buff.cat === "best") { let m = 0; for (const c of D.cats) if (ok(c)) m = Math.max(m, catSB(D, c, st)); return m; }
+    const c = D.cats[buff.cat]; return c && ok(c) ? catSB(D, c, st) : 0;
+  }
   function buffable(w, li) { const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
-  function applyBuff(w, li, A, buff, st) {
+  function applyBuff(w, li, A, buff, st, D) {
     const b = buff && BUFFS[buff.id];
     if (!b || !buffable(w, li)) return A;
     if (b.req && st && (st[2] < b.req[0] || st[3] < b.req[1])) return A;       // can't cast the spell with these stats
     const paired = /Paired/.test(w.c), out = A.slice();
     if (b.phys) out[0] *= 1 + (b.phys - 1) * (paired ? PAIRED_BLESSED : 1);
     else if (b.add != null) out[b.e] += b.add * (paired ? PAIRED_BUFF : 1);          // resins: reduced on paired weapons
-    else out[b.e] += b.pct / 100 * Math.floor(buff.sb || 0);                        // spells: not reduced (measured)
+    else out[b.e] += b.pct / 100 * spellBuff(D, buff, st);                           // spells: not reduced (measured)
     return out;
   }
   const REGEN = 45;          // base stamina per second; Chloranthy Ring / Green Blossom add to it (T.regen)
@@ -111,7 +126,7 @@
   function chainEval(D, w, key, li, st, T) {
     const steps = D.moves[w.n][key];
     const stE = hollowSt(w, li, addSt(st, T), T);
-    const A = applyBuff(w, li, ar(D, w, li, stE, { twoHand: key !== "r1h" }), T.buff, stE).map((v, i) => v * (T.armul ? T.armul[i] : 1));
+    const A = applyBuff(w, li, ar(D, w, li, stE, { twoHand: key !== "r1h" }), T.buff, stE, D).map((v, i) => v * (T.armul ? T.armul[i] : 1));
     let direct = 0, frames = 0, hits = 0, stam = 0;
     const stepDmg = [];            // damage of each press as the game shows it (every hit rounded down)
     for (const [f, sc, hs] of steps) {
@@ -173,6 +188,12 @@
     if (s[2] > 0 && (d[1] > 0 || d[2] > 0 || d[4] > 0)) out.push(2);
     if (s[3] > 0 && (d[2] > 0 || d[3] > 0 || d[4] > 0 || (w.i === "Blessed" && d[0] > 0))) out.push(3);
     if ((s[4] > 0 && d[0] > 0) || (T && T.bleed && L[10] > 0 && w.lc > 0)) out.push(4);
+    const sp = T && T.buff && T.buff.cat != null && BUFFS[T.buff.id] && BUFFS[T.buff.id].pct && buffable(w, li);
+    if (sp) {                                                                    // the catalyst's spell buff grows with Int / Faith
+      const sch = BUFFS[T.buff.id].sch, add = sch === 0 ? [2] : sch === 1 ? [3] : [2, 3];
+      for (const i of add) if (!out.includes(i)) out.push(i);
+    }
+    out.sort();
     return out;
   }
 
@@ -341,8 +362,15 @@
         const sp = b && BUFFS[b.id] && BUFFS[b.id].req;
         if (sp) {
           const t = st.slice(), sb = T.sbon || [0, 0, 0, 0, 0];
-          let extra = Math.max(0, sp[0] - sb[2] - t[2]) + Math.max(0, sp[1] - sb[3] - t[3]);
-          if (extra > 0) { const r = optimizeMove(D, w, key, opts.base, opts.budget, opts.up, T); return r ? r.dps : -1; }
+          // quick estimate: take the missing Int / Faith from the stat that has the most points (the final pass re-optimizes)
+          const need = [Math.max(0, sp[0] - sb[2] - t[2]), Math.max(0, sp[1] - sb[3] - t[3])];
+          let extra = need[0] + need[1];
+          if (extra > 0) {
+            t[2] += need[0]; t[3] += need[1];
+            for (const i of [1, 0, 4, 2, 3]) { const free = Math.max(0, t[i] - Math.max(opts.base[i], i < 4 ? needOf(w, key !== "r1h", T)[i] : 0)); const a = Math.min(free, extra); t[i] -= a; extra -= a; }
+            if (extra > 0) return -1;
+            return wieldable(w, t, key !== "r1h", T) ? chainEval(D, w, key, li, t, T).dps : -1;
+          }
         }
       }
       return wieldable(w, st, key !== "r1h", T) ? chainEval(D, w, key, li, st, T).dps : -1;
@@ -350,7 +378,7 @@
     let curS = score(buff, rings);
     if (auto.buff) {
       for (const id of auto.buffs) {
-        const b = { id, sb: auto.sb }, v = score(b, rings);
+        const b = { id, sb: auto.sb, cat: auto.cat }, v = score(b, rings);
         if (v > curS + 1e-9) { curS = v; buff = b; }
       }
     }
@@ -423,7 +451,7 @@
     return { cost: points[0].pts, points, chunks };
   }
 
-  const api = { eff, ar, rank, rankAuto, autoPick, BUFFS, RINGS, ringMods, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
+  const api = { eff, ar, rank, rankAuto, spellBuff, catSB, autoPick, BUFFS, RINGS, ringMods, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.DS3 = api;
 })(this);
