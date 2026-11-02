@@ -210,7 +210,66 @@
       for (let u = 0; u <= left; u++) { cur[i] = keep + u * step; if (cur[i] > 99 + step) break; rec(j + 1, left - u); }
       cur[i] = keep;
     };
-    if (k === 0) tryOne(); else rec(0, units);
+    if (k === 0) tryOne();
+    else if (units <= 14 || T.exhaustive) rec(0, units);
+    else {
+      // coarse grid, then move points between pairs of stats while it helps, halving the step down to the base step
+      let big = step * Math.ceil(units / 10);
+      const cu = Math.floor(R / big);
+      const save = units;
+      const recC = (j, left) => {
+        if (j === k - 1) { const i = rel[j]; const keep = cur[i]; cur[i] += left * big; tryC(); cur[i] = keep; return; }
+        const i = rel[j], keep = cur[i];
+        for (let u = 0; u <= left; u++) { cur[i] = keep + u * big; if (cur[i] > 99 + big) break; recC(j + 1, left - u); }
+        cur[i] = keep;
+      };
+      const cands = [];
+      const memo = new Map();
+      const evalT = (t) => {
+        const c = t.map(v => Math.min(99, v)), kk = c.join(",");
+        let v = memo.get(kk); if (v === undefined) { v = chainEval(D, w, key, li, c, T).dps; memo.set(kk, v); }
+        return v;
+      };
+      const tryC = () => { const t = cur.slice(); t[rel[0]] += R - cu * big; cands.push({ t, d: evalT(t) }); };
+      recC(0, cu);
+      cands.sort((x, y) => y.d - x.d);
+      const climb = (t, d) => {
+        for (let sz = big; sz >= 1; sz = Math.floor(sz / 2)) {
+          let moved = true;
+          while (moved) {
+            moved = false;
+            for (const a of rel) for (const b of rel) {
+              if (a === b || t[a] - sz < st[a] || t[b] >= 99) continue;
+              const n = t.slice(); n[a] -= sz; n[b] += sz;
+              const nd = evalT(n);
+              if (nd > d + 1e-9) { t = n; d = nd; moved = true; }
+            }
+          }
+        }
+        // line search: for every pair, every transfer size up to two coarse steps, keep the best; repeat while it helps
+        let again = true;
+        while (again) {
+          again = false;
+          for (const a of rel) for (const b of rel) {
+            if (a === b) continue;
+            let bt = null, bd = d;
+            for (let q = 1; q <= 2 * big; q++) {
+              if (t[a] - q < st[a] || t[b] + q > 99 + q - 1 && t[b] >= 99) break;
+              const n = t.slice(); n[a] -= q; n[b] += q;
+              const nd = evalT(n);
+              if (nd > bd + 1e-9) { bd = nd; bt = n; }
+            }
+            if (bt) { t = bt; d = bd; again = true; }
+          }
+        }
+        return { t, d };
+      };
+      let bc = null;
+      for (const c of cands.slice(0, 4)) { const r = climb(c.t, c.d); if (!bc || r.d > bc.d + 1e-9) bc = r; }
+      const fin = bc.t.map(v => Math.min(99, v));
+      best = Object.assign({ move: key, stats: fin }, chainEval(D, w, key, li, fin, T));
+      void save;
+    }
     // points no stat can use any more (e.g. SL802) go to the stats that don't change DPS, so the shown spread
     // adds up to the soul level; DPS is unchanged
     if (best) {

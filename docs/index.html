@@ -33,7 +33,7 @@ header p{margin:0;color:var(--ink2);max-width:760px}
 @media (max-width:860px){.layout{grid-template-columns:1fr}}
 .layout>*{min-width:0}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
-.ringchecks{flex-wrap:wrap}.ringchecks label{font-size:12.5px}.ringchecks label.off{opacity:.45}
+.ringchecks{flex-wrap:wrap}#tb.stale{opacity:.45;transition:opacity .15s}.ringchecks label{font-size:12.5px}.ringchecks label.off{opacity:.45}
 .controls{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 @media (max-width:860px){.controls{position:static;max-height:none;overflow:visible}}
 .group{margin-bottom:16px}
@@ -212,7 +212,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <div class="row2" style="margin-top:8px">
           <label class="field"><span>Head</span><select id="crown"><option value="">Other</option><option value="1">Crown of Dusk</option></select></label>
         </div>
-        <div class="field" style="margin-top:8px"><span>Rings (up to 4)</span></div>
+        <div class="field" style="margin-top:8px"><span>Rings <b id="ringCount">0/4</b> (Chloranthy Ring counts too)</span></div>
         <div class="checks ringchecks" id="ringBox">
           <label title="x1.15 magic damage"><input type="checkbox" data-ring="clutchM">Magic Clutch</label>
           <label title="x1.15 fire damage"><input type="checkbox" data-ring="clutchF">Fire Clutch</label>
@@ -289,7 +289,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021450"></script>
+<script src="calc.js?v=202611021510"></script>
 <script>
 (function(){
   "use strict";
@@ -330,7 +330,14 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     ringLimit();
   }
   function ringIds() { return [...document.querySelectorAll("#ringBox input:checked")].map(x => x.dataset.ring); }
-  function ringLimit() { const full = ringIds().length >= 4; document.querySelectorAll("#ringBox input").forEach(x => { x.disabled = full && !x.checked; x.parentElement.classList.toggle("off", x.disabled); }); }
+  // four ring slots in the game; the Chloranthy Ring (stamina options) takes one of them
+  function ringLimit() {
+    const chl = $("stam").checked && $("ring").value !== "0";
+    const n = ringIds().length + (chl ? 1 : 0), full = n >= 4;
+    document.querySelectorAll("#ringBox input").forEach(x => { x.disabled = full && !x.checked; x.parentElement.classList.toggle("off", x.disabled); });
+    $("ring").disabled = !chl && ringIds().length >= 4;
+    $("ringCount").textContent = `${n}/4`;
+  }
   function writeHash() {
     const h = new URLSearchParams();
     h.set("mode", mode);
@@ -612,10 +619,15 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     $("status").textContent = `${total} ${bestOnly ? (total === 1 ? "weapon" : "weapons") : "weapon/infusion combos"}${ms != null ? ` · ${ms} ms` : ""}`;
   }
 
-  const schedule = () => { clearTimeout(timer); timer = setTimeout(compute, 250); };
-  ["sl","vig","att","end","vit","str","dex","int","fth","lck","def","sb"].forEach(id => $(id).addEventListener("input", schedule));
-  document.querySelectorAll("#ringBox input").forEach(x => x.addEventListener("change", () => { ringLimit(); compute(); }));
-  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown"].forEach(id => $(id).addEventListener("change", compute));
+  // recompute once the user stops clicking; the table dims meanwhile so it is clear a new result is coming
+  const schedule = (ms) => {
+    clearTimeout(timer);
+    $("tb").classList.add("stale"); $("status").textContent = "Calculating…";
+    timer = setTimeout(() => requestAnimationFrame(() => setTimeout(() => { compute(); $("tb").classList.remove("stale"); }, 0)), typeof ms === "number" ? ms : 350);
+  };
+  ["sl","vig","att","end","vit","str","dex","int","fth","lck","def","sb"].forEach(id => $(id).addEventListener("input", () => schedule(350)));
+  document.querySelectorAll("#ringBox input").forEach(x => x.addEventListener("change", () => { ringLimit(); schedule(450); }));
+  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
   document.querySelectorAll("#by button").forEach(b => b.addEventListener("click", () => { by = b.dataset.by; compute(); }));
