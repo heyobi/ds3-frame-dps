@@ -197,7 +197,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       <div class="group">
         <div class="label">Rank by</div>
         <div class="seg" id="by" style="margin-bottom:12px">
-          <button data-by="dps" class="on">DPS</button>
+          <button data-by="dps" class="on">Damage per second</button>
           <button data-by="hit">Damage per attack</button>
         </div>
         <div class="label">Attacks</div>
@@ -230,7 +230,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <table>
           <thead><tr>
             <th>#</th><th>Weapon</th><th class="hide-s">Attack</th><th class="n hide-s hide-m">s / attack</th>
-            <th class="n hide-s hide-m">AR</th><th class="n hide-s" title="Weapon reach: hand to the far end of the hitbox, in metres. Second line: plus how far the character has stepped forward when the hit starts.">Reach</th><th id="metricTh">DPS</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
+            <th class="n hide-s hide-m">AR</th><th class="n hide-s" title="Weapon reach: hand to the far end of the hitbox, in metres. Second line: plus how far the character has stepped forward when the hit starts.">Reach</th><th id="metricTh">Damage / second</th><th class="n"><span class="hide-s">Str/Dex/Int/Fth/Lck</span><span class="show-s">S/D/I/F/L</span></th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
@@ -332,7 +332,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     $("stamNote").textContent = `Stamina limited: long fights where you keep attacking. Stamina does not refill while attacking and refills at ${regen}/s otherwise (base 45${regen > 45 ? " + ring / blossom" : ""}), so each point spent costs 1/${regen} s.`;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
-    $("metricTh").textContent = by === "hit" ? "Damage / attack" : "DPS";
+    $("metricTh").textContent = by === "hit" ? "Damage / attack" : "Damage / second";
     $("defBox").style.visibility = boss ? "hidden" : "visible";
     $("bossNote").innerHTML = boss ? bossInfo(boss, def, ng, zr) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
     const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? `, stamina limited (${regen}/s)` : "");
@@ -456,7 +456,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
                                  : DS3.evalMove(D, r.w, move, o.stats, o.up, o.def);
     const rv = D.reach && D.reach[r.w.n];
     const reachLine = rv ? `<p><b>Reach</b> (hand to the far end of the hitbox, longest swing; "with step" adds how far the character has moved forward when the hit starts): ${Object.keys(MOVE_LABEL).filter(m => rv[m]).map(m => `${MOVE_LABEL[m]} ${rv[m][1].toFixed(2)} m` + (rv[m].length > 3 ? ` (${rv[m][3].toFixed(2)} m with step)` : "")).join(" · ")}</p>` : "";
-    const hitsLine = cur ? `<p><b>Damage per attack</b> (each press of the chain, every hit rounded down like the game): ${cur.stepDmg.join(" → ")} · <b>${Math.round(cur.rate)} DPS</b> at ${cur.stats.join("/")}</p>` : "";
+    const hitsLine = cur ? `<p><b>Damage per attack</b> (each press of the chain, every hit rounded down like the game): ${cur.stepDmg.join(" → ")} · <b>${Math.round(cur.rate)} damage per second</b> at ${cur.stats.join("/")}</p>` : "";
     return `${tabs}<div class="det">
       <div>
         ${hitsLine}${reachLine}
