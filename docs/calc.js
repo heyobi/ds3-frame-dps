@@ -55,13 +55,32 @@
              bleed: base.bleed == null ? null : base.bleed * k[1], frost: base.frost == null ? null : base.frost * k[2],
              bloodRate: b.bloodRate, stamina: !!stamina, zone: zone || 1 };
   }
+  // Weapon buffs. Resins: flat AR from SpEffectParam (magicAtkPower etc.). Spells: % of the catalyst's Spell Buff (wiki).
+  // Blessed Weapon: physical AR x1.075 (wiki). Only weapons with no elemental damage can be buffed.
+  // Paired weapons get a reduced buff (the wiki mentions hidden multipliers on daggers and paired weapons); the factors
+  // below were fitted to himheart's in-game measurements of Sellsword Twinblades L1 (resins 62/65 exact, Blessed 17/17).
+  const BUFFS = {
+    charcoal: { e: 2, add: 85 }, gold: { e: 3, add: 95 }, pale: { e: 1, add: 90 }, human: { e: 4, add: 95 },
+    mw: { e: 1, pct: 75 }, gmw: { e: 1, pct: 85 }, cmw: { e: 1, pct: 95 }, lb: { e: 3, pct: 95 }, dmb: { e: 1, pct: 93 },
+    cfa: { e: 2, pct: 90 }, blessed: { phys: 1.075 },
+  };
+  const PAIRED_BUFF = 0.826, PAIRED_BLESSED = 0.8;
+  function buffable(w, li) { const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
+  function applyBuff(w, li, A, buff) {
+    const b = buff && BUFFS[buff.id];
+    if (!b || !buffable(w, li)) return A;
+    const paired = /Paired/.test(w.c), out = A.slice();
+    if (b.phys) out[0] *= 1 + (b.phys - 1) * (paired ? PAIRED_BLESSED : 1);
+    else out[b.e] += (b.add != null ? b.add : b.pct / 100 * (buff.sb || 0)) * (paired ? PAIRED_BUFF : 1);
+    return out;
+  }
   const REGEN = 45;          // base stamina per second; Chloranthy Ring / Green Blossom add to it (T.regen)
   const FROST_AMP = 0.07, FROST_TIME = 14;   // frostbite: target takes 7% more damage for 14 s
 
   // One full 3-step chain against target T. Returns dps and its parts.
   function chainEval(D, w, key, li, st, T) {
     const steps = D.moves[w.n][key];
-    const A = ar(D, w, li, st, { twoHand: key !== "r1h" });
+    const A = applyBuff(w, li, ar(D, w, li, st, { twoHand: key !== "r1h" }), T.buff);
     let direct = 0, frames = 0, hits = 0, stam = 0;
     const stepDmg = [];            // damage of each press as the game shows it (every hit rounded down)
     for (const [f, sc, hs] of steps) {
@@ -73,7 +92,7 @@
         for (let e = 0; e < 5; e++) {
           if (!h[e] || !A[e]) continue;
           const m = T.mul ? T.mul[e === 0 ? h[5] : e + 3] : 1;
-          hd += eff(A[e] * h[e] / 100, T.def[e]) * m * (T.zone || 1);
+          hd += eff(A[e] * h[e] / 100, T.def[e]) * m * (T.zone || 1) * (T.emul ? T.emul[e] : 1);
         }
         direct += hd; sd += Math.floor(hd);
       }
@@ -234,7 +253,7 @@
     return { cost: points[0].pts, points, chunks };
   }
 
-  const api = { eff, ar, rank, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
+  const api = { eff, ar, rank, BUFFS, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.DS3 = api;
 })(this);
