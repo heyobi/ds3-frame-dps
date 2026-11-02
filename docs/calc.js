@@ -147,6 +147,12 @@
       cur[i] = keep;
     };
     if (k === 0) tryOne(); else rec(0, units);
+    // points no stat can use any more (e.g. SL802) go to the stats that don't change DPS, so the shown spread
+    // adds up to the soul level; DPS is unchanged
+    if (best) {
+      let left = budget - best.stats.reduce((a, v, i) => a + v - base[i], 0);
+      for (const i of [4, 3, 2, 1, 0]) { const a = Math.max(0, Math.min(left, 99 - best.stats[i])); best.stats[i] += a; left -= a; }
+    }
     return best;
   }
 
