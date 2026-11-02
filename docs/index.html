@@ -75,7 +75,6 @@ td.w small{display:block;color:var(--muted);font-size:12px;font-weight:400}
 .mv{display:inline-block;background:var(--chip);border-radius:5px;padding:1px 7px;font-size:12.5px;color:var(--ink2)}
 .alt{color:var(--muted);font-size:12.5px}
 .more{display:block;margin:14px auto 0;background:var(--chip);border:0;color:var(--ink);border-radius:8px;padding:8px 16px;font:inherit;font-size:14px;cursor:pointer}
-@media (max-width:1420px){.hide-m{display:none}}
 td.mvc small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
 .show-s{display:none}
 @media (max-width:640px){.hide-s{display:none}td.rank .tw{display:none}td.rank{width:22px}.show-s{display:inline}td,th{padding:8px 5px}td.w{white-space:normal;min-width:130px}td{font-size:13px}}
@@ -115,6 +114,13 @@ tr.detail>td{white-space:normal;padding:4px 8px 18px;background:var(--panel)!imp
 table.ms{width:100%;font-size:13px}
 table.ms td,table.ms th{padding:4px 6px;font-size:13px}
 table.ms tr.cur td{font-weight:650;color:var(--accent)}
+/* fit: no sideways scroll at any width */
+@media (min-width:1440px){.wrap{max-width:1320px}}
+@media (max-width:1439px){.hide-m{display:none}}
+@media (max-width:1100px){.layout{grid-template-columns:1fr}.controls{position:static}}
+@media (max-width:640px){td,th{padding:8px 3px}td{font-size:12.5px}td.rank{width:20px}}
+@media (max-width:420px){td.n:last-child{font-size:11px;letter-spacing:-.02em}td.w{min-width:110px!important}td.dps{min-width:0}}
+.tabs{flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -387,7 +393,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const avail = Object.keys(r.per);
     const move = avail.includes(openMove) ? openMove : r.move;
     const d = detailData(r, move);
-    const tabs = avail.length > 1 ? `<div class="tabs">${avail.map(m => `<button data-move="${m}" class="${m === move ? "on" : ""}">${MOVE_LABEL[m]}</button>`).join("")}</div>` : "";
+    const tabs = avail.length > 1 ? `<div class="tabs">${avail.map(m => `<button data-move="${m}" class="${m === move ? "on" : ""}">${MOVE_LABEL[m]} · ${Math.round(r.per[m])}</button>`).join("")}</div>` : "";
     if (!d.path || !d.pts.length) return `${tabs}<p>Not reachable with these settings.</p>`;
     const reqs = d.path.chunks.filter(c => c.req).map(c => `<span class="st req">${SN[c.stat]} ${c.to}${c.stat === 0 && move !== "r1h" ? " (2H)" : ""}</span>`);
     const ph = phases(d.path.chunks).map(t => `<span class="st">${escH(t)}</span>`);
@@ -412,7 +418,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <div class="order">${order}</div>
         <div class="legend"><span><i></i>following this path</span><span><i class="o"></i>best spread at that level (respec)</span></div>
         ${chartSvg(d)}
-        <div class="readout"></div>
+        <div class="readout">Hover or tap the chart.</div>
         <p>Each point goes to the stat that adds the most DPS over the next few points, so every level builds on the last one.${d.opt ? " Vig/Att/End/Vit stay as set on the left." : " Starts from the stats you entered."}</p>
         ${capNote}
       </div>
