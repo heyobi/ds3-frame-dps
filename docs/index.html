@@ -155,7 +155,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
           <label class="field"><span>Vitality</span><input type="number" id="vit" min="10" max="99" value="15"></label>
         </div>
         <div class="budget" id="budget"></div>
-        <label class="field" style="margin-top:8px"><span>Starting class</span><select id="sclass"></select></label>
+        <div class="row2" style="margin-top:8px">
+          <label class="field"><span>Starting class</span><select id="sclass"></select></label>
+          <label class="field"><span>Level preset</span><select id="pre"></select></label>
+        </div>
         <div class="note" id="classNote">The points left after Vig/Att/End/Vit go to Str/Dex/Int/Fth/Lck on top of the class's starting stats, placed separately for each weapon.</div>
       </div>
 
@@ -312,10 +315,25 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     Pyromancer: [8, [11, 12, 10, 8], [12, 9, 14, 14, 7]], Cleric: [7, [10, 14, 9, 7], [12, 8, 7, 16, 13]],
   };
   const cls = () => CLASSES[$("sclass").value] || CLASSES.Deprived;
+  // level presets (the soul levels and defensive spreads used in the README tables); each stat is at least the class's start
+  const PRESETS = { start: ["Class start", 0, null], sl30: ["SL30", 30, [20, 10, 10, 10]], sl60: ["SL60", 60, [27, 10, 15, 10]],
+    sl80: ["SL80", 80, [27, 10, 20, 10]], sl120: ["SL120", 120, [27, 10, 20, 15]], sl125: ["SL125 (PvP meta)", 125, [27, 10, 20, 15]],
+    sl150: ["SL150", 150, [40, 10, 25, 15]], sl802: ["SL802 (all 99)", 802, [99, 99, 99, 99]], custom: ["Custom", 0, null] };
+  function applyPreset() {
+    const p = PRESETS[$("pre").value], c = cls();
+    if (!p || $("pre").value === "custom") {                 // own values: keep them, only raise what is below the class's start
+      ["vig","att","end","vit"].forEach((id, i) => { if (num(id, 1, 99) < c[1][i]) $(id).value = c[1][i]; });
+      if (num("sl", 1, 802) < c[0]) $("sl").value = c[0];
+      return;
+    }
+    const d = p[2] ? p[2].map((v, i) => Math.max(v, c[1][i])) : c[1];
+    ["vig","att","end","vit"].forEach((id, i) => $(id).value = d[i]);
+    $("sl").value = p[1] ? Math.max(p[1], c[0]) : c[0];
+  }
   const offBase = () => cls()[2].slice();
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
-  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown","cat","cup","sclass"];
+  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown","cat","cup","sclass","pre"];
   const flags = ["autoRings","hollow"];
   const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
@@ -324,6 +342,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   $("up").value = 10;
   for (const c of Object.keys(CLASSES)) { const o = document.createElement("option"); o.value = o.textContent = `${c}`; o.textContent = `${c} (SL${CLASSES[c][0]})`; $("sclass").appendChild(o); }
   $("sclass").value = "Deprived";
+  for (const [k, v] of Object.entries(PRESETS)) { const o = document.createElement("option"); o.value = k; o.textContent = v[0]; $("pre").appendChild(o); }
+  $("pre").value = "sl125";
   for (let i = 0; i <= 10; i++) { const o = document.createElement("option"); o.value = i; o.textContent = "+" + i; $("cup").appendChild(o); }
   $("cup").value = 10;
 
@@ -350,6 +370,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const rg = (h.get("rg") || "").split(",").concat(h.get("clutch") ? [["", "clutchM", "clutchF", "clutchL", "clutchD"][+h.get("clutch")]] : []);
     document.querySelectorAll("#ringBox input").forEach(x => x.checked = rg.includes(x.dataset.ring));
     for (const f of flags) $(f).checked = h.get(f) === "1";
+    if (!h.has("pre") && ["sl","vig","att","end","vit"].some(f => h.has(f))) {   // old links: custom unless they match SL125
+      const same = $("sl").value == 125 && [27, 10, 20, 15].every((v, i) => $(["vig","att","end","vit"][i]).value == v) && $("sclass").value === "Deprived";
+      $("pre").value = same ? "sl125" : "custom";
+    }
     ringLimit();
   }
   function ringIds() { return [...document.querySelectorAll("#ringBox input:checked")].map(x => x.dataset.ring); }
@@ -367,7 +391,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const h = new URLSearchParams();
     h.set("mode", mode);
     if (by === "hit") h.set("by", "hit");
-    const keep = mode === "opt" ? ["sl","vig","att","end","vit"].concat($("sclass").value !== "Deprived" ? ["sclass"] : []) : ["str","dex","int","fth","lck"];
+    const keep = mode === "opt" ? ["sl","vig","att","end","vit"].concat($("sclass").value !== "Deprived" ? ["sclass"] : [], $("pre").value !== "sl125" ? ["pre"] : []) : ["str","dex","int","fth","lck"];
     for (const f of keep.concat(["up","def"])) h.set(f, $(f).value);
     if ($("boss").value) { h.set("boss", $("boss").value); if ($("ng").value !== "0") h.set("ng", $("ng").value); if ($("zone").value) h.set("zone", $("zone").value); }
     if ($("stam").checked) { h.set("stam", "1"); if ($("ring").value !== "0") h.set("ring", $("ring").value); if ($("blos").value !== "0") h.set("blos", $("blos").value); }
@@ -694,7 +718,9 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     timer = setTimeout(() => requestAnimationFrame(() => setTimeout(() => { compute(); $("tb").classList.remove("stale"); }, 0)), typeof ms === "number" ? ms : 350);
   };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def","sb"].forEach(id => $(id).addEventListener("input", () => schedule(350)));
-  $("sclass").addEventListener("change", () => { const c = cls(); ["vig","att","end","vit"].forEach((id, i) => { if (num(id, 1, 99) < c[1][i]) $(id).value = c[1][i]; }); if (num("sl", 1, 802) < c[0]) $("sl").value = c[0]; schedule(200); });
+  $("sclass").addEventListener("change", () => { applyPreset(); schedule(200); });
+  $("pre").addEventListener("change", () => { applyPreset(); schedule(200); });
+  ["sl","vig","att","end","vit"].forEach(id => $(id).addEventListener("input", () => { $("pre").value = "custom"; }));
   document.querySelectorAll("#ringBox input").forEach(x => x.addEventListener("change", () => { ringLimit(); schedule(450); }));
   ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown","autoRings","hollow","cat","cup"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
