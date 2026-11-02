@@ -204,6 +204,8 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   spell buff in game, so it is not counted. The head option can also be left to the calculator per weapon. Clicking a
   weapon shows the full setup: buff, the catalyst and upgrade it is cast with and the spell buff that gives, rings, head
   and the stats after ring / Hollow bonuses.
+- **Starting class**: the calculator's soul-level mode can start from any class (its starting stats and level), not only
+  Deprived. **Dark Hand** is now in the calculator too (1H R1 palm strikes; 88 physical + 150 dark, no upgrades).
 - **Hollow infusion** gets +Luck from its resident effect (+2 at +0 up to +5 at +10), but only while the character is
   hollow with 15+ hollowing; the calculator has this as an option.
 

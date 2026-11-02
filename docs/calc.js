@@ -78,13 +78,15 @@
     pontiff: { ar: [1.1, 1.1, 1.1, 1.1, 1.1] },               // top stack while attacking without a break (1.03 -> 1.05 -> 1.10)
     knight: { st: [5, 0, 0, 0, 0] }, hunter: { st: [0, 5, 0, 0, 0] }, scholar: { st: [0, 0, 5, 0, 0] }, priestess: { st: [0, 0, 0, 5, 0] },
     milk: { st: [0, 3, 0, 0, 0] },
+    chl: { regen: 10 },                                       // Chloranthy Ring+3 (only matters when stamina limited)
   };
   function ringMods(ids, crown) {
-    const m = { ar: [1, 1, 1, 1, 1], dmg: [1, 1, 1, 1, 1], st: [0, 0, 0, 0, 0], status: 1 };
+    const m = { ar: [1, 1, 1, 1, 1], dmg: [1, 1, 1, 1, 1], st: [0, 0, 0, 0, 0], status: 1, regen: 0 };
     for (const id of ids || []) {
       const r = RINGS[id]; if (!r) continue;
       for (let i = 0; i < 5; i++) { if (r.ar) m.ar[i] *= r.ar[i]; if (r.dmg) m.dmg[i] *= r.dmg[i]; if (r.st) m.st[i] += r.st[i]; }
       if (r.status) m.status *= r.status;
+      if (r.regen) m.regen += r.regen;
     }
     if (crown) m.dmg[1] *= 1.05;                              // Crown of Dusk
     return m;
@@ -362,7 +364,7 @@
   // auto: { buff: bool, buffs: [ids], sb, rings: bool, pool: [ids], slots, crown }
   function withPicks(T, buff, rings, auto, crown) {
     const m = ringMods(rings, crown == null ? auto.crown : crown);
-    return Object.assign({}, T, { buff, emul: m.dmg, armul: m.ar, sbon: m.st, status: m.status });
+    return Object.assign({}, T, { buff, emul: m.dmg, armul: m.ar, sbon: m.st, status: m.status, regen: (T.regen || REGEN) + m.regen });
   }
   function autoPick(D, w, opts, auto) {
     const T0 = opts.def;
@@ -400,7 +402,7 @@
         while (rings.length < auto.slots) {
           let pick = null, pv = curS;
           for (const id of auto.pool) {
-            if (rings.includes(id) || (id === "lloyd" && rings.includes("rts")) || (id === "rts" && rings.includes("lloyd"))) continue;
+            if (rings.includes(id) || (id === "lloyd" && rings.includes("rts")) || (id === "rts" && rings.includes("lloyd")) || (id === "chl" && !T0.stamina)) continue;
             const v = score(buff, rings.concat([id]));
             if (v > pv + 1e-9) { pv = v; pick = id; }
           }

@@ -155,7 +155,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
           <label class="field"><span>Vitality</span><input type="number" id="vit" min="10" max="99" value="15"></label>
         </div>
         <div class="budget" id="budget"></div>
-        <div class="note">Deprived start (every stat 10). The remaining points go to Str/Dex/Int/Fth/Lck, placed separately for each weapon.</div>
+        <label class="field" style="margin-top:8px"><span>Starting class</span><select id="sclass"></select></label>
+        <div class="note" id="classNote">The points left after Vig/Att/End/Vit go to Str/Dex/Int/Fth/Lck on top of the class's starting stats, placed separately for each weapon.</div>
       </div>
 
       <div class="group" id="fixedBox" hidden>
@@ -295,31 +296,43 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021945"></script>
+<script src="calc.js?v=202611022000"></script>
 <script>
 (function(){
   "use strict";
   const $ = (id) => document.getElementById(id);
   let pendingZone = "", by = "dps";
   const ML = () => by === "hit" ? "dmg" : "DPS";
+  // starting classes: [soul level, [vig, att, end, vit], [str, dex, int, fth, lck]]
+  const CLASSES = {
+    Deprived: [1, [10, 10, 10, 10], [10, 10, 10, 10, 10]], Knight: [9, [12, 10, 11, 15], [13, 12, 9, 9, 7]],
+    Mercenary: [8, [11, 12, 11, 10], [10, 16, 10, 8, 9]], Warrior: [7, [14, 6, 12, 11], [16, 9, 8, 9, 11]],
+    Herald: [9, [12, 10, 9, 12], [12, 11, 8, 13, 11]], Thief: [5, [10, 11, 10, 9], [9, 13, 10, 8, 14]],
+    Assassin: [10, [10, 14, 11, 10], [10, 14, 11, 9, 10]], Sorcerer: [6, [9, 16, 9, 7], [7, 12, 16, 7, 12]],
+    Pyromancer: [8, [11, 12, 10, 8], [12, 9, 14, 14, 7]], Cleric: [7, [10, 14, 9, 7], [12, 8, 7, 16, 13]],
+  };
+  const cls = () => CLASSES[$("sclass").value] || CLASSES.Deprived;
+  const offBase = () => cls()[2].slice();
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
-  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown","cat","cup"];
+  const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown","cat","cup","sclass"];
   const flags = ["autoRings","hollow"];
   const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
   for (let i = 0; i <= 7; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i ? "NG+" + i : "NG"; $("ng").appendChild(o); }
   for (let i = 0; i <= 10; i++) { const o = document.createElement("option"); o.value = i; o.textContent = "+" + i; $("up").appendChild(o); }
   $("up").value = 10;
+  for (const c of Object.keys(CLASSES)) { const o = document.createElement("option"); o.value = o.textContent = `${c}`; o.textContent = `${c} (SL${CLASSES[c][0]})`; $("sclass").appendChild(o); }
+  $("sclass").value = "Deprived";
   for (let i = 0; i <= 10; i++) { const o = document.createElement("option"); o.value = i; o.textContent = "+" + i; $("cup").appendChild(o); }
   $("cup").value = 10;
 
   const num = (id, lo, hi) => { let v = parseInt($(id).value, 10); if (isNaN(v)) v = lo; return Math.max(lo, Math.min(hi, v)); };
 
   function budgetInfo() {
-    const sl = num("sl", 1, 802);
-    const used = ["vig","att","end","vit"].reduce((a, id) => a + num(id, 10, 99) - 10, 0);
-    return { sl, budget: sl - 1 - used };
+    const c = cls(), sl = num("sl", c[0], 802);
+    const used = ["vig","att","end","vit"].reduce((a, id, i) => a + Math.max(0, num(id, 1, 99) - c[1][i]), 0);
+    return { sl, budget: sl - c[0] - used };
   }
 
   function wikiUrl(name) {
@@ -345,16 +358,16 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const chl = $("stam").checked && $("ring").value !== "0";
     const auto = $("autoRings").checked;
     const n = ringIds().length + (chl ? 1 : 0), full = !auto && n >= 4;
-    $("ringHead").innerHTML = auto ? `Rings to choose from (none ticked = all but Red Tearstone), ${4 - (chl ? 1 : 0)} slots` : `Rings <b id="ringCount"></b> (Chloranthy Ring counts too)`;
+    $("ringHead").innerHTML = auto ? `Rings to choose from (none ticked = all but Red Tearstone; Chloranthy Ring+3 is tried when stamina limited), 4 slots` : `Rings <b id="ringCount"></b> (Chloranthy Ring counts too)`;
     document.querySelectorAll("#ringBox input").forEach(x => { x.disabled = full && !x.checked; x.parentElement.classList.toggle("off", x.disabled); });
-    $("ring").disabled = !auto && !chl && ringIds().length >= 4;
+    $("ring").disabled = auto || (!chl && ringIds().length >= 4);
     if ($("ringCount")) $("ringCount").textContent = `${n}/4`;
   }
   function writeHash() {
     const h = new URLSearchParams();
     h.set("mode", mode);
     if (by === "hit") h.set("by", "hit");
-    const keep = mode === "opt" ? ["sl","vig","att","end","vit"] : ["str","dex","int","fth","lck"];
+    const keep = mode === "opt" ? ["sl","vig","att","end","vit"].concat($("sclass").value !== "Deprived" ? ["sclass"] : []) : ["str","dex","int","fth","lck"];
     for (const f of keep.concat(["up","def"])) h.set(f, $(f).value);
     if ($("boss").value) { h.set("boss", $("boss").value); if ($("ng").value !== "0") h.set("ng", $("ng").value); if ($("zone").value) h.set("zone", $("zone").value); }
     if ($("stam").checked) { h.set("stam", "1"); if ($("ring").value !== "0") h.set("ring", $("ring").value); if ($("blos").value !== "0") h.set("blos", $("blos").value); }
@@ -405,9 +418,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const crownAuto = $("crown").value === "auto", crownOn = $("crown").value === "1";
     const rids = ringIds(), rm = DS3.ringMods(autoR ? [] : rids, crownOn);
     def.emul = rm.dmg; def.armul = rm.ar; def.sbon = rm.st; def.status = rm.status;
-    const chl = $("stam").checked && $("ring").value !== "0";
+    const chl = !autoR && $("stam").checked && $("ring").value !== "0";
+    if (autoR) def.regen = 45 + num("blos", 0, 9);          // the ring picker decides on the Chloranthy Ring itself
     const auto = (autoBuff || autoR || crownAuto) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), cat: catSel, cup, rings: autoR,
-      pool: rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts"), slots: 4 - (chl ? 1 : 0), crown: crownOn, crownAuto } : null;
+      pool: (rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts" && x !== "chl")).concat($("stam").checked ? ["chl"] : []), slots: 4 - (chl ? 1 : 0), crown: crownOn, crownAuto } : null;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
     $("metricTh").textContent = by === "hit" ? "Damage / attack" : "Damage / second";
@@ -420,7 +434,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     let opts;
     if (mode === "opt") {
       if (b.budget < 0) { rows = []; render("Soul level too low for those Vig/Att/End/Vit values."); return; }
-      opts = { mode: "opt", base: [10,10,10,10,10], budget: b.budget, up, def, moves };
+      opts = { mode: "opt", base: offBase(), budget: b.budget, up, def, moves };
     } else {
       opts = { mode: "fixed", stats: ["str","dex","int","fth","lck"].map(id => num(id, 1, 99)), up, def, moves };
     }
@@ -438,7 +452,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   }
 
   const RING_NAME = { clutchM: "Magic Clutch", clutchF: "Fire Clutch", clutchL: "Lightning Clutch", clutchD: "Dark Clutch", lloyd: "Lloyd's Sword",
-    rts: "Red Tearstone", flynn: "Flynn's", pontiff: "Pontiff's Right Eye", knight: "Knight's", hunter: "Hunter's", milk: "Carthus Milkring", scholar: "Scholar", priestess: "Priestess" };
+    rts: "Red Tearstone", flynn: "Flynn's", pontiff: "Pontiff's Right Eye", knight: "Knight's", hunter: "Hunter's", milk: "Carthus Milkring", scholar: "Scholar", priestess: "Priestess", chl: "Chloranthy+3" };
   const BUFF_NAME = { charcoal: "Charcoal Pine Resin", gold: "Gold Pine Resin", pale: "Pale Pine Resin", human: "Human Pine Resin", mw: "Magic Weapon",
     gmw: "Great Magic Weapon", cmw: "Crystal Magic Weapon", lb: "Lightning Blade", dmb: "Darkmoon Blade", db: "Dark Blade", cfa: "Carthus Flame Arc", blessed: "Blessed Weapon" };
   const pickText = (p) => [p.buff ? BUFF_NAME[p.buff] : null, p.rings.length ? p.rings.map(x => RING_NAME[x]).join(", ") : null, p.crown ? "Crown of Dusk" : null].filter(Boolean).join(" · ");
@@ -493,7 +507,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   }
   function detailData0(r, move) {
     const o = ctx.opts, opt = o.mode === "opt";
-    const base = opt ? [10, 10, 10, 10, 10] : o.stats;
+    const base = opt ? o.base : o.stats;
     const now = opt ? o.budget : 0;
     const maxB = opt ? Math.min(Math.max(now + 30, 60), 400) : 60;
     const path = DS3.levelPath(D, r.w, move, base, maxB, o.up, r.T || o.def, 1);
@@ -556,12 +570,12 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     if (d.opt && d.now >= d.path.cost) rowsAt.set(d.now, true);
     const ms = [...rowsAt.keys()].sort((a, b) => a - b).map(p => {
       const pp = d.path.points.filter(x => x.pts <= p).pop();
-      const best = DS3.optimizeMove(D, r.w, move, d.opt ? [10, 10, 10, 10, 10] : o.stats, p, o.up, r.T || o.def);
+      const best = DS3.optimizeMove(D, r.w, move, d.opt ? o.base : o.stats, p, o.up, r.T || o.def);
       const gap = best ? (pp.dps / best.dps - 1) * 100 : 0;
       return `<tr class="${rowsAt.get(p) ? "cur" : ""}"><td>${xLabel(d, p)}</td><td class="n">${pp.stats.join("/")}</td><td class="n">${Math.round(pp.dps)}</td><td class="n">${gap > -0.05 ? "best" : gap.toFixed(1) + "%"}</td></tr>`;
     }).join("");
     const capNote = lastPts < d.pts[d.pts.length - 1].p ? `<p>After ${xLabel(d, lastPts)} no stat raises this weapon's ${by === "hit" ? "damage" : "DPS"} any more; spend the rest on Vigor, Endurance and so on.</p>` : "";
-    const cur = o.mode === "opt" ? DS3.optimizeMove(D, r.w, move, [10, 10, 10, 10, 10], o.budget, o.up, r.T || o.def)
+    const cur = o.mode === "opt" ? DS3.optimizeMove(D, r.w, move, o.base, o.budget, o.up, r.T || o.def)
                                  : DS3.evalMove(D, r.w, move, o.stats, o.up, r.T || o.def);
     const rv = D.reach && D.reach[r.w.n];
     const reachLine = rv ? `<p><b>Reach</b> (hand to the far end of the hitbox, longest swing; "with step" adds how far the character has moved forward when the hit starts): ${Object.keys(MOVE_LABEL).filter(m => rv[m]).map(m => `${MOVE_LABEL[m]} ${rv[m][1].toFixed(2)} m` + (rv[m].length > 3 ? ` (${rv[m][3].toFixed(2)} m with step)` : "")).join(" · ")}</p>` : "";
@@ -680,6 +694,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     timer = setTimeout(() => requestAnimationFrame(() => setTimeout(() => { compute(); $("tb").classList.remove("stale"); }, 0)), typeof ms === "number" ? ms : 350);
   };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def","sb"].forEach(id => $(id).addEventListener("input", () => schedule(350)));
+  $("sclass").addEventListener("change", () => { const c = cls(); ["vig","att","end","vit"].forEach((id, i) => { if (num(id, 1, 99) < c[1][i]) $(id).value = c[1][i]; }); if (num("sl", 1, 802) < c[0]) $("sl").value = c[0]; schedule(200); });
   document.querySelectorAll("#ringBox input").forEach(x => x.addEventListener("change", () => { ringLimit(); schedule(450); }));
   ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown","autoRings","hollow","cat","cup"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
@@ -696,7 +711,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json?v=202611021930").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611022010").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();

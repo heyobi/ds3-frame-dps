@@ -14,7 +14,7 @@ MOVE_DEF = {"r1h": (30000, "rh"), "r2h": (34000, "rh"), "l1": (33000, "lh")}
 L1_WEAPONS = {"Sellsword Twinblades", "Warden Twinblades", "Winged Knight Twinaxes", "Dancer's Enchanted Swords",
               "Brigand Twindaggers", "Gotthard Twinswords", "Onikiri and Ubadachi", "Drang Twinspears", "Drang Hammers",
               "Crow Quills", "Caestus", "Demon's Fist", "Claw", "Manikin Claws", "Crow Talons", "Farron Greatsword"}
-SKIP_W = {"Giant Door Shield", "Dark Hand", "Ringed Knight Paired Greatswords"}
+SKIP_W = {"Giant Door Shield", "Ringed Knight Paired Greatswords"}
 PHYS_TYPE = {0: 0, 1: 1, 2: 2, 3: 3}     # DS3 AtkAttribute: 0 standard, 1 slash (scimitar, katana), 2 strike (mace, club),
                                           # 3 thrust (spear, rapier), 4 = weapon default; same order as the boss multipliers
 
