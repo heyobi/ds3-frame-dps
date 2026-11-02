@@ -175,7 +175,8 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   u/himheart's measurements fit buff AR x0.826 (62 of 65 resin hits exact; Lightning Blade and Dark Blade then both point
   to the same talisman, spell buff ~263) and Blessed Weapon x1.060 (17 of 17). Where the game stores this reduction was
   not found, so the calculator applies these measured factors to every paired weapon. Dagger light attacks show no sign
-  of a reduction in the attack params and use the full value.
+  of a reduction in the attack params and use the full value. Great Swamp Ring and Witch's Ring (x1.12 / x1.20
+  catalyst attack in the regulation) change neither the catalyst's spell buff nor the buff's damage (checked in game).
 
 Best weapon per boss at SL125 (Vig 27, End 20, Vit 15), +10, no stamina limit, kill time = HP / DPS with nonstop
 attacking:
