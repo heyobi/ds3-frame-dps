@@ -55,14 +55,14 @@
              bleed: base.bleed == null ? null : base.bleed * k[1], frost: base.frost == null ? null : base.frost * k[2],
              bloodRate: b.bloodRate, stamina: !!stamina, zone: zone || 1 };
   }
-  // Weapon buffs. Resins: flat AR from SpEffectParam (magicAtkPower etc.). Spells: % of the catalyst's Spell Buff (wiki).
-  // Blessed Weapon: physical AR x1.075 (wiki). Only weapons with no elemental damage can be buffed.
+  // Weapon buffs, all from SpEffectParam. Resins: flat AR (magicAtkPower etc.). Spells: the same fields hold the % of the
+  // catalyst's Spell Buff (spell rows 1013xxxxx-1037xxxxx). Blessed Weapon: physAtkPowerRate x1.075. Only weapons with no elemental damage can be buffed.
   // Paired weapons get a reduced buff (the wiki mentions hidden multipliers on daggers and paired weapons); the factors
   // below were fitted to himheart's in-game measurements of Sellsword Twinblades L1 (resins 62/65 exact, Blessed 17/17).
   const BUFFS = {
     charcoal: { e: 2, add: 85 }, gold: { e: 3, add: 95 }, pale: { e: 1, add: 90 }, human: { e: 4, add: 95 },
-    mw: { e: 1, pct: 75 }, gmw: { e: 1, pct: 85 }, cmw: { e: 1, pct: 95 }, lb: { e: 3, pct: 95 }, dmb: { e: 1, pct: 93 },
-    cfa: { e: 2, pct: 90 }, blessed: { phys: 1.075 },
+    mw: { e: 1, pct: 75 }, gmw: { e: 1, pct: 85 }, cmw: { e: 1, pct: 95 }, lb: { e: 3, pct: 95 }, dmb: { e: 1, pct: 95 },
+    db: { e: 4, pct: 85 }, cfa: { e: 2, pct: 80 }, blessed: { phys: 1.075 },
   };
   const PAIRED_BUFF = 0.826, PAIRED_BLESSED = 0.8;
   function buffable(w, li) { const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
