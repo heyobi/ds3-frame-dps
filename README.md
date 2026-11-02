@@ -184,6 +184,13 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   their element. Attack-rate rings act on attack rating before defense, damage-rate rings on the damage after it.
   Knight's / Hunter's / Scholar / Priestess Ring +5 Str / Dex / Int / Fth and Carthus Milkring +3 Dex add to the stats,
   count for requirements, and come on top of the spread shown.
+- **Auto-pick** (calculator options). "Best for each weapon" in the buff list tries every resin and spell (spells use
+  the spell buff you enter and need their Int / Faith, which the optimizer then spends points on). "Pick the best rings"
+  adds rings one at a time, each time the one that adds the most damage, until the free slots are full (four, minus the
+  Chloranthy Ring; Lloyd's and Red Tearstone are never combined). Every weapon is ranked first, then the top 60 get
+  their own picks and the list is re-ranked.
+- **Hollow infusion** gets +Luck from its resident effect (+2 at +0 up to +5 at +10), but only while the character is
+  hollow with 15+ hollowing; the calculator has this as an option.
 
 Best weapon per boss at SL125 (Vig 27, End 20, Vit 15), +10, no stamina limit, kill time = HP / DPS with nonstop
 attacking:

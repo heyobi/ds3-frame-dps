@@ -62,8 +62,10 @@
   // Flame Arc with the in-game spell buff (Pyromancy Flame +10 at 99/99 = 242) matches 16/16 at full value.
   const BUFFS = {
     charcoal: { e: 2, add: 85 }, gold: { e: 3, add: 95 }, pale: { e: 1, add: 90 }, human: { e: 4, add: 95 },
-    mw: { e: 1, pct: 75 }, gmw: { e: 1, pct: 85 }, cmw: { e: 1, pct: 95 }, lb: { e: 3, pct: 95 }, dmb: { e: 1, pct: 95 },
-    db: { e: 4, pct: 85 }, cfa: { e: 2, pct: 80 }, blessed: { phys: 1.075 },
+    // req: [Int, Faith] to cast (Magic param)
+    mw: { e: 1, pct: 75, req: [10, 0] }, gmw: { e: 1, pct: 85, req: [15, 0] }, cmw: { e: 1, pct: 95, req: [30, 0] },
+    lb: { e: 3, pct: 95, req: [0, 30] }, dmb: { e: 1, pct: 95, req: [0, 30] }, db: { e: 4, pct: 85, req: [0, 25] },
+    cfa: { e: 2, pct: 80, req: [10, 10] }, blessed: { phys: 1.075, req: [0, 15] },
   };
   const PAIRED_BUFF = 0.826, PAIRED_BLESSED = 0.8;
   // Rings (SpEffectParam via EquipParamAccessory). ar: AtkPowerRate (on attack rating, before defense);
@@ -88,10 +90,14 @@
     return m;
   }
   const addSt = (st, T) => T && T.sbon ? st.map((v, i) => Math.min(99, v + T.sbon[i])) : st;
+  // Hollow infusion: +Luck while hollow with 15+ hollowing (resident SpEffect 1290015xx: +2 at +0 ... +5 at +10)
+  const HOLLOW_LCK = [2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5];
+  const hollowSt = (w, li, st, T) => T && T.hollow && w.i === "Hollow" ? st.map((v, i) => i === 4 ? Math.min(99, v + HOLLOW_LCK[Math.min(li, 10)]) : v) : st;
   function buffable(w, li) { const L = w.lv[li]; return !(L[1] || L[2] || L[3] || L[4]); }
-  function applyBuff(w, li, A, buff) {
+  function applyBuff(w, li, A, buff, st) {
     const b = buff && BUFFS[buff.id];
     if (!b || !buffable(w, li)) return A;
+    if (b.req && st && (st[2] < b.req[0] || st[3] < b.req[1])) return A;       // can't cast the spell with these stats
     const paired = /Paired/.test(w.c), out = A.slice();
     if (b.phys) out[0] *= 1 + (b.phys - 1) * (paired ? PAIRED_BLESSED : 1);
     else if (b.add != null) out[b.e] += b.add * (paired ? PAIRED_BUFF : 1);          // resins: reduced on paired weapons
@@ -104,8 +110,8 @@
   // One full 3-step chain against target T. Returns dps and its parts.
   function chainEval(D, w, key, li, st, T) {
     const steps = D.moves[w.n][key];
-    const stE = addSt(st, T);
-    const A = applyBuff(w, li, ar(D, w, li, stE, { twoHand: key !== "r1h" }), T.buff).map((v, i) => v * (T.armul ? T.armul[i] : 1));
+    const stE = hollowSt(w, li, addSt(st, T), T);
+    const A = applyBuff(w, li, ar(D, w, li, stE, { twoHand: key !== "r1h" }), T.buff, stE).map((v, i) => v * (T.armul ? T.armul[i] : 1));
     let direct = 0, frames = 0, hits = 0, stam = 0;
     const stepDmg = [];            // damage of each press as the game shows it (every hit rounded down)
     for (const [f, sc, hs] of steps) {
@@ -154,7 +160,8 @@
   }
   const needOf = (w, twoHand, T) => {
     const b = (T && T.sbon) || [0, 0, 0, 0, 0];
-    return [twoHand ? Math.ceil(w.req[0] / 1.5) - b[0] : w.req[0] - b[0], w.req[1] - b[1], w.req[2] - b[2], w.req[3] - b[3], 0];
+    const sp = T && T.buff && BUFFS[T.buff.id] && BUFFS[T.buff.id].req && buffable(w, w.lv.length - 1) ? BUFFS[T.buff.id].req : [0, 0];
+    return [twoHand ? Math.ceil(w.req[0] / 1.5) - b[0] : w.req[0] - b[0], w.req[1] - b[1], Math.max(w.req[2], sp[0]) - b[2], Math.max(w.req[3], sp[1]) - b[3], 0];
   };
 
   // Which stats can change this weapon's damage at this level
@@ -300,6 +307,80 @@
     return rows;
   }
 
+  // Best result for one weapon over the enabled moves (same rules as rank)
+  function bestFor(D, w, opts, T) {
+    let best = null;
+    const per = {};
+    for (const key of Object.keys(MOVES)) {
+      if (!opts.moves[key]) continue;
+      const r = opts.mode === "opt" ? optimizeMove(D, w, key, opts.base, opts.budget, opts.up, T)
+                                    : evalMove(D, w, key, opts.stats, opts.up, T);
+      if (!r) continue;
+      per[key] = r.dps;
+      if (!best || r.dps > best.dps) best = r;
+    }
+    return best && Object.assign({ w, per, T }, best);
+  }
+  // Auto-pick: best buff, then rings added one at a time (each time the one that adds most), for one weapon.
+  // auto: { buff: bool, buffs: [ids], sb, rings: bool, pool: [ids], slots, crown }
+  function withPicks(T, buff, rings, auto) {
+    const m = ringMods(rings, auto.crown);
+    return Object.assign({}, T, { buff, emul: m.dmg, armul: m.ar, sbon: m.st, status: m.status });
+  }
+  function autoPick(D, w, opts, auto) {
+    const T0 = opts.def;
+    let buff = T0.buff || null, rings = (auto.fixed || []).slice();
+    const start = bestFor(D, w, opts, withPicks(T0, buff, rings, auto));
+    if (!start) return null;
+    // choose with the stats fixed at the current best spread (fast), re-optimize the spread at the end
+    const key = start.move, li = levelIndex(w, opts.up);
+    let st = start.stats.slice();
+    const score = (b, rg) => {
+      const T = withPicks(T0, b, rg, auto);
+      if (opts.mode === "opt") {                       // keep the spell's stat requirement inside the budget
+        const sp = b && BUFFS[b.id] && BUFFS[b.id].req;
+        if (sp) {
+          const t = st.slice(), sb = T.sbon || [0, 0, 0, 0, 0];
+          let extra = Math.max(0, sp[0] - sb[2] - t[2]) + Math.max(0, sp[1] - sb[3] - t[3]);
+          if (extra > 0) { const r = optimizeMove(D, w, key, opts.base, opts.budget, opts.up, T); return r ? r.dps : -1; }
+        }
+      }
+      return wieldable(w, st, key !== "r1h", T) ? chainEval(D, w, key, li, st, T).dps : -1;
+    };
+    let curS = score(buff, rings);
+    if (auto.buff) {
+      for (const id of auto.buffs) {
+        const b = { id, sb: auto.sb }, v = score(b, rings);
+        if (v > curS + 1e-9) { curS = v; buff = b; }
+      }
+    }
+    if (auto.rings) {
+      while (rings.length < auto.slots) {
+        let pick = null, pv = curS;
+        for (const id of auto.pool) {
+          if (rings.includes(id) || (id === "lloyd" && rings.includes("rts")) || (id === "rts" && rings.includes("lloyd"))) continue;
+          const v = score(buff, rings.concat([id]));
+          if (v > pv + 1e-9) { pv = v; pick = id; }
+        }
+        if (!pick) break;
+        rings.push(pick); curS = pv;
+      }
+    }
+    const cur = bestFor(D, w, opts, withPicks(T0, buff, rings, auto));
+    if (!cur) return start;
+    cur.picks = { buff: buff && buff.id, rings };
+    return cur;
+  }
+  // Re-rank with auto picks: every weapon is ranked normally first, then the top `n` get their own picks
+  function rankAuto(D, opts, auto, n) {
+    const base = rank(D, opts);
+    const top = base.slice(0, n || 60).map(r => autoPick(D, r.w, opts, auto)).filter(Boolean);
+    const done = new Set(top.map(r => r.w));
+    const rows = top.concat(base.filter(r => !done.has(r.w)));
+    rows.sort((a, b) => b.dps - a.dps);
+    return rows;
+  }
+
   // Leveling path: meet the requirements, then add points one at a time to whichever stat gives the most DPS
   // per point (judged over the next 1 to 25 points, so slow-starting curves are not skipped). Every point in the
   // path extends the previous one, so the spread never jumps around between soul levels.
@@ -342,7 +423,7 @@
     return { cost: points[0].pts, points, chunks };
   }
 
-  const api = { eff, ar, rank, BUFFS, RINGS, ringMods, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
+  const api = { eff, ar, rank, rankAuto, autoPick, BUFFS, RINGS, ringMods, buffable, applyBuff, flatTarget, bossTarget, chainEval, optimizeMove, evalMove, levelPath, levelIndex, MOVES, STATS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.DS3 = api;
 })(this);

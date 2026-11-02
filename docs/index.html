@@ -33,7 +33,7 @@ header p{margin:0;color:var(--ink2);max-width:760px}
 @media (max-width:860px){.layout{grid-template-columns:1fr}}
 .layout>*{min-width:0}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
-.ringchecks{flex-wrap:wrap}#tb.stale{opacity:.45;transition:opacity .15s}.ringchecks label{font-size:12.5px}.ringchecks label.off{opacity:.45}
+.ringchecks{flex-wrap:wrap}td.w small .picks{display:block;color:var(--accent,#a5532a);margin-top:2px}#tb.stale{opacity:.45;transition:opacity .15s}.ringchecks label{font-size:12.5px}.ringchecks label.off{opacity:.45}
 .controls{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 @media (max-width:860px){.controls{position:static;max-height:none;overflow:visible}}
 .group{margin-bottom:16px}
@@ -199,7 +199,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <div class="label">Buffs and rings</div>
         <div class="row2">
           <label class="field"><span>Weapon buff</span><select id="buff">
-            <option value="">None</option>
+            <option value="">None</option><option value="auto">Best for each weapon (auto)</option>
             <optgroup label="Resins"><option value="charcoal">Charcoal Pine Resin (fire 85)</option><option value="gold">Gold Pine Resin (lightning 95)</option>
               <option value="pale">Pale Pine Resin (magic 90)</option><option value="human">Human Pine Resin (dark 95)</option></optgroup>
             <optgroup label="Spells (% of spell buff)"><option value="mw">Magic Weapon (magic 75%)</option><option value="gmw">Great Magic Weapon (magic 85%)</option>
@@ -211,8 +211,10 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
         <div class="note" id="sbNote" hidden>Spell buff as shown in the equipment screen. Pyromancy Flame +10: 116 at 10 Int / 10 Faith, 207 at 40/40, 242 at 99/99.</div>
         <div class="row2" style="margin-top:8px">
           <label class="field"><span>Head</span><select id="crown"><option value="">Other</option><option value="1">Crown of Dusk</option></select></label>
+          <div class="checks" style="align-self:end"><label title="Hollow-infused weapons add Luck (+2 at +0 up to +5 at +10) while you are hollow with 15 or more hollowing"><input type="checkbox" id="hollow">Hollow (15+ hollowing)</label></div>
         </div>
-        <div class="field" style="margin-top:8px"><span>Rings <b id="ringCount">0/4</b> (Chloranthy Ring counts too)</span></div>
+        <div class="checks" style="margin-top:8px"><label title="For each weapon, rings are added one at a time, each time the one that adds the most damage, until the slots are full"><input type="checkbox" id="autoRings">Pick the best rings for each weapon</label></div>
+        <div class="field" style="margin-top:8px"><span id="ringHead">Rings <b id="ringCount">0/4</b> (Chloranthy Ring counts too)</span></div>
         <div class="checks ringchecks" id="ringBox">
           <label title="x1.15 magic damage"><input type="checkbox" data-ring="clutchM">Magic Clutch</label>
           <label title="x1.15 fire damage"><input type="checkbox" data-ring="clutchF">Fire Clutch</label>
@@ -289,7 +291,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611021510"></script>
+<script src="calc.js?v=202611021830"></script>
 <script>
 (function(){
   "use strict";
@@ -299,6 +301,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   let D = null, mode = "opt", rows = [], showAll = false, timer = null, ctx = null, openKey = null, openMove = null;
   const MOVE_LABEL = { r1h: "1H R1", r2h: "2H R1", l1: "L1 dual" };
   const fields = ["sl","vig","att","end","vit","str","dex","int","fth","lck","up","def","boss","ng","q","cls","inf","ring","blos","buff","sb","crown"];
+  const flags = ["autoRings","hollow"];
   const boxes = ["m_r1h","m_r2h","m_l1","bestOnly","stam"];
 
   for (let i = 0; i <= 7; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i ? "NG+" + i : "NG"; $("ng").appendChild(o); }
@@ -327,16 +330,19 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     pendingZone = h.get("zone") || "";
     const rg = (h.get("rg") || "").split(",").concat(h.get("clutch") ? [["", "clutchM", "clutchF", "clutchL", "clutchD"][+h.get("clutch")]] : []);
     document.querySelectorAll("#ringBox input").forEach(x => x.checked = rg.includes(x.dataset.ring));
+    for (const f of flags) $(f).checked = h.get(f) === "1";
     ringLimit();
   }
   function ringIds() { return [...document.querySelectorAll("#ringBox input:checked")].map(x => x.dataset.ring); }
   // four ring slots in the game; the Chloranthy Ring (stamina options) takes one of them
   function ringLimit() {
     const chl = $("stam").checked && $("ring").value !== "0";
-    const n = ringIds().length + (chl ? 1 : 0), full = n >= 4;
+    const auto = $("autoRings").checked;
+    const n = ringIds().length + (chl ? 1 : 0), full = !auto && n >= 4;
+    $("ringHead").innerHTML = auto ? `Rings to choose from (none ticked = all but Red Tearstone), ${4 - (chl ? 1 : 0)} slots` : `Rings <b id="ringCount"></b> (Chloranthy Ring counts too)`;
     document.querySelectorAll("#ringBox input").forEach(x => { x.disabled = full && !x.checked; x.parentElement.classList.toggle("off", x.disabled); });
-    $("ring").disabled = !chl && ringIds().length >= 4;
-    $("ringCount").textContent = `${n}/4`;
+    $("ring").disabled = !auto && !chl && ringIds().length >= 4;
+    if ($("ringCount")) $("ringCount").textContent = `${n}/4`;
   }
   function writeHash() {
     const h = new URLSearchParams();
@@ -348,7 +354,8 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     if ($("stam").checked) { h.set("stam", "1"); if ($("ring").value !== "0") h.set("ring", $("ring").value); if ($("blos").value !== "0") h.set("blos", $("blos").value); }
     for (const f of ["q","cls","inf","buff","crown"]) if ($(f).value) h.set(f, $(f).value);
     const rg = ringIds(); if (rg.length) h.set("rg", rg.join(","));
-    if (DS3.BUFFS[$("buff").value] && DS3.BUFFS[$("buff").value].pct) h.set("sb", $("sb").value);
+    for (const f of flags) if ($(f).checked) h.set(f, "1");
+    if ($("buff").value === "auto" || (DS3.BUFFS[$("buff").value] && DS3.BUFFS[$("buff").value].pct)) h.set("sb", $("sb").value);
     for (const b of boxes) if (b !== "stam" && !$(b).checked) h.set(b, "0");
     history.replaceState(null, "", "#" + h.toString());
   }
@@ -381,17 +388,21 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     def.regen = regen;
     $("stamOpts").hidden = !$("stam").checked;
     $("stamNote").textContent = `Stamina limited: long fights where you keep attacking. Stamina does not refill while attacking and refills at ${regen}/s otherwise (base 45${regen > 45 ? " + ring / blossom" : ""}), so each point spent costs 1/${regen} s.`;
-    const bid = $("buff").value, binfo = DS3.BUFFS[bid];
-    $("sbBox").hidden = $("sbNote").hidden = !(binfo && binfo.pct);
+    const bid = $("buff").value, binfo = DS3.BUFFS[bid], autoBuff = bid === "auto", autoR = $("autoRings").checked;
+    $("sbBox").hidden = $("sbNote").hidden = !(autoBuff || (binfo && binfo.pct));
     def.buff = binfo ? { id: bid, sb: num("sb", 0, 600) } : null;
-    const rids = ringIds(), rm = DS3.ringMods(rids, !!$("crown").value);
+    def.hollow = $("hollow").checked;
+    const rids = ringIds(), rm = DS3.ringMods(autoR ? [] : rids, !!$("crown").value);
     def.emul = rm.dmg; def.armul = rm.ar; def.sbon = rm.st; def.status = rm.status;
+    const chl = $("stam").checked && $("ring").value !== "0";
+    const auto = (autoBuff || autoR) ? { buff: autoBuff, buffs: Object.keys(DS3.BUFFS), sb: num("sb", 0, 600), rings: autoR,
+      pool: rids.length ? rids : Object.keys(DS3.RINGS).filter(x => x !== "rts"), slots: 4 - (chl ? 1 : 0), crown: !!$("crown").value } : null;
     def.metric = by;
     document.querySelectorAll("#by button").forEach(x => x.classList.toggle("on", x.dataset.by === by));
     $("metricTh").textContent = by === "hit" ? "Damage / attack" : "Damage / second";
     $("defBox").style.visibility = boss ? "hidden" : "visible";
     $("bossNote").innerHTML = boss ? bossInfo(boss, def, ng, zr) : "Boss and unique weapons go to +5; they use half the level shown (+10 → +5, +7 → +3).";
-    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? `, stamina limited (${regen}/s)` : "") + (binfo ? `, ${$("buff").selectedOptions[0].textContent.split(" (")[0]}` : "") + (rids.length ? `, ${rids.length} ring${rids.length > 1 ? "s" : ""}` : "") + ($("crown").value ? ", Crown of Dusk" : "");
+    const tgt = (boss ? `vs ${boss.n}${ng ? ` NG+${ng}` : ""}${zr !== 1 ? ` (${$("zone").value})` : ""}` : `defense ${defN}`) + ($("stam").checked ? `, stamina limited (${regen}/s)` : "") + (autoBuff ? ", best buff" : binfo ? `, ${$("buff").selectedOptions[0].textContent.split(" (")[0]}` : "") + (autoR ? ", best rings" : rids.length ? `, ${rids.length} ring${rids.length > 1 ? "s" : ""}` : "") + (def.hollow ? ", hollow" : "") + ($("crown").value ? ", Crown of Dusk" : "");
     const b = budgetInfo();
     $("budget").innerHTML = mode === "opt" ? `Offensive points to place: <b>${b.budget}</b>` : "";
     $("budget").classList.toggle("bad", b.budget < 0);
@@ -405,7 +416,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     $("status").textContent = "Calculating…";
     setTimeout(() => {
       const t = performance.now();
-      rows = DS3.rank(D, opts);
+      rows = auto ? DS3.rankAuto(D, opts, auto, 60) : DS3.rank(D, opts);
       ctx = { opts, b, defUsed: mode === "opt" ? b.sl - 1 - b.budget : 0 };
       $("title").textContent = mode === "opt"
         ? `SL${b.sl}, +${up} weapons, ${tgt}`
@@ -415,6 +426,11 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     }, 20);
   }
 
+  const RING_NAME = { clutchM: "Magic Clutch", clutchF: "Fire Clutch", clutchL: "Lightning Clutch", clutchD: "Dark Clutch", lloyd: "Lloyd's Sword",
+    rts: "Red Tearstone", flynn: "Flynn's", pontiff: "Pontiff's Right Eye", knight: "Knight's", hunter: "Hunter's", milk: "Carthus Milkring", scholar: "Scholar", priestess: "Priestess" };
+  const BUFF_NAME = { charcoal: "Charcoal Pine Resin", gold: "Gold Pine Resin", pale: "Pale Pine Resin", human: "Human Pine Resin", mw: "Magic Weapon",
+    gmw: "Great Magic Weapon", cmw: "Crystal Magic Weapon", lb: "Lightning Blade", dmb: "Darkmoon Blade", db: "Dark Blade", cfa: "Carthus Flame Arc", blessed: "Blessed Weapon" };
+  const pickText = (p) => [p.buff ? BUFF_NAME[p.buff] : null, p.rings.length ? p.rings.map(x => RING_NAME[x]).join(", ") : null].filter(Boolean).join(" · ");
   const SN = ["Str", "Dex", "Int", "Fth", "Lck"];
   const escH = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
@@ -443,7 +459,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const base = opt ? [10, 10, 10, 10, 10] : o.stats;
     const now = opt ? o.budget : 0;
     const maxB = opt ? Math.min(Math.max(now + 30, 60), 400) : 60;
-    const path = DS3.levelPath(D, r.w, move, base, maxB, o.up, o.def, 1);
+    const path = DS3.levelPath(D, r.w, move, base, maxB, o.up, r.T || o.def, 1);
     if (!path || !path.points.length) return { path, pts: [] };
     const last = path.points[path.points.length - 1].pts;
     const samples = [path.cost];
@@ -451,7 +467,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const pts = [];
     for (const p of samples) {
       const pp = path.points.filter(x => x.pts <= p).pop();
-      const best = DS3.optimizeMove(D, r.w, move, base, p, o.up, o.def);
+      const best = DS3.optimizeMove(D, r.w, move, base, p, o.up, r.T || o.def);
       pts.push({ p, path: pp, best: best ? best.dps : null, capped: p > last });
     }
     return { path, pts, now, opt, defUsed: ctx.defUsed };
@@ -503,13 +519,13 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     if (d.opt && d.now >= d.path.cost) rowsAt.set(d.now, true);
     const ms = [...rowsAt.keys()].sort((a, b) => a - b).map(p => {
       const pp = d.path.points.filter(x => x.pts <= p).pop();
-      const best = DS3.optimizeMove(D, r.w, move, d.opt ? [10, 10, 10, 10, 10] : o.stats, p, o.up, o.def);
+      const best = DS3.optimizeMove(D, r.w, move, d.opt ? [10, 10, 10, 10, 10] : o.stats, p, o.up, r.T || o.def);
       const gap = best ? (pp.dps / best.dps - 1) * 100 : 0;
       return `<tr class="${rowsAt.get(p) ? "cur" : ""}"><td>${xLabel(d, p)}</td><td class="n">${pp.stats.join("/")}</td><td class="n">${Math.round(pp.dps)}</td><td class="n">${gap > -0.05 ? "best" : gap.toFixed(1) + "%"}</td></tr>`;
     }).join("");
     const capNote = lastPts < d.pts[d.pts.length - 1].p ? `<p>After ${xLabel(d, lastPts)} no stat raises this weapon's ${by === "hit" ? "damage" : "DPS"} any more; spend the rest on Vigor, Endurance and so on.</p>` : "";
-    const cur = o.mode === "opt" ? DS3.optimizeMove(D, r.w, move, [10, 10, 10, 10, 10], o.budget, o.up, o.def)
-                                 : DS3.evalMove(D, r.w, move, o.stats, o.up, o.def);
+    const cur = o.mode === "opt" ? DS3.optimizeMove(D, r.w, move, [10, 10, 10, 10, 10], o.budget, o.up, r.T || o.def)
+                                 : DS3.evalMove(D, r.w, move, o.stats, o.up, r.T || o.def);
     const rv = D.reach && D.reach[r.w.n];
     const reachLine = rv ? `<p><b>Reach</b> (hand to the far end of the hitbox, longest swing; "with step" adds how far the character has moved forward when the hit starts): ${Object.keys(MOVE_LABEL).filter(m => rv[m]).map(m => `${MOVE_LABEL[m]} ${rv[m][1].toFixed(2)} m` + (rv[m].length > 3 ? ` (${rv[m][3].toFixed(2)} m with step)` : "")).join(" · ")}</p>` : "";
     const hitsLine = cur ? `<p><b>Damage per attack</b> (each press of the chain, every hit rounded down like the game): ${cur.stepDmg.join(" → ")} · <b>${Math.round(cur.rate)} damage per second</b> at ${cur.stats.join("/")}</p>` : "";
@@ -605,7 +621,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
       const pct = Math.max(2, r.dps / max * 100);
       const key = r.w.n + "|" + r.w.i, open = key === openKey;
       return `<tr class="main${open ? " open" : ""}" data-key="${esc(key)}"><td class="rank"><span class="tw">›</span> ${k}</td>
-        <td class="w"><a href="${wikiUrl(r.w.n)}" target="_blank" rel="noopener">${esc(r.w.n)}</a><small>${r.w.i === "-" ? "" : esc(r.w.i) + " · "}${esc(r.w.c)}<span class="show-s"> · ${MOVE_LABEL[r.move]}</span></small></td>
+        <td class="w"><a href="${wikiUrl(r.w.n)}" target="_blank" rel="noopener">${esc(r.w.n)}</a><small>${r.w.i === "-" ? "" : esc(r.w.i) + " · "}${esc(r.w.c)}<span class="show-s"> · ${MOVE_LABEL[r.move]}</span>${r.picks ? `<span class="picks">${esc(pickText(r.picks))}</span>` : ""}</small></td>
         <td class="mvc hide-s"><span class="mv">${MOVE_LABEL[r.move]}</span>${others ? `<small>${others}</small>` : ""}</td>
         <td class="n hide-s hide-m">${secs.toFixed(3)}</td>
         <td class="n hide-s hide-m">${arT}</td>
@@ -627,7 +643,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   };
   ["sl","vig","att","end","vit","str","dex","int","fth","lck","def","sb"].forEach(id => $(id).addEventListener("input", () => schedule(350)));
   document.querySelectorAll("#ringBox input").forEach(x => x.addEventListener("change", () => { ringLimit(); schedule(450); }));
-  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
+  ["up","m_r1h","m_r2h","m_l1","boss","stam","ng","zone","ring","blos","buff","crown","autoRings","hollow"].forEach(id => $(id).addEventListener("change", () => { ringLimit(); schedule(300); }));
   ["q","cls","inf","bestOnly"].forEach(id => $(id).addEventListener("input", () => { render(); writeHash(); }));
   document.querySelectorAll("#mode button").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.m); compute(); }));
   document.querySelectorAll("#by button").forEach(b => b.addEventListener("click", () => { by = b.dataset.by; compute(); }));
