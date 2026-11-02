@@ -44,13 +44,14 @@
   function flatTarget(def, stamina) {
     return { def: [def, def, def, def, def], mul: null, hp: 0, bleed: null, frost: null, bloodRate: 100, stamina: !!stamina };
   }
-  // ng: 0 = NG, 1..7 = NG+..NG+7 (the boss's NG+ effect on top of its NG scaling, then ClearCountCorrectParam HP / status per cycle).
+  // ng: 0 = NG, 1..7 = NG+..NG+7 (the boss's NG+ effect on top of its NG scaling, then ClearCountCorrectParam HP / defense / status per cycle).
   // zone: body part damage rate (1 = body; weak points 1.5 to 2.0 on some bosses), applied to direct damage.
   function bossTarget(b, stamina, ng, zone, cc) {
     ng = ng || 0;
     const base = ng > 0 && b.ngp ? b.ngp : b;
     const k = ng > 0 && cc ? cc[Math.min(ng, cc.length) - 1] : [1, 1, 1];
-    return { def: base.df, mul: b.mul, hp: Math.round(base.hp * k[0]),
+    const df = base.df.map((d, i) => d * (k[3 + i] || 1));
+    return { def: df, mul: b.mul, hp: Math.round(base.hp * k[0]),
              bleed: base.bleed == null ? null : base.bleed * k[1], frost: base.frost == null ? null : base.frost * k[2],
              bloodRate: b.bloodRate, stamina: !!stamina, zone: zone || 1 };
   }

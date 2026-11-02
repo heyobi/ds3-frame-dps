@@ -245,7 +245,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
   </footer>
 </div>
 
-<script src="calc.js?v=202611020600hit"></script>
+<script src="calc.js?v=202611021310"></script>
 <script>
 (function(){
   "use strict";
@@ -512,7 +512,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     const abs = b.mul.map((m, i) => `${typ[i]} ${pct(m)}%`).join(" · ");
     const st = (v) => v == null ? "immune" : v;
     const r = (v) => v == null ? "immune" : Math.round(v);
-    return `HP ${T.hp.toLocaleString("en")} · defense ${Math.round(T.def[0])} · bleed ${r(T.bleed)} · frost ${r(T.frost)}<br>Absorption: ${abs}<br>Negative absorption = takes extra damage. ${ng ? `NG+${ng}: the boss's NG+ scaling effect on top of its NG scaling, plus the per-cycle HP and status scaling` : "NG values"}, from the game's regulation.${zr !== 1 ? ` Hits land on a part that takes ×${zr} damage.` : ""}`;
+    return `HP ${T.hp.toLocaleString("en")} · defense ${Math.round(T.def[0])} · bleed ${r(T.bleed)} · frost ${r(T.frost)}<br>Absorption: ${abs}<br>Negative absorption = takes extra damage. ${ng ? `NG+${ng}: the boss's NG+ scaling effect on top of its NG scaling, plus the per-cycle HP, defense and status scaling` : "NG values"}, from the game's regulation.${zr !== 1 ? ` Hits land on a part that takes ×${zr} damage.` : ""}`;
   }
 
   function render(msg, ms) {
@@ -568,7 +568,7 @@ table.ms tr.cur td{font-weight:650;color:var(--accent)}
     render();
   });
 
-  fetch("data.json?v=202611021300").then(r => r.json()).then(d => {
+  fetch("data.json?v=202611021310").then(r => r.json()).then(d => {
     D = d;
     const classes = [...new Set(D.weapons.map(w => w.c))].sort();
     const infs = [...new Set(D.weapons.map(w => w.i))].filter(x => x !== "-").sort();

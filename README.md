@@ -152,9 +152,8 @@ regulation (`Data0.bdt`) by `tools/ds3_params.py`:
   Estoc and Rapier 3). An earlier version used Elden Ring's numbering here, which put many hits on the wrong
   multiplier against bosses (flat-defense tables were not affected); fixed on 2 Nov 2026.
 - **NG+ cycles:** each boss row names its NG+ scaling effect (`GameClearSpEffectID`, e.g. 7400 `NG+ Scaling -
-  Cemetery of Ash`), applied on top of the NG area scaling, and `ClearCountCorrectParam` scales HP and status resistance per
-  cycle (NG+7: HP x1.40, bleed/frost resistance x1.09). Its defense fields are not applied, because that is what
-  matches in-game measurements (below).
+  Cemetery of Ash`), applied on top of the NG area scaling, and `ClearCountCorrectParam` scales HP, defense and
+  status resistance per cycle (NG+7: HP x1.40, defense x1.30, bleed/frost resistance x1.09).
 - **Hit zones:** `NpcParam` also has `weakPartsDamageRate` and `partsDamageRate1-8` (Midir's weak point x2.0,
   King of the Storm x1.3, most knights' weak point x1.5). Which body part is which zone is in the boss model files,
   so the calculator lets you pick the zone instead of guessing.
@@ -217,12 +216,12 @@ calculator shows it as a column.
 Longest: Lothric Knight Greatsword 2.62 m, Dragonslayer Swordspear 2.61 m, whips 2.52 m. Shortest: Dagger 0.81 m.
 Lothric Knight Sword 1.38 m vs Long Sword 1.25 m vs Broadsword 1.11 m.
 
-**Checked against in-game measurements.** u/himheart measured damage per L1 of Warden Twinblades at SL802, NG+7,
-on every boss. With the boss's NG+7 values above, the model's Sharp numbers land within 4% of his on 21 of the 22
-bosses where the model knows which entity is hit (2.8% average difference), and the three big gaps (King of the Storm,
-Demon in Pain, Midir) close once the zone rate is applied. Elemental infusions (Chaos, Lightning, Crystal, Dark)
-match too, within 1.7% on average. Bosses with several hittable parts (Greatwood, Twin Princes,
-Demon Prince) are not modelled well.
+**Checked against in-game measurements.** u/himheart measured damage per L1 of Sellsword Twinblades at SL802, NG+7,
+on every boss (Clutch rings on for the elemental infusions, which the regulation gives as x1.15 damage of that
+element). With the boss's NG+7 values above, the model gives the same number he measured on almost every boss
+(Iudex Sharp 430 = 430, Lightning 534 = 534, Midir 464 = 464 with the x2.0 weak point, King of the Storm 516 vs
+515 with the x1.3 head). Crystal comes out 3% low everywhere, which is still open. Bosses with several hittable
+parts (Greatwood, Twin Princes, Demon Prince) are not modelled well.
 
 **Two things the attack params show that the community motion-value sheet does not.**
 Dancer's Enchanted Swords' dual L1 hits carry magic on one blade and fire on the other (each blade's other element

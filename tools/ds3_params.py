@@ -65,8 +65,8 @@ def boss(name, rid):
         frost=None if (30040 in off or r["resistFrost"] >= 999) else round(r["resistFrost"] * g("registFrostChangeRate")),
         bloodRate=blood,
         # NG+ (any cycle): the boss row names its NG+ scaling effect (GameClearSpEffectID), applied on top of the NG one.
-        # ClearCountCorrectParam then scales HP and status resistance per cycle (see "cc"); its defense fields are not
-        # applied, which is what matches in-game NG+7 measurements.
+        # ClearCountCorrectParam then scales HP, defense and status resistance per cycle (see "cc"). This matches
+        # in-game NG+7 measurements to the point.
         ngp=ngplus(r, area, off),
         # per body part damage rates (which part is which lives in the boss model files)
         zones=[["Weak point", round(r["weakPartsDamageRate"], 2)]] * (abs(r["weakPartsDamageRate"] - 1) > 1e-6)
@@ -118,7 +118,9 @@ for bid, r in beh.items():
                                                 a["AtkFireCorrection"], a["AtkThunCorrection"], a["atkDarkCorrection"],
                                                 a["AtkAttribute"]]
 # per NG+ cycle (1..7): HP, bleed resist, frost resist multipliers on top of the NG+ effect
-ccs = [[round(cc[k]["HP"], 3), round(cc[k]["BleedResist"], 3), round(cc[k]["FrostResist"], 3)] for k in range(1, 8)]
+# + defense multipliers for phys, magic, fire, lightning, dark
+ccs = [[round(cc[k][f], 3) for f in ("HP", "BleedResist", "FrostResist", "PhysResist", "MagicResist", "FireResist",
+                                    "ThunderResist", "DarkResist")] for k in range(1, 8)]
 res = dict(bosses=[boss(n, i) for n, i in BOSSES], weapons=weapons, behaviors=behaviors, cc=ccs)
 json.dump(res, open(out, "w"), separators=(",", ":"))
 print(f"{len(res['bosses'])} bosses, {len(weapons)} weapon rows, {sum(len(v) for v in behaviors.values())} behaviors -> {out}")
